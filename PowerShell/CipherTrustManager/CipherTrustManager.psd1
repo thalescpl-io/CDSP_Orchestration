@@ -1,6 +1,7 @@
 #######################################################################################################################
 # File:             CipherTrustManager.psd1                                                                           #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
+# Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
 # Usage:            To load this module in your PowerShell:                                                           #
@@ -121,8 +122,8 @@
         "Get-CM_DPG_ProxyConfig",
         "Get-CM_DPG_JSONRequestResponse",
         "Get-CM_ListClientProfiles",
-        "Get-CM_CreateApplication",
-        "Get-CM_DeleteApplication",        
+        "Get-CM_CreateClientProfile",
+        "Get-CM_DeleteClientProfile",        
         "Get-CM_JWT",
         "Test-CM_JWT",
         "Write-HashtableArray"

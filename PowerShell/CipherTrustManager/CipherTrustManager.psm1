@@ -1,6 +1,7 @@
 #######################################################################################################################
 # File:             CipherTrustManager.psm1                                                                           #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
+# Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
 # Usage:            To load this module in your PowerShell:                                                           #
@@ -25,17 +26,27 @@ New-Variable -Name CM_Session -Value $CM_Session -Scope Global -Force
 #
 ###
 
+####
+# Constants
+#
+$KMS_NAME = "CipherTrust Manager"
+####
+
 <#
     .SYNOPSIS
     Create a connection to CipherTrust Manager and store AuthToken for use in future calls
 
     .DESCRIPTION
-    
+    Create a connection to CipherTrust Manager and store AuthToken (JWT) for use in future calls. It uses Get-JWT to manage the lifecycle of your JWT token so it is `set and forget`
+
     .PARAMETER server
     Specifies the IP Address or FQDN of CipherTrust Manager.
 
-    .PARAMETER credential
-    Specifies the "credential (username/password) authorized to connect with CipherTrust manager.
+    .PARAMETER user
+    Specifies the username for the account authorized to connect with CipherTrust manager.
+
+    .PARAMETER pass
+    Specifies the password (in plaintext for now) for the user.
 
     .INPUTS
     None. You cannot pipe objects to Connect-CipherTrustManager.
@@ -47,7 +58,7 @@ New-Variable -Name CM_Session -Value $CM_Session -Scope Global -Force
     PS> Connect-CipherTrustManager -server 10.23.104.40 -user "user1" -pass "P@ssw0rd!"
 
     .LINK
-    Online version: <github docs>
+    Online version: https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
 
 function Connect-CipherTrustManager {
@@ -73,7 +84,7 @@ function Connect-CipherTrustManager {
     Write-Debug "Session Parameters: $($CM_Session)"
 
     #Invoke API for token generation
-    Write-Debug "Getting authentication token from CipherTrust Manager..."
+    Write-Debug "Getting authentication token from $($KMS_NAME)..."
     
     $CM_Session.REST_URL = "https://" + ($CM_Session.KMS_IP) + "/api/v1"
 
@@ -83,24 +94,6 @@ function Connect-CipherTrustManager {
     Write-Debug "End: $($MyInvocation.MyCommand.Name)"
     return
 }
-
-<#
-    .SYNOPSIS
-        Display the internal module parameters held in $CM_Session
-
-    .EXAMPLE
-        PS> Get-CM_Parameters
-
-
-        .NOTES
-        NOT EXPORTED. INTERNAL ONLY
-
-#>
-
-function Get-CM_Parameters {
-    Write-Output $CM_Session
-}
-
 
 ###
 # Exports
@@ -156,9 +149,5 @@ Export-ModuleMember -Function Get-CM_DPG_ProxyConfig
 Export-ModuleMember -Function Get-CM_DPG_JSONRequestResponse
 #ClientProfiles
 Export-ModuleMember -Function Get-CM_ListClientProfiles
-Export-ModuleMember -Function Get-CM_CreateApplication
-Export-ModuleMember -Function Get-CM_DeleteApplication
-
-
-
-
+Export-ModuleMember -Function Get-CM_CreateClientProfile
+Export-ModuleMember -Function Get-CM_DeleteClientProfile

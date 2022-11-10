@@ -154,8 +154,8 @@ Export-ModuleMember -Function Get-CM_DPG_CreatePolicy
 Export-ModuleMember -Function Get-CM_DPG_DeletePolicy
 Export-ModuleMember -Function Get-CM_DPG_ProxyConfig
 Export-ModuleMember -Function Get-CM_DPG_JSONRequestResponse
-#Applications
-Export-ModuleMember -Function Get-CM_ListApplications
+#ClientProfiles
+Export-ModuleMember -Function Get-CM_ListClientProfiles
 Export-ModuleMember -Function Get-CM_CreateApplication
 Export-ModuleMember -Function Get-CM_DeleteApplication
 

@@ -80,7 +80,7 @@
         "DataProtection/CipherTrustManager-ProtectionPolicies",
         "DataProtection/CipherTrustManager-AccessPolicies",
         "DataProtection/CipherTrustManager-DPGPolicies",
-        "DataProtection/CipherTrustManager-Applications",
+        "DataProtection/CipherTrustManager-ClientProfiles",
         "Interfaces/CipherTrustManager-Interfaces",
         "Keys/CipherTrustManager-Keys",
         "Users/CipherTrustManager-Users"
@@ -120,7 +120,7 @@
         "Get-CM_DPG_DeletePolicy",
         "Get-CM_DPG_ProxyConfig",
         "Get-CM_DPG_JSONRequestResponse",
-        "Get-CM_ListApplications",
+        "Get-CM_ListClientProfiles",
         "Get-CM_CreateApplication",
         "Get-CM_DeleteApplication",        
         "Get-CM_JWT",

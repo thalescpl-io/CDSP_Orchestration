@@ -1,5 +1,5 @@
 #######################################################################################################################
-# File:             CipherTrustManager-Applications.psm1                                                                #
+# File:             CipherTrustManager-ClientProfiles.psm1                                                                #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
@@ -202,7 +202,7 @@ function Get-CM_CreateApplication {
     return $regToken
 }    
 
-function Get-CM_ListApplications {
+function Get-CM_ListClientProfiles {
     param
     (
         [Parameter(Mandatory = $false,
@@ -310,7 +310,7 @@ function Get-CM_ListApplications {
             Write-Error "Error $([int]$StatusCode) $($StatusCode): $($_.Exception.Response.ReasonPhrase)" -ErrorAction Stop
         }
     }
-    Write-Debug "List of Applications created"
+    Write-Debug "List of ClientProfiles created"
     return $response
 }    
 
@@ -359,7 +359,7 @@ function Get-CM_DeleteApplication {
     return
 }    
 
-Export-ModuleMember -Function Get-CM_ListApplications
+Export-ModuleMember -Function Get-CM_ListClientProfiles
 Export-ModuleMember -Function Get-CM_CreateApplication
 Export-ModuleMember -Function Get-CM_DeleteApplication
 

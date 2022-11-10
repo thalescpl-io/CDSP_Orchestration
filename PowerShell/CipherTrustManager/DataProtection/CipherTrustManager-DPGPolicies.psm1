@@ -1,6 +1,7 @@
 #######################################################################################################################
 # File:             CipherTrustManager-DPGPolicies.psm1                                                        #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
+# Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
 # Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
@@ -32,25 +33,25 @@ $target_uri = "/data-protection/dpg-policies"
     .DESCRIPTION
         This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
         This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
 
         This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
         https://github.com/thalescpl-io/whatever_this_repo_is
 #>
-function Get-CM_DPG_CreatePolicy {
+function New-CMDPGPolicy {
     param
     (
         [Parameter(Mandatory = $true,
@@ -83,7 +84,7 @@ function Get-CM_DPG_CreatePolicy {
     Write-Debug "JSON Body: $($jsonBody)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -111,7 +112,7 @@ function Get-CM_DPG_CreatePolicy {
 }    
 
 
-function Get-CM_DPG_ListPolicies {
+function Find-CMDPGPolicies {
     param
     (
         [Parameter(Mandatory = $false,
@@ -150,7 +151,7 @@ function Get-CM_DPG_ListPolicies {
     Write-Debug "Endpoint w Query: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -177,7 +178,7 @@ function Get-CM_DPG_ListPolicies {
 }    
 
 
-function Get-CM_DPG_DeletePolicy {
+function Remove-CMDPGPolicy {
     param
     (
         [Parameter(Mandatory = $true,
@@ -195,7 +196,7 @@ function Get-CM_DPG_DeletePolicy {
     Write-Debug "Endpoint with ID: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -222,7 +223,7 @@ function Get-CM_DPG_DeletePolicy {
 }    
 
  
-function Get-CM_DPG_ProxyConfig {
+function New-CMDPGProxyConfig {
     param(
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
@@ -282,7 +283,7 @@ function Get-CM_DPG_ProxyConfig {
     return $proxy_config
 }
 
-function Get-CM_DPG_JSONRequestResponse {
+function New-CMDPGJSONRequestResponse {
     param(
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
@@ -337,8 +338,8 @@ function Get-CM_DPG_JSONRequestResponse {
     return $json_tokens
 }
 
-Export-ModuleMember -Function Get-CM_DPG_ListPolicies
-Export-ModuleMember -Function Get-CM_DPG_CreatePolicy
-Export-ModuleMember -Function Get-CM_DPG_DeletePolicy
-Export-ModuleMember -Function Get-CM_DPG_ProxyConfig
-Export-ModuleMember -Function Get-CM_DPG_JSONRequestResponse
+Export-ModuleMember -Function Find-CMDPGPolicies
+Export-ModuleMember -Function New-CMDPGPolicy
+Export-ModuleMember -Function Remove-CMDPGPolicy
+Export-ModuleMember -Function New-CMDPGProxyConfig
+Export-ModuleMember -Function New-CMDPGJSONRequestResponse

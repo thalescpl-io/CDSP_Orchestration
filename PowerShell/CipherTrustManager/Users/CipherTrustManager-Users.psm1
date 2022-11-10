@@ -37,21 +37,21 @@ $target_uri = "/usermgmt/users"
     .PARAMETER user_metadata        
         A schema-less object, which can be used by applications to store information about the resource. `user_metadata` is typically used by applications to store information about the resource which the end-users are allowed to modify, such as user preferences.
     .EXAMPLE
-        PS> Get-CM_CreateUser -email <email> -name <full name> -ps_creds <PSCredential>
+        PS> New-CMUser -email <email> -name <full name> -ps_creds <PSCredential>
 
         This creates a User with basic settings using a PSCredential.
     .EXAMPLE
-        PS> Get-CM_CreateUser -email <email> -name <full name> -username <account name> -secure_password <SecureString>
+        PS> New-CMUser -email <email> -name <full name> -username <account name> -secure_password <SecureString>
 
         This creates a User with basic settings. Password is provided in SecureString
     .EXAMPLE
-        PS> Get-CM_CreateUser -email <email> -name <full name> -username <account name> -password <plaintext>
+        PS> New-CMUser -email <email> -name <full name> -username <account name> -password <plaintext>
 
         This creates a User with basic settings. Password is provided in plaintext (least secure)
     .LINK
         https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
-function Get-CM_CreateUser {
+function New-CMUser {
     [CmdletBinding(DefaultParameterSetName = 'by PSCredential')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 
         '', 
@@ -140,7 +140,7 @@ function Get-CM_CreateUser {
     Write-Debug "JSON Body: $($jsonBody)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -190,14 +190,15 @@ function Get-CM_CreateUser {
     .PARAMETER limit
         The max number of resources to return. Equivalent to `limit` in SQL.
     .EXAMPLE
-        PS> Get-CM_ListUsers -name "Bob*"
+        PS> Find-CMUsers -name "Bob*"
 
         Returns a list of all users whose name starts with "Bob"
     .LINK
         https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
-function Get-CM_ListUsers {
-    param
+#function Get-CM_ListUsers {
+function Find-CMUsers {
+        param
     (
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
@@ -287,7 +288,7 @@ function Get-CM_ListUsers {
     Write-Debug "Endpoint w Query: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -322,16 +323,16 @@ function Get-CM_ListUsers {
         If the current user is logged into a sub-domain, the user is deleted from that sub-domain. 
         If the current user is logged into the root domain, the user is deleted from all domains it belongs to.    
     .PARAMETER user_id
-        The ID of the user to be deleted. Can be obtained through Get-CM_ListUsers
+        The ID of the user to be deleted. Can be obtained through Find-CMUsers
     .EXAMPLE
-        PS> $toDelete = Get-CM_ListUsers -name "Bob Smith" #assuming there is only ONE `Bob Smith` in CipherTrust Manager
-        PS> Get-CM_DeleteUser -user_id $toDelete.resources[0].user_id
+        PS> $toDelete = Find-CMUsers -name "Bob Smith" #assuming there is only ONE `Bob Smith` in CipherTrust Manager
+        PS> Remove-CMUser -user_id $toDelete.resources[0].user_id
 
         Deletes the user `Bob Smith` by the user's id
     .LINK
         https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
-function Get-CM_DeleteUser {
+function Remove-CMUser {
     param
     (
         [Parameter(Mandatory = $true,
@@ -349,7 +350,7 @@ function Get-CM_DeleteUser {
     Write-Debug "Endpoint with ID: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -376,6 +377,6 @@ function Get-CM_DeleteUser {
     return
 }    
 
-Export-ModuleMember -Function Get-CM_ListUsers
-Export-ModuleMember -Function Get-CM_CreateUser
-Export-ModuleMember -Function Get-CM_DeleteUser
+Export-ModuleMember -Function Find-CMUsers
+Export-ModuleMember -Function New-CMUser
+Export-ModuleMember -Function Remove-CMUser

@@ -1,6 +1,7 @@
 #######################################################################################################################
 # File:             CipherTrustManager-ProtectionPolicies.psm1                                                        #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
+# Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
 # Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
@@ -19,25 +20,25 @@ $target_uri = "/data-protection/protection-policies"
     .DESCRIPTION
         This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
         This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
 
         This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
         https://github.com/thalescpl-io/whatever_this_repo_is
 #>
-function Get-CM_CreateProtectionPolicy {
+function New-CMProtectionPolicy {
     param
     (
         [Parameter(Mandatory = $true,
@@ -90,7 +91,7 @@ function Get-CM_CreateProtectionPolicy {
     Write-Debug "JSON Body: $($jsonBody)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -117,7 +118,7 @@ function Get-CM_CreateProtectionPolicy {
     return $ssnPolicyId
 }    
 
-function Get-CM_ListProtectionPolicies {
+function Find-CMProtectionPolicies {
     param
     (
         [Parameter(Mandatory = $false,
@@ -156,7 +157,7 @@ function Get-CM_ListProtectionPolicies {
     Write-Debug "Endpoint w Query: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -183,7 +184,7 @@ function Get-CM_ListProtectionPolicies {
 }    
 
 
-function Get-CM_DeleteProtectionPolicy {
+function Remove-CMProtectionPolicy {
     param
     (
         [Parameter(Mandatory = $true,
@@ -201,7 +202,7 @@ function Get-CM_DeleteProtectionPolicy {
     Write-Debug "Endpoint with ID: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -211,16 +212,11 @@ function Get-CM_DeleteProtectionPolicy {
     }
     Catch {
         $StatusCode = $_.Exception.Response.StatusCode
-        if ($StatusCode -EQ [System.Net.HttpStatusCode]::Conflict) {
-            Write-Error "Error $([int]$StatusCode) $($StatusCode): User set already exists"
-            return
-        }
-        elseif ($StatusCode -EQ [System.Net.HttpStatusCode]::BadRequest) {
-            Write-Error "Error $([int]$StatusCode) $($StatusCode): Unable to find a Protection Policy by that name to delete"
-            return
+        if ($StatusCode -EQ [System.Net.HttpStatusCode]::BadRequest) {
+            Write-Debug "Error $([int]$StatusCode) $($StatusCode): Unable to find a Protection Policy by that name to delete" -ErrorAction Continue
         }
         elseif ($StatusCode -EQ [System.Net.HttpStatusCode]::Unauthorized) {
-            Write-Error "Error $([int]$StatusCode) $($StatusCode): Unable to connect to CipherTrust Manager with current credentials"
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): Unable to connect to CipherTrust Manager with current credentials" -ErrorAction Stop
             return
         }
         else {
@@ -231,6 +227,6 @@ function Get-CM_DeleteProtectionPolicy {
     return
 }    
 
-Export-ModuleMember -Function Get-CM_ListProtectionPolicies
-Export-ModuleMember -Function Get-CM_CreateProtectionPolicy
-Export-ModuleMember -Function Get-CM_DeleteProtectionPolicy
+Export-ModuleMember -Function Find-CMProtectionPolicies
+Export-ModuleMember -Function New-CMProtectionPolicy
+Export-ModuleMember -Function Remove-CMProtectionPolicy

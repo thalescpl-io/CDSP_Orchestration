@@ -1,6 +1,7 @@
 #######################################################################################################################
 # File:             CipherTrustManager-Keys.psm1                                                                    #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
+# Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
 # Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
@@ -22,25 +23,25 @@ $target_search_uri = "/vault/query-keys/"
     .DESCRIPTION
         This allows you to create a new key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
         This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
 
         This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
         https://github.com/thalescpl-io/whatever_this_repo_is
 #>
-function Get-CM_CreateKey {
+function New-CMKey {
     param
     (
         [Parameter(Mandatory = $true,
@@ -88,7 +89,7 @@ function Get-CM_CreateKey {
     Write-Debug "JSON Body: $($jsonBody)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer " + $CM_Session.AuthToken
         }
@@ -283,7 +284,7 @@ function Get-CM_CreateKey {
 
 <#
     .SYNOPSIS
-        Get-CM_ListKeys
+        Find-CMKeys
     .DESCRIPTION
         Returns a list of keys. 
 #    .PARAMETER server
@@ -306,7 +307,7 @@ function Get-CM_CreateKey {
 #>
 
 
-function Get-CM_ListKeys {
+function Find-CMKeys {
     param
     (
         [Parameter(Mandatory = $false,
@@ -350,7 +351,7 @@ function Get-CM_ListKeys {
     Write-Debug "JSON Body: $($jsonBody)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -381,7 +382,7 @@ function Get-CM_ListKeys {
 }    
 
 
-function Get-CM_DeleteKey {
+function Remove-CMKey {
     param
     (
         [Parameter(Mandatory = $true,
@@ -399,7 +400,7 @@ function Get-CM_DeleteKey {
     Write-Debug "Endpoint with ID: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -430,6 +431,6 @@ function Get-CM_DeleteKey {
 }    
 
 
-Export-ModuleMember -Function Get-CM_ListKeys
-Export-ModuleMember -Function Get-CM_CreateKey
-Export-ModuleMember -Function Get-CM_DeleteKey
+Export-ModuleMember -Function Find-CMKeys
+Export-ModuleMember -Function New-CMKey
+Export-ModuleMember -Function Remove-CMKey

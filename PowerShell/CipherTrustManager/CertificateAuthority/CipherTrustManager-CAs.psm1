@@ -1,6 +1,7 @@
 #######################################################################################################################
 # File:             CipherTrustManager-CAs.psm1                                                                    #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
+# Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
 # Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
@@ -19,13 +20,13 @@
 #    .DESCRIPTION
 #        This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
 #    .EXAMPLE
-#        PS> Get-CM_CreateKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+#        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 #
 #        This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
     .LINK
         https://github.com/thalescpl-io/whatever_this_repo_is
 #>
-function Get-CM_ListLocalCAs {
+function Find-CMCAs {
     param
     (
         [Parameter(Mandatory = $false,
@@ -121,7 +122,7 @@ function Get-CM_ListLocalCAs {
     Write-Debug "Endpoint: $($endpoint)"    
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -146,4 +147,4 @@ function Get-CM_ListLocalCAs {
     return "$($caID)"
 }    
 
-Export-ModuleMember -Function Get-CM_ListLocalCAs
+Export-ModuleMember -Function Find-CMCAs

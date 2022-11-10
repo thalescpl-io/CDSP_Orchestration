@@ -1,6 +1,7 @@
 #######################################################################################################################
 # File:             CipherTrustManager-AccessPolicies.psm1                                                        #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
+# Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
 # Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
@@ -40,25 +41,25 @@ $CM_RevealTypesDef = @{
     .DESCRIPTION
         This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
         This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
 
         This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
         https://github.com/thalescpl-io/whatever_this_repo_is
 #>
-function Get-CM_CreateAccessPolicy {
+function New-CMAccessPolicy {
     param
     (
         [Parameter(Mandatory = $true,
@@ -105,7 +106,7 @@ function Get-CM_CreateAccessPolicy {
     Write-Debug "JSON Body: $($jsonBody)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -132,7 +133,7 @@ function Get-CM_CreateAccessPolicy {
     return $ssnPolicyId
 }    
 
-function Get-CM_ListAccessPolicies {
+function Find-CMAccessPolicies {
     param
     (
         [Parameter(Mandatory = $false,
@@ -179,7 +180,7 @@ function Get-CM_ListAccessPolicies {
     Write-Debug "Endpoint w Query: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -206,7 +207,7 @@ function Get-CM_ListAccessPolicies {
 }    
 
 
-function Get-CM_DeleteAccessPolicy {
+function Remove-CMAccessPolicy {
     param
     (
         [Parameter(Mandatory = $true,
@@ -224,7 +225,7 @@ function Get-CM_DeleteAccessPolicy {
     Write-Debug "Endpoint with ID: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -250,7 +251,7 @@ function Get-CM_DeleteAccessPolicy {
     return
 }    
 
-function Get-CM_CreateUserSetPolicy {
+function New-CMUserSetPolicy {
     param(
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
@@ -299,7 +300,7 @@ function Get-CM_CreateUserSetPolicy {
     return $user_set_policy
 }
 
-Export-ModuleMember -Function Get-CM_ListAccessPolicies
-Export-ModuleMember -Function Get-CM_CreateAccessPolicy
-Export-ModuleMember -Function Get-CM_DeleteAccessPolicy
-Export-ModuleMember -Function Get-CM_CreateUserSetPolicy
+Export-ModuleMember -Function Find-CMAccessPolicies
+Export-ModuleMember -Function New-CMAccessPolicy
+Export-ModuleMember -Function Remove-CMAccessPolicy
+Export-ModuleMember -Function New-CMUserSetPolicy

@@ -89,7 +89,7 @@ function Connect-CipherTrustManager {
     $CM_Session.REST_URL = "https://" + ($CM_Session.KMS_IP) + "/api/v1"
 
     #Authenticate with CM, get JWT and set BEARER token in Headers
-    Get-CM_JWT  
+    Get-CMJWT  
 
     Write-Debug "End: $($MyInvocation.MyCommand.Name)"
     return
@@ -101,53 +101,53 @@ function Connect-CipherTrustManager {
 #This module
 Export-ModuleMember -Function Connect-CipherTrustManager
 #Utils
-Export-ModuleMember -Function Get-CM_JWT
-Export-ModuleMember -Function Test-CM_JWT
+Export-ModuleMember -Function Get-CMJWT
+Export-ModuleMember -Function Test-CMJWT
 Export-ModuleMember -Function Write-HashtableArray
 #Keys
-Export-ModuleMember -Function Get-CM_ListKeys
-Export-ModuleMember -Function Get-CM_CreateKey
-Export-ModuleMember -Function Get-CM_DeleteKey
+Export-ModuleMember -Function Find-CMKeys
+Export-ModuleMember -Function New-CMKey
+Export-ModuleMember -Function Remove-CMKey
 #Users
-Export-ModuleMember -Function Get-CM_ListUsers
-Export-ModuleMember -Function Get-CM_CreateUser
-Export-ModuleMember -Function Get-CM_DeleteUser
+Export-ModuleMember -Function Find-CMUsers
+Export-ModuleMember -Function New-CMUser
+Export-ModuleMember -Function Remove-CMUser
 #Tokens
 Export-ModuleMember -Function Get-CM_AuthTokens
 #CAs
-Export-ModuleMember -Function Get-CM_ListLocalCAs
+Export-ModuleMember -Function Find-CMCAs
 #Char Sets
-Export-ModuleMember -Function Get-CM_ListCharacterSets
-Export-ModuleMember -Function Get-CM_CreateCharacterSet
-Export-ModuleMember -Function Get-CM_DeleteCharacterSet
+Export-ModuleMember -Function Find-CMCharacterSets
+Export-ModuleMember -Function New-CMCharacterSet
+Export-ModuleMember -Function Remove-CMCharacterSet
 #User Sets
-Export-ModuleMember -Function Get-CM_ListUserSets
-Export-ModuleMember -Function Get-CM_CreateUserSet
-Export-ModuleMember -Function Get-CM_DeleteUserSet
+Export-ModuleMember -Function Find-CMUserSets
+Export-ModuleMember -Function New-CMUserSet
+Export-ModuleMember -Function Remove-CMUserSet
 #Masking Formats
-Export-ModuleMember -Function Get-CM_ListMaskingFormats
-Export-ModuleMember -Function Get-CM_CreateMaskingFormat
-Export-ModuleMember -Function Get-CM_DeleteMaskingFormat
+Export-ModuleMember -Function Find-CMMaskingFormats
+Export-ModuleMember -Function New-CMMaskingFormat
+Export-ModuleMember -Function Remove-CMMaskingFormat
 #Protection Policies
-Export-ModuleMember -Function Get-CM_ListProtectionPolicies
-Export-ModuleMember -Function Get-CM_CreateProtectionPolicy
-Export-ModuleMember -Function Get-CM_DeleteProtectionPolicy
+Export-ModuleMember -Function Find-CMProtectionPolicies
+Export-ModuleMember -Function New-CMProtectionPolicy
+Export-ModuleMember -Function Remove-CMProtectionPolicy
 #Access Policies
-Export-ModuleMember -Function Get-CM_ListAccessPolicies
-Export-ModuleMember -Function Get-CM_CreateAccessPolicy
-Export-ModuleMember -Function Get-CM_DeleteAccessPolicy
-Export-ModuleMember -Function Get-CM_CreateUserSetPolicy
+Export-ModuleMember -Function Find-CMAccessPolicies
+Export-ModuleMember -Function New-CMAccessPolicy
+Export-ModuleMember -Function Remove-CMAccessPolicy
+Export-ModuleMember -Function New-CMUserSetPolicy
 #Interfaces
-Export-ModuleMember -Function Get-CM_ListInterfaces
-Export-ModuleMember -Function Get-CM_AddInterface
-Export-ModuleMember -Function Get-CM_DeleteInterface
+Export-ModuleMember -Function Find-CMInterfaces
+Export-ModuleMember -Function New-CMInterface
+Export-ModuleMember -Function Remove-CMInterface
 #DPG Policies
-Export-ModuleMember -Function Get-CM_DPG_ListPolicies
-Export-ModuleMember -Function Get-CM_DPG_CreatePolicy
-Export-ModuleMember -Function Get-CM_DPG_DeletePolicy
-Export-ModuleMember -Function Get-CM_DPG_ProxyConfig
-Export-ModuleMember -Function Get-CM_DPG_JSONRequestResponse
+Export-ModuleMember -Function Find-CMDPGPolicies
+Export-ModuleMember -Function New-CMDPGPolicy
+Export-ModuleMember -Function Remove-CMDPGPolicy
+Export-ModuleMember -Function New-CMDPGProxyConfig
+Export-ModuleMember -Function New-CMDPGJSONRequestResponse
 #ClientProfiles
-Export-ModuleMember -Function Get-CM_ListClientProfiles
-Export-ModuleMember -Function Get-CM_CreateClientProfile
-Export-ModuleMember -Function Get-CM_DeleteClientProfile
+Export-ModuleMember -Function Find-CMClientProfiles
+Export-ModuleMember -Function New-CMClientProfiles
+Export-ModuleMember -Function Remove-CMClientProfiles

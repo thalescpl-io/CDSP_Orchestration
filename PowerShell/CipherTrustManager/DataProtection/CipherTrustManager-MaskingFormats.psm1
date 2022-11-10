@@ -1,6 +1,7 @@
 #######################################################################################################################
 # File:             CipherTrustManager-MaskingFormats.psm1                                                            #
 # Author:           Anurag Jain, Developer Advocate                                                                   #
+# Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
 # Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
@@ -13,25 +14,25 @@
     .DESCRIPTION
         This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
         This Shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
 
         This Shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
 
         This Shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
     .EXAMPLE
-        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
 
         This Shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
         https://github.com/thalescpl-io/whatever_this_repo_is
 #>
-function Get-CM_CreateMaskingFormat {
+function New-CMMaskingFormat {
     param
     (
         [Parameter(Mandatory = $true,
@@ -72,7 +73,7 @@ function Get-CM_CreateMaskingFormat {
     Write-Debug "JSON Body: $($jsonBody)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -98,7 +99,7 @@ function Get-CM_CreateMaskingFormat {
     Write-Debug "Masking Format created"
     return $maskingFormatId
 }    
-function Get-CM_ListMaskingFormats {
+function Find-CMMaskingFormats {
     param
     (
         [Parameter(Mandatory = $false,
@@ -172,7 +173,7 @@ function Get-CM_ListMaskingFormats {
     Write-Debug "Endpoint w Query: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -199,7 +200,7 @@ function Get-CM_ListMaskingFormats {
 }    
 
 
-function Get-CM_DeleteMaskingFormat {
+function Remove-CMMaskingFormat {
     param
     (
         [Parameter(Mandatory = $true,
@@ -217,7 +218,7 @@ function Get-CM_DeleteMaskingFormat {
     Write-Debug "Endpoint with ID: $($endpoint)"
 
     Try {
-        Test-CM_JWT #Make sure we have an up-to-date jwt
+        Test-CMJWT #Make sure we have an up-to-date jwt
         $headers = @{
             Authorization = "Bearer $($CM_Session.AuthToken)"
         }
@@ -244,6 +245,6 @@ function Get-CM_DeleteMaskingFormat {
 }    
 
 
-Export-ModuleMember -Function Get-CM_ListMaskingFormats
-Export-ModuleMember -Function Get-CM_CreateMaskingFormat
-Export-ModuleMember -Function Get-CM_DeleteMaskingFormat
+Export-ModuleMember -Function Find-CMMaskingFormats
+Export-ModuleMember -Function New-CMMaskingFormat
+Export-ModuleMember -Function Remove-CMMaskingFormat

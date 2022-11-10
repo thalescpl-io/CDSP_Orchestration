@@ -18,11 +18,11 @@ Install-Module -name JWTDetails -Force
     .DESCRIPTION
         This function gets all of its necessary information from $CM_Session variables within this module
     .EXAMPLE
-        PS> Get-CM_JWT
+        PS> Get-CMJWT
     .NOTES
         NOT EXPORTED. INTERNAL ONLY
 #>
-function Get-CM_JWT {
+function Get-CMJWT {
     Write-Debug "Start: $($MyInvocation.MyCommand.Name)"
 
     $CM_Session.AuthToken = $null
@@ -60,17 +60,17 @@ function Get-CM_JWT {
     .DESCRIPTION
         This function gets all of its necessary information from $CM_Session variables within this module
     .EXAMPLE
-        PS> Get-CM_JWT
+        PS> Get-CMJWT
     .NOTES
         NOT EXPORTED. INTERNAL ONLY
 #>
-function Test-CM_JWT {
+function Test-CMJWT {
     Write-Debug "Start: $($MyInvocation.MyCommand.Name)"
 
     Write-Debug "Time to expire (sec): $((get-jwtdetails $CM_Session.AuthToken).timeToExpiry.TotalSeconds)"
     if ((get-jwtdetails $CM_Session.AuthToken).timeToExpiry.TotalSeconds -lt 60) {
         Write-Debug "JWT is close to or past expiry. Refreshing token."
-        Get-CM_JWT
+        Get-CMJWT
     }
     else {
         Write-Debug "JWT not close to or past expiry"
@@ -119,6 +119,6 @@ function Write-HashtableArray {
     Write-Debug "End: $($MyInvocation.MyCommand.Name)"
 }
 
-Export-ModuleMember -Function Get-CM_JWT
-Export-ModuleMember -Function Test-CM_JWT
+Export-ModuleMember -Function Get-CMJWT
+Export-ModuleMember -Function Test-CMJWT
 Export-ModuleMember -Function Write-HashtableArray

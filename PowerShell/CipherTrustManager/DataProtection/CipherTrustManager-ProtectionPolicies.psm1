@@ -1,0 +1,236 @@
+#######################################################################################################################
+# File:             CipherTrustManager-ProtectionPolicies.psm1                                                        #
+# Author:           Anurag Jain, Developer Advocate                                                                   #
+# Publisher:        Thales Group                                                                                      #
+# Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
+# Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
+#                   Do not load this directly                                                                         #
+#######################################################################################################################
+
+####
+# Local Variables
+####
+$target_uri = "/data-protection/protection-policies"
+####
+
+<#
+    .SYNOPSIS
+        Create a new character set
+    .DESCRIPTION
+        This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
+    .EXAMPLE
+        PS> Get-CM_CreateKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+
+        This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
+    .EXAMPLE
+        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+
+        This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
+    .EXAMPLE
+        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+
+        This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
+    .EXAMPLE
+        PS> Get-CM_CreateKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+
+        This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
+    .LINK
+        https://github.com/thalescpl-io/whatever_this_repo_is
+#>
+function Get-CM_CreateProtectionPolicy {
+    param
+    (
+        [Parameter(Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true)]
+        [string] $name, 
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [string] $key,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [string] $algorithm,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [switch] $allow_single_char_input,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [string] $character_set_id,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [string] $init_vector,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [string] $tweak,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [string] $tweak_algorithm
+    )
+
+    Write-Debug "Creating a Protection Policy in CM"
+    $endpoint = $CM_Session.REST_URL + $target_uri
+    Write-Debug "Endpoint: $($endpoint)"
+
+    $ssnPolicyId = $null
+
+    # Mandatory Parameters
+    $body = @{
+        'name' = $name
+        'key' = $key
+        'algorithm' = $algorithm
+    }
+
+    # Optional Parameters
+    if ($allow_single_char_input) { $body.add('allow_single_char_input', $true) }
+    if ($character_set_id) { $body.add('character_set_id', $character_set_id) }
+    if ($init_vector) { $body.add('init_vector', $init_vector) }
+    if ($tweak) { $body.add('tweak', $tweak) }
+    if ($tweak_algorithm) { $body.add('tweak_algorithm', $tweak_algorithm) }
+
+    $jsonBody = $body | ConvertTo-Json -Depth 5
+    Write-Debug "JSON Body: $($jsonBody)"
+
+    Try {
+        Test-CM_JWT #Make sure we have an up-to-date jwt
+        $headers = @{
+            Authorization = "Bearer $($CM_Session.AuthToken)"
+        }
+        Write-Debug "Headers: $($headers)"    
+        $response = Invoke-RestMethod -SkipCertificateCheck -Method 'POST' -Uri $endpoint -Body $jsonBody -Headers $headers -ContentType 'application/json'
+        Write-Debug "Response: $($response)"  
+        $ssnPolicyId = $response.id  
+    }
+    Catch {
+        $StatusCode = $_.Exception.Response.StatusCode
+        if ($StatusCode -EQ [System.Net.HttpStatusCode]::Conflict) {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): Protection Policy already exists"
+            return
+        }
+        elseif ($StatusCode -EQ [System.Net.HttpStatusCode]::Unauthorized) {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): Unable to connect to CipherTrust Manager with current credentials"
+            return
+        }
+        else {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): $($_.Exception.Response.ReasonPhrase)" -ErrorAction Stop
+        }
+    }
+    Write-Debug "Protection Policy created"
+    return $ssnPolicyId
+}    
+
+function Get-CM_ListProtectionPolicies {
+    param
+    (
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true)]
+        [string] $name, 
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [int] $skip,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [int] $limit
+    )
+
+    Write-Debug "Getting a List of Protection Policies configured in CM"
+    $endpoint = $CM_Session.REST_URL + $target_uri
+    Write-Debug "Endpoint: $($endpoint)"
+
+    #Set query
+#    $firstset = $false #can skip if there is only one mandatory element
+    if ($name) {
+        $endpoint += "?name="
+#        $firstset = $true
+        $endpoint += $name            
+    }
+
+    if ($skip) {
+        $endpoint += "&skip="
+        $endpoint += $skip
+    }
+
+    if ($limit) {
+        $endpoint += "&limit="
+        $endpoint += $limit
+    }
+
+    Write-Debug "Endpoint w Query: $($endpoint)"
+
+    Try {
+        Test-CM_JWT #Make sure we have an up-to-date jwt
+        $headers = @{
+            Authorization = "Bearer $($CM_Session.AuthToken)"
+        }
+        Write-Debug "Headers: $($headers)"    
+        $response = Invoke-RestMethod -SkipCertificateCheck -Method 'GET' -Uri $endpoint -Body $jsonBody -Headers $headers -ContentType 'application/json'
+        Write-Debug "Response: $($response)"  
+    }
+    Catch {
+        $StatusCode = $_.Exception.Response.StatusCode
+        if ($StatusCode -EQ [System.Net.HttpStatusCode]::Conflict) {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): User set already exists"
+            return
+        }
+        elseif ($StatusCode -EQ [System.Net.HttpStatusCode]::Unauthorized) {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): Unable to connect to CipherTrust Manager with current credentials"
+            return
+        }
+        else {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): $($_.Exception.Response.ReasonPhrase)" -ErrorAction Stop
+        }
+    }
+    Write-Debug "List of Protection Policies created"
+    return $response
+}    
+
+
+function Get-CM_DeleteProtectionPolicy {
+    param
+    (
+        [Parameter(Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true)]
+        [string] $policy_name
+    )
+
+    Write-Debug "Deleting a Protection Policy by Name in CM"
+    $endpoint = $CM_Session.REST_URL + $target_uri
+    Write-Debug "Endpoint: $($endpoint)"
+
+    #Set ID
+    $endpoint += "/$policy_name"
+
+    Write-Debug "Endpoint with ID: $($endpoint)"
+
+    Try {
+        Test-CM_JWT #Make sure we have an up-to-date jwt
+        $headers = @{
+            Authorization = "Bearer $($CM_Session.AuthToken)"
+        }
+        Write-Debug "Headers: $($headers)"    
+        $response = Invoke-RestMethod -SkipCertificateCheck -Method 'DELETE' -Uri $endpoint -Headers $headers -ContentType 'application/json'
+        Write-Debug "Response: $($response)"  
+    }
+    Catch {
+        $StatusCode = $_.Exception.Response.StatusCode
+        if ($StatusCode -EQ [System.Net.HttpStatusCode]::Conflict) {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): User set already exists"
+            return
+        }
+        elseif ($StatusCode -EQ [System.Net.HttpStatusCode]::BadRequest) {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): Unable to find a Protection Policy by that name to delete"
+            return
+        }
+        elseif ($StatusCode -EQ [System.Net.HttpStatusCode]::Unauthorized) {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): Unable to connect to CipherTrust Manager with current credentials"
+            return
+        }
+        else {
+            Write-Error "Error $([int]$StatusCode) $($StatusCode): $($_.Exception.Response.ReasonPhrase)" -ErrorAction Stop
+        }
+    }
+    Write-Debug "Protection Policy deleted"
+    return
+}    
+
+Export-ModuleMember -Function Get-CM_ListProtectionPolicies
+Export-ModuleMember -Function Get-CM_CreateProtectionPolicy
+Export-ModuleMember -Function Get-CM_DeleteProtectionPolicy

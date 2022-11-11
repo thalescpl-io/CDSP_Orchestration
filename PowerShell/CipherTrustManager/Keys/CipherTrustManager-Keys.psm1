@@ -4,9 +4,38 @@
 # Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
-# Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
+# Notes:            This module is loaded by the master module, CipherTrustManager                                    #
 #                   Do not load this directly                                                                         #
 #######################################################################################################################
+
+####
+# ENUMS
+####
+#Usage Masks
+[flags()] Enum UsageMaskTable {
+    Sign                = 1 
+    Verify              = 2 
+    Encrypt             = 4
+    Decrypt             = 8 
+    WrapKey             = 16 
+    UnwrapKey           = 32
+    Export              = 64 
+    MACGenerate         = 128 
+    MACVerify           = 256 
+    DeriveKey           = 512
+    ContentCommitment   = 1024 
+    KeyAgreement        = 2048
+    CertificateSign     = 4096 
+    CRLSign             = 8192
+    GenerateCryptogram  = 16384
+    ValidateCryptogram  = 32768 
+    TranslateEncrypt    = 65536 
+    TranslateDecrypt    = 131072 
+    TranslateWrap       = 262144
+    TranslateUnwrap     = 524288 
+    FPEEncrypt          = 1048576
+    FPEDecrypt          = 2097152 
+}
 
 ####
 # Local Variables
@@ -21,7 +50,19 @@ $target_search_uri = "/vault/query-keys/"
     .SYNOPSIS
         Create a key in CipherTrust Manager
     .DESCRIPTION
-        This allows you to create a new key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
+        Keys are the cryptographic material used in crypto operations.
+
+        Keys can be symmetric or asymmetric, in various sizes and algorithms. The crypto endpoints take key identifiers as parameters to specify which key to use. If the key is exportable, the key material can be exported to the caller and used for local encryption.
+    .PARAMETER keyname 
+        Friendly name. The key name should not contain special characters such as angular brackets (<,>) and backslash ().
+    .PARAMETER usageMask 
+        Cryptographic usage mask. Add the usage masks to allow certain usages based on [UsageMaskTable] enum 
+        Add the usage mask values to allow the usages. To set all usage mask bits, use 4194303.
+    .PARAMETER algorithm
+    .PARAMETER size
+    .PARAMETER Unexportable
+    .PARAMETER Undeletable    
+    .PARAMETER NoVersionedKey
     .EXAMPLE
         PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
@@ -39,7 +80,7 @@ $target_search_uri = "/vault/query-keys/"
 
         This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
-        https://github.com/thalescpl-io/whatever_this_repo_is
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
 function New-CMKey {
     param
@@ -49,7 +90,7 @@ function New-CMKey {
         [string] $keyname, 
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [int] $usageMask, 
+        [UsageMaskTable] $usageMask, 
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
         [Alias("algo")]
@@ -75,7 +116,7 @@ function New-CMKey {
 
     $body = @{
         'name'         = "$keyname"
-        'usageMask'    = $usageMask
+        'usageMask'    = [int]$usageMask
         'algorithm'    = "$algorithm"
         'size'         = 256
         'unexportable' = If ($Unexportable) { $true } else { $false }

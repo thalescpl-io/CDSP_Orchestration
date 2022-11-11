@@ -222,6 +222,7 @@ function Find-CMUsers {
             ValueFromPipelineByPropertyName = $true )]
         [int] $limit
     )
+    Write-Debug "Start: $($MyInvocation.MyCommand.Name)"
 
     Write-Debug "Getting a List of Users in CM"
     $endpoint = $CM_Session.REST_URL + $target_uri
@@ -312,6 +313,7 @@ function Find-CMUsers {
         }
     }
     Write-Debug "List of users created"
+    Write-Debug "End: $($MyInvocation.MyCommand.Name)"
     return $response
 }    
 
@@ -339,6 +341,7 @@ function Remove-CMUser {
             ValueFromPipelineByPropertyName = $true)]
         [string] $user_id
     )
+    Write-Debug "Start: $($MyInvocation.MyCommand.Name)"
 
     Write-Debug "Deleting a User by ID in CM"
     $endpoint = $CM_Session.REST_URL + $target_uri
@@ -374,6 +377,7 @@ function Remove-CMUser {
         }
     }
     Write-Debug "User deleted"
+    Write-Debug "End: $($MyInvocation.MyCommand.Name)"
     return
 }    
 

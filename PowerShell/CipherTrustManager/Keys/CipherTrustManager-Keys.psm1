@@ -13,29 +13,51 @@
 ####
 #Usage Masks
 [flags()] Enum UsageMaskTable {
-    Sign                = 1 
-    Verify              = 2 
-    Encrypt             = 4
-    Decrypt             = 8 
-    WrapKey             = 16 
-    UnwrapKey           = 32
-    Export              = 64 
-    MACGenerate         = 128 
-    MACVerify           = 256 
-    DeriveKey           = 512
-    ContentCommitment   = 1024 
-    KeyAgreement        = 2048
-    CertificateSign     = 4096 
-    CRLSign             = 8192
-    GenerateCryptogram  = 16384
-    ValidateCryptogram  = 32768 
-    TranslateEncrypt    = 65536 
-    TranslateDecrypt    = 131072 
-    TranslateWrap       = 262144
-    TranslateUnwrap     = 524288 
-    FPEEncrypt          = 1048576
-    FPEDecrypt          = 2097152 
+    Sign = 1 
+    Verify = 2 
+    Encrypt = 4
+    Decrypt = 8 
+    WrapKey = 16 
+    UnwrapKey = 32
+    Export = 64 
+    MACGenerate = 128 
+    MACVerify = 256 
+    DeriveKey = 512
+    ContentCommitment = 1024 
+    KeyAgreement = 2048
+    CertificateSign = 4096 
+    CRLSign = 8192
+    GenerateCryptogram = 16384
+    ValidateCryptogram = 32768 
+    TranslateEncrypt = 65536 
+    TranslateDecrypt = 131072 
+    TranslateWrap = 262144
+    TranslateUnwrap = 524288 
+    FPEEncrypt = 1048576
+    FPEDecrypt = 2097152 
 }
+###
+# Supported Algorithms
+Add-Type -TypeDefinition @"
+   public enum KeyAlgorithms {
+    aes,
+    tdes,
+    rsa,
+    ec,
+    seed,
+    aria,
+    opaque
+}
+"@
+# Was not able to include
+#    hmac-sha1,
+#    hmac-sha256,
+#    hmac-sha384,
+#    hmac-sha512,
+#
+####
+
+
 
 ####
 # Local Variables
@@ -59,24 +81,29 @@ $target_search_uri = "/vault/query-keys/"
         Cryptographic usage mask. Add the usage masks to allow certain usages based on [UsageMaskTable] enum 
         Add the usage mask values to allow the usages. To set all usage mask bits, use 4194303.
     .PARAMETER algorithm
+        Cryptographic algorithm this key is used with based on [KeyAlgorithms] enum. Defaults to 'aes'
     .PARAMETER size
+        Bit length for the key
     .PARAMETER Unexportable
-    .PARAMETER Undeletable    
+        Key is NOT Exportable. Defaults to false
+    .PARAMETER Undeletable   
+        Key is NOT Deletable. Defaults to false
     .PARAMETER NoVersionedKey
+        Key does not have versioning. This is a fixed key that cannot be rotated.
     .EXAMPLE
         PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
         This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
     .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+        PS> New-CMKey -keyname $name -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
     .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+        PS> New-CMKey -keyname $name -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
 
         This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
     .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+        PS> New-CMKey -keyname $name -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
 
         This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
@@ -85,16 +112,16 @@ $target_search_uri = "/vault/query-keys/"
 function New-CMKey {
     param
     (
-        [Parameter(Mandatory = $true,
+        [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
-        [string] $keyname, 
+        [string] $name, 
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
         [UsageMaskTable] $usageMask, 
-        [Parameter(Mandatory = $true,
+        [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
         [Alias("algo")]
-        [string] $algorithm, 
+        [KeyAlgorithms] $algorithm = "aes", 
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
         [int] $size,
@@ -108,6 +135,7 @@ function New-CMKey {
             ValueFromPipelineByPropertyName = $true)]
         [switch] $NoVersionedKey = $false
     )
+    Write-Debug "Start: $($MyInvocation.MyCommand.Name)"
 
     Write-Debug "Creating a Key in CM"
     $endpoint = $CM_Session.REST_URL + $target_uri
@@ -115,7 +143,7 @@ function New-CMKey {
     $keyID = $null
 
     $body = @{
-        'name'         = "$keyname"
+        'name'         = "$name"
         'usageMask'    = [int]$usageMask
         'algorithm'    = "$algorithm"
         'size'         = 256
@@ -142,16 +170,15 @@ function New-CMKey {
     Catch {
         $StatusCode = $_.Exception.Response.StatusCode
         if ($StatusCode -EQ [System.Net.HttpStatusCode]::Conflict) {
-            Write-Error "Conflict: Key already exists by that name"
-            return
+            Write-Error "Conflict: Key already exists by that name" -ErrorAction Continue
         }
         else {
             Write-Error "Expected 200, got $([int]$StatusCode)" -ErrorAction Stop
-            return
         }
     }
 
     Write-Debug $keyID
+    Write-Debug "End: $($MyInvocation.MyCommand.Name)"
     return $keyID
 }    
 
@@ -327,13 +354,24 @@ function New-CMKey {
     .SYNOPSIS
         Find-CMKeys
     .DESCRIPTION
-        Returns a list of keys. 
-#    .PARAMETER server
-##    Specifies the IP Address or FQDN of CipherTrust Manager.
-#
-#    .PARAMETER credential
-#    Specifies the "credential (username/password) authorized to connect with CipherTrust manager.
-#
+        This operation uses `query-keys` and searches for keys stored on the CipherTrust Manager. The operation is similar to the list operation. The differences are (a) a lot more search parameters can be passed in, and (b) the search parameters are passed in the body of an HTTP POST request instead of being passed as query parameters in a HTTP GET request. Normally, this operation returns a list of keys, secrets, etc., that satisfy the search criteria. When the returnOnlyIDs input parameter is specified as true, this operation just returns a list of key IDs.
+    .PARAMETER keyname
+        Filters results to those with matching names.  The '?' and '*' wildcard characters may be used.
+
+    .PARAMETER usageMask
+        Deprecated: Use 'usageMasks'.
+        Filters results to those with matching Cryptographic usage maskbased on [UsageMaskTable] enum
+    .PARAMETER algorithm
+        Deprecated: Use 'algorithms'. Filters results to those with matching algorithms based on [KeyAlgorithms] enum.
+        The '?' and '*' wildcard characters may be used.
+    .PARAMETER size
+        Deprecated: Use 'sizes'. Filters results to those with matching size.
+    .PARAMETER Unexportable
+        Find keys with the specified value of the `unexportable` attribute (opposite of the KMIP `Extractable` attribute).    
+    .PARAMETER skip
+        The index of the first resource to return. Equivalent to `offset` in SQL.
+    .PARAMETER limit
+        The max number of resources to return. Equivalent to `limit` in SQL.
 #    .INPUTS
 #    None. You cannot pipe objects to Connect-CipherTrustManager.
 #
@@ -342,9 +380,8 @@ function New-CMKey {
 #
 #    .EXAMPLE
 #    PS> Connect-CipherTrustManager -server 10.23.104.40 -user "user1" -pass "P@ssw0rd!"
-#
-#    .LINK
-#    Online version: <github docs>
+    .LINK
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
 
 
@@ -353,10 +390,10 @@ function Find-CMKeys {
     (
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
-        [string] $keyname, 
+        [string] $name, 
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
-        [int] $usageMask, 
+        [UsageMaskTable] $usageMask, 
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
         [Alias("algo")]
@@ -368,8 +405,11 @@ function Find-CMKeys {
             ValueFromPipelineByPropertyName = $true)]
         [switch] $Unexportable,
         [Parameter(Mandatory = $false,
-            ValueFromPipelineByPropertyName = $true)]
-        [switch] $Undeletable
+            ValueFromPipelineByPropertyName = $true )]
+        [int] $skip,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true )]
+        [int] $limit
     )
 
     Write-Debug "Getting a List of Keys configured in CM"
@@ -380,14 +420,23 @@ function Find-CMKeys {
     $body = @{}
 
     # Optional Parameters
-    if ($keyname) { $body.add('name', $keyname) }
-    if ($usageMask) { $body.add('usageMask', $usageMask) }
+    if ($name) { $body.add('name', $name) }
+    if ($usageMask) { $body.add('usageMask', [int]$usageMask) }
     if ($algorithm) { $body.add('algorithm', $algorithm) }
     if ($size) { $body.add('size', $size) }
 
     if ($Unexportable) { $body.add('unexportable', $true) }
-    if ($Undeletable) { $body.add('undeletable', $true) }
     
+    if ($skip) {
+        $endpoint += "&skip="
+        $endpoint += $skip
+    }
+
+    if ($limit) {
+        $endpoint += "&limit="
+        $endpoint += $limit
+    }
+
     $jsonBody = $body | ConvertTo-Json -Depth 5
     Write-Debug "JSON Body: $($jsonBody)"
 
@@ -423,20 +472,70 @@ function Find-CMKeys {
 }    
 
 
+<#
+    .SYNOPSIS
+        Remove-CMKey
+    .DESCRIPTION
+        This operation deletes a key by id.
+    .PARAMETER id
+        Filters results to those with matching names.  The '?' and '*' wildcard characters may be used.
+    .PARAMETER version
+        Specifies the key version: Default is latest version
+    .PARAMETER type
+        Specify the type of the idenfifier specified by the `name` option.
+        Must be one of name, id, uri or alias.
+        If not specificed, the type of the identifier is inferred
+#    .INPUTS
+#    None. You cannot pipe objects to Connect-CipherTrustManager.
+#
+#    .OUTPUTS
+#    None. Connect-CipherTrustManager returns a proxy to this connection.
+#
+#    .EXAMPLE
+#    PS> Connect-CipherTrustManager -server 10.23.104.40 -user "user1" -pass "P@ssw0rd!"
+    .LINK
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
+#>
+
 function Remove-CMKey {
     param
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [string] $key_id
+        [string] $id,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true)]
+        [int] $version,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true)]
+        [string] $type
     )
+    Write-Debug "Start: $($MyInvocation.MyCommand.Name)"
 
     Write-Debug "Deleting a Key by ID in CM"
     $endpoint = $CM_Session.REST_URL + $target_uri
     Write-Debug "Endpoint: $($endpoint)"
 
-    #Set ID
-    $endpoint += "/$key_id"
+    #set id which is mandatory
+    $endpoint += "/$id"
+
+    #Set query
+    $firstset = $false
+    if ($version) {
+        $endpoint += "?version="
+        $firstset = $true
+        $endpoint += $version            
+    }
+    if ($type) {
+        if ($firstset) {
+            $endpoint += "&type="
+        }
+        else {
+            $endpoint += "?type="
+            $firstset = $true
+        }
+        $endpoint += $type
+    }
 
     Write-Debug "Endpoint with ID: $($endpoint)"
 
@@ -468,6 +567,7 @@ function Remove-CMKey {
         }
     }
     Write-Debug "Key deleted"
+    Write-Debug "End: $($MyInvocation.MyCommand.Name)"
     return
 }    
 

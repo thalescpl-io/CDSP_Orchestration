@@ -1,0 +1,111 @@
+---
+  - name: "Create DPG Application Playbook"
+    hosts: localhost
+    connection: local
+
+    vars_files:
+      - variables.yaml
+
+    tasks:
+
+    - name: "Create new key on Ciphertrust Manager"
+      thales.ciphertrust.vault_keys_create:
+        localNode: "{{ this_node_connection_string }}"
+        keyName: "{{ dpg_key_name }}"
+
+    - name: "create NAE interface"
+      thales.ciphertrust.config_interface_nae_post:
+        portNumber: "{{ nae_port_number }}"
+        localNode: "{{ this_node_connection_string }}"
+
+    - name: "Create Character Set"
+      thales.ciphertrust.dpg_character_sets_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ char_set_name }}"
+      register: charset
+    
+    - name: "Create Protection Policy for non-CARD"
+      thales.ciphertrust.dpg_protection_policy_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ non_card_protection_policy_name }}"
+        key: "{{ dpg_key_name }}"
+        tweak: "1628462495815733"
+        tweak_algorithm: "SHA1"
+        algorithm: "FPE/FF3/ASCII"
+        character_set_id: "{{ charset['charsetId'] }}"
+      register: protection_policy_non_card
+
+    - name: "Create Protection Policy for CARD"
+      thales.ciphertrust.dpg_protection_policy_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ fpe_card_protection_policy_name }}"
+        key: "{{ dpg_key_name }}"
+        tweak: "9828462495846783"
+        tweak_algorithm: "SHA1"
+        algorithm: "FPE/AES/CARD10"
+      register: protection_policy_card
+
+    - name: "User Creation"
+      thales.ciphertrust.cm_usermgmt_user_create:
+        localNode: "{{ this_node_connection_string }}"
+        users: "{{ var_users }}"
+
+    - name: "Userset Creation"
+      thales.ciphertrust.dpg_user_sets_create:
+        localNode: "{{ this_node_connection_string }}"
+        usersets: "{{ var_usersets }}"
+
+    - name: "Create Access Policy"
+      thales.ciphertrust.dpg_access_policy_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ access_policy_name }}"
+        default_reveal_type: "Ciphertext"
+        default_error_replacement_value: 000000
+        userSetPolicies: "{{ var_usersetPolicies }}"
+
+    - name: "Create DPG Policy"
+      thales.ciphertrust.dpg_policies_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{  dpg_policy_name }}"
+        proxy_config:
+          - rest_op_type: "POST"
+            api_url: "/tmp/abc"
+            tokens:
+              - name: "details.ssn"
+                operation: "protect"
+                protection_policy: "{{ non_card_protection_policy_name }}"
+              - name: "details.dob"
+                operation: "protect"
+                protection_policy: "{{ non_card_protection_policy_name }}"
+          - rest_op_type: "POST"
+            api_url: "/tmp/card"
+            tokens:
+              - name: "ccnumber"
+                operation: "protect"
+                protection_policy: "{{ fpe_card_protection_policy_name }}"
+              - name: "cvv"
+                operation: "protect"
+                protection_policy: "{{ non_card_protection_policy_name }}"
+          - rest_op_type: "GET"
+            api_url: "/get/card"
+            tokens:
+              - name: "accounts.[*].ccnumber"
+                operation: "reveal"
+                protection_policy: "{{ fpe_card_protection_policy_name }}"
+                access_policy: "{{ access_policy_name }}"
+              - name: "accounts.[*].cvv"
+                operation: "reveal"
+                protection_policy: "{{ non_card_protection_policy_name }}"
+                access_policy: "{{ access_policy_name }}"
+      register: policy
+
+    - name: "Create Client Profile"
+      thales.ciphertrust.dpg_client_profile_create:
+        name: "{{ client_profile_name }}"
+        nae_iface_port: "{{ nae_port_number }}"
+        policy_id: "{{ policy['policyId'] }}"
+        localNode: "{{ this_node_connection_string }}"
+      register: output
+
+    - name: Debug Output
+      debug: var=output

@@ -126,14 +126,8 @@ function New-CMUser {
     if ('app_metadata') {
         $body.add('app_metadata', $app_metadata)
     }
-    else {
-        $body.add('app_metadata', @{})
-    }
     if ('user_metadata') {
         $body.add('user_metadata', $user_metadata)
-    }
-    else {
-        $body.add('user_metadata', @{})
     }
 
     $jsonBody = $body | ConvertTo-Json -Depth 5
@@ -338,7 +332,7 @@ function Find-CMUsers {
         The ID of the user to be deleted. Can be obtained through Find-CMUsers
     .EXAMPLE
         PS> $toDelete = Find-CMUsers -name "Bob Smith" #assuming there is only ONE `Bob Smith` in CipherTrust Manager
-        PS> Remove-CMUser -id $toDelete.resources[0].id
+        PS> Remove-CMUser -id $toDelete.resources[0].user_id
 
         Deletes the user `Bob Smith` by the user's id
     .LINK

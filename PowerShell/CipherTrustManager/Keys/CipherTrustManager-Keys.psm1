@@ -49,7 +49,7 @@ Add-Type -TypeDefinition @"
     opaque
 }
 "@
-# Was not able to include
+# Was not able to include in enum due to hyphen
 #    hmac-sha1,
 #    hmac-sha256,
 #    hmac-sha384,
@@ -127,6 +127,9 @@ function New-CMKey {
         [int] $size,
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
+        [string] $ownerId,
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true)]
         [switch] $Unexportable = $false,
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
@@ -143,17 +146,25 @@ function New-CMKey {
     $keyID = $null
 
     $body = @{
-        'name'         = "$name"
-        'usageMask'    = [int]$usageMask
-        'algorithm'    = "$algorithm"
-        'size'         = 256
-        'unexportable' = If ($Unexportable) { $true } else { $false }
-        'undeletable'  = If ($Undeletable) { $true } else { $false }
-        'meta'         = @{
-            'ownerId'      = 'local|312c1485-aa03-454c-8591-6bd41509d846'
-            'versionedKey' = If ($NoVersionedKey) { $false } else { $true }
-        }
+        'name'      = "$name"
+        'usageMask' = [int]$usageMask
+        'algorithm' = "$algorithm"
+        'size'      = 256
     }
+
+    # Optional
+    if ($Unexportable) { $body.add('unexportable', $true) }
+    if ($Undeletable) { $body.add('undeletable', $true) }
+
+    if ($ownerId -OR $versionedKey) { 
+        $meta = @{}
+        if ($ownerId) {
+            $meta.add('local', @($ownerId)) 
+        }
+        if ($NoVersionedKey) { $meta.add('versionedKey', $true) }
+        $body.add('meta', $meta)
+    }
+
     $jsonBody = $body | ConvertTo-Json -Depth 5
     Write-Debug "JSON Body: $($jsonBody)"
 

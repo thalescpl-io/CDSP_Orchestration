@@ -4,7 +4,7 @@
 # Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
-# Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
+# Notes:            This module is loaded by the master module, CipherTrustManager                                    #
 #                   Do not load this directly                                                                         #
 #######################################################################################################################
 
@@ -303,6 +303,36 @@ function New-CMInterface {
     return $interfaceID
 }    
 
+<#
+    .SYNOPSIS
+        Returns a string list of all the interface names
+    .PARAMETER name
+        Filters results to those with matching names.
+    .PARAMETER interface_type
+        Filters results by interface_type.
+    .PARAMETER skip
+        The index of the first resource to return. Equivalent to `offset` in SQL.
+    .PARAMETER limit
+        The max number of resources to return. Equivalent to `limit` in SQL.
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+
+    #     This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+
+    #     This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
+    .LINK
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
+#>
 function Find-CMInterfaces {
     param
     (
@@ -374,6 +404,35 @@ function Find-CMInterfaces {
 }    
 
 
+<#
+    .SYNOPSIS
+        Delete an interface by name
+    .DESCRIPTION
+        Delete given interface.
+
+        Interfaces with name web, kmip and nae cannot be deleted.
+    .PARAMETER name
+        The name of the interface. 
+        Not valid for interface_type nae.
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+
+    #     This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+
+    #     This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
+    .LINK
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
+#>
 function Remove-CMInterface {
     param
     (

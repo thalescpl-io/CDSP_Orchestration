@@ -198,7 +198,7 @@ function New-CMUser {
 #>
 #function Get-CM_ListUsers {
 function Find-CMUsers {
-        param
+    param
     (
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true)]
@@ -229,11 +229,13 @@ function Find-CMUsers {
     Write-Debug "Endpoint: $($endpoint)"
 
     #Set query
+    $isQuery=$false
     $firstset = $false
     if ($name) {
         $endpoint += "?name="
         $firstset = $true
-        $endpoint += $name            
+        $endpoint += $name
+        $isQuery = $true            
     }
     if ($username) {
         if ($firstset) {
@@ -244,6 +246,7 @@ function Find-CMUsers {
             $firstset = $true
         }
         $endpoint += $username
+        $isQuery = $true            
     }
     if ($email) {
         if ($firstset) {
@@ -254,6 +257,7 @@ function Find-CMUsers {
             $firstset = $true
         }
         $endpoint += $email
+        $isQuery = $true            
     }
     if ($groups) {
         if ($firstset) {
@@ -264,6 +268,7 @@ function Find-CMUsers {
             $firstset = $true
         }
         $endpoint += $groups
+        $isQuery = $true            
     }
     if ($auth_domain_name) {
         if ($firstset) {
@@ -274,6 +279,11 @@ function Find-CMUsers {
             $firstset = $true
         }
         $endpoint += $auth_domain_name
+        $isQuery = $true            
+    }
+
+    if(-NOT $isQuery){
+        throw "No search parameters provided"
     }
 
     if ($skip) {
@@ -324,11 +334,11 @@ function Find-CMUsers {
         Deletes a user given the user's user-id. 
         If the current user is logged into a sub-domain, the user is deleted from that sub-domain. 
         If the current user is logged into the root domain, the user is deleted from all domains it belongs to.    
-    .PARAMETER user_id
+    .PARAMETER id
         The ID of the user to be deleted. Can be obtained through Find-CMUsers
     .EXAMPLE
         PS> $toDelete = Find-CMUsers -name "Bob Smith" #assuming there is only ONE `Bob Smith` in CipherTrust Manager
-        PS> Remove-CMUser -user_id $toDelete.resources[0].user_id
+        PS> Remove-CMUser -id $toDelete.resources[0].id
 
         Deletes the user `Bob Smith` by the user's id
     .LINK
@@ -339,7 +349,7 @@ function Remove-CMUser {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [string] $user_id
+        [string] $id
     )
     Write-Debug "Start: $($MyInvocation.MyCommand.Name)"
 
@@ -348,7 +358,7 @@ function Remove-CMUser {
     Write-Debug "Endpoint: $($endpoint)"
 
     #Set ID
-    $endpoint += "/$user_id"
+    $endpoint += "/$id"
 
     Write-Debug "Endpoint with ID: $($endpoint)"
 

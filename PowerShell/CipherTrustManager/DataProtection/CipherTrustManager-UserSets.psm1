@@ -4,33 +4,39 @@
 # Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
-# Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
+# Notes:            This module is loaded by the master module, CipherTrustManager                                    #
 #                   Do not load this directly                                                                         #
 #######################################################################################################################
 
 <#
     .SYNOPSIS
-        Create a new character set
+        Create a new user set
     .DESCRIPTION
-        This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
-    .EXAMPLE
-        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+        This allows you to create a set of users to be used by Access Policies to determine HOW to Reveal protected data to someone
+    .PARAMETER name
+        Unique name for the user set.
+    .PARAMETER description
+        The description of user-set.
+    .PARAMETER users
+        List of users by name to be added in user set.
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
-        This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
-    .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+    #     This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
 
-        This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
-    .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
 
-        This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
-    .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
 
-        This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
+    #     This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
-        https://github.com/thalescpl-io/whatever_this_repo_is
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
 function New-CMUserSet {
     param
@@ -93,6 +99,41 @@ function New-CMUserSet {
     return $charSetId
 }    
 
+<#
+    .SYNOPSIS
+        Find user sets
+    .DESCRIPTION
+        Returns a list of user sets. The results can be filtered using the query parameters.    
+    .PARAMETER name
+        Unique name for the user set to find
+    .PARAMETER skip
+        The index of the first resource to return. Equivalent to `offset` in SQL.
+    .PARAMETER limit
+        The max number of resources to return. Equivalent to `limit` in SQL.
+    .PARAMETER sort
+        The fields to sort results by. This should be a comma-delimited list of properties. Multiple properties will result in a multi-column sort. 
+        Sort order is ascending by default.
+        To have a descending sort for a fied, precede the field name with a minus sign ("-").
+        For example: name,-createAt... will sort the reults first by 'name', ascending, then by 'createdAt', descending.
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+
+    #     This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+
+    #     This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
+    .LINK
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
+#>
 function Find-CMUserSets {
     param
     (
@@ -167,13 +208,38 @@ function Find-CMUserSets {
     return $response
 }    
 
+<#
+    .SYNOPSIS
+        Remove a user set by id
+    .DESCRIPTION
+        Deletes a user set with a given id.    
+    .PARAMETER id
+        Id of a User Set to delete.  Use 'Find-CMUserSets' to locate the Id of the User Set by name or other parameters
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
+    #     This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+
+    #     This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
+    # .EXAMPLE
+    #     PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+
+    #     This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
+    .LINK
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
+#>
 function Remove-CMUserSet {
     param
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [string] $userset_id
+        [string] $id
     )
 
     Write-Debug "Deleting a User Set by ID in CM"
@@ -181,7 +247,7 @@ function Remove-CMUserSet {
     Write-Debug "Endpoint: $($endpoint)"
 
     #Set ID
-    $endpoint += "/$userset_id"
+    $endpoint += "/$id"
 
     Write-Debug "Endpoint with ID: $($endpoint)"
 

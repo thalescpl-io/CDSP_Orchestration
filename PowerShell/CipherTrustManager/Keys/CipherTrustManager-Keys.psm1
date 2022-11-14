@@ -89,7 +89,7 @@ $target_search_uri = "/vault/query-keys/"
     .PARAMETER Undeletable   
         Key is NOT Deletable. Defaults to false
     .PARAMETER NoVersionedKey
-        Key does not have versioning. This is a fixed key that cannot be rotated.
+        Key does not have versioning. This is a fixed key that cannot be rotated. Default is `versioned keys`
     .EXAMPLE
         PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
@@ -159,9 +159,9 @@ function New-CMKey {
     if ($ownerId -OR $versionedKey) { 
         $meta = @{}
         if ($ownerId) {
-            $meta.add('local', @($ownerId)) 
+            $meta.add('ownerId', $ownerId) 
         }
-        if ($NoVersionedKey) { $meta.add('versionedKey', $true) }
+        if (-NOT $NoVersionedKey) { $meta.add('versionedKey', $true) }
         $body.add('meta', $meta)
     }
 

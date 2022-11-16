@@ -4,7 +4,7 @@
 # Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
-# Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
+# Notes:            This module is loaded by the master module, CipherTrustManager                                    #
 #                   Do not load this directly                                                                         #
 #######################################################################################################################
 
@@ -18,13 +18,13 @@
     .SYNOPSIS
         List/Find Local CAs
 #    .DESCRIPTION
-#        This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
+#        This allows you to create a key on CipherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
 #    .EXAMPLE
 #        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 #
 #        This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
     .LINK
-        https://github.com/thalescpl-io/whatever_this_repo_is
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
 function Find-CMCAs {
     param

@@ -9,6 +9,43 @@
 #######################################################################################################################
 
 ####
+# ENUMS
+####
+# Supported Algorithms
+#Add-Type -TypeDefinition @"
+#   public enum ProtectionPolicyAlgorithms {
+#    AES/GCM/NoPadding,
+#    DESede/CBC/NoPadding,
+#    DESede/CBC/PKCS5Padding,
+#    DESede/CBC/IngrianPadding,
+#    DESede/ECB/NoPadding,
+#    DESede/ECB/PKCS5Padding,
+#    FPE/AES/CARD10,
+#    FPE/AES/CARD26,
+#    FPE/AES/CARD62,
+#    FPE/AES/UNICODE,
+#    FPE/FF1v2/CARD10,
+#    FPE/FF1v2/CARD26,
+#    FPE/FF1v2/CARD62,
+#    FPE/FF1v2/ASCII,
+#    FPE/FF1v2/UNICODE,
+#    FPE/FF3/CARD10,
+#    FPE/FF3/CARD26,
+#    FPE/FF3/CARD62,
+#    FPE/FF3/ASCII,
+#    FPE/FF3/UNICODE,
+#    AES/CBC/NoPadding,
+#    AES/CBC/PKCS5Padding,
+#    AES/ECB/NoPadding,
+#    AES/ECB/PKCS5Padding,
+#    AES/CTR/NoPadding
+#
+#}
+#"@
+#Struggling to add these as enum... may be the forward slash
+####
+
+####
 # Local Variables
 ####
 $target_uri = "/data-protection/protection-policies"

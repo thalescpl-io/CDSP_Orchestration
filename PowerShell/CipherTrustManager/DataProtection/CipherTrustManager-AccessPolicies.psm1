@@ -4,7 +4,7 @@
 # Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
-# Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
+# Notes:            This module is loaded by the master module, CipherTrustManager                                    #
 #                   Do not load this directly                                                                         #
 #######################################################################################################################
 
@@ -39,7 +39,7 @@ $CM_RevealTypesDef = @{
     .SYNOPSIS
         Create a new access policy
     .DESCRIPTION
-        This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
+        This allows you to create a key on CipherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
     .EXAMPLE
         PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
 
@@ -57,7 +57,7 @@ $CM_RevealTypesDef = @{
 
         This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
-        https://github.com/thalescpl-io/whatever_this_repo_is
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
 function New-CMAccessPolicy {
     param
@@ -212,7 +212,7 @@ function Remove-CMAccessPolicy {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [string] $policy_id
+        [string] $id
     )
 
     Write-Debug "Deleting a Access Policy by ID in CM"
@@ -220,7 +220,7 @@ function Remove-CMAccessPolicy {
     Write-Debug "Endpoint: $($endpoint)"
 
     #Set ID
-    $endpoint += "/$policy_id"
+    $endpoint += "/$id"
 
     Write-Debug "Endpoint with ID: $($endpoint)"
 

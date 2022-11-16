@@ -4,7 +4,7 @@
 # Author:           Marc Seguin, Developer Advocate                                                                   #
 # Publisher:        Thales Group                                                                                      #
 # Copyright:        (c) 2022 Thales Group. All rights reserved.                                                       #
-# Notes:            This module is loaded by the master module, CIpherTrustManager                                    #
+# Notes:            This module is loaded by the master module, CipherTrustManager                                    #
 #                   Do not load this directly                                                                         #
 #######################################################################################################################
 
@@ -29,27 +29,33 @@ $target_uri = "/data-protection/dpg-policies"
 
 <#
     .SYNOPSIS
-        Create a new character set
+        Create a new DPG policy
     .DESCRIPTION
-        This allows you to create a key on CIpherTrust Manager and control a series of its parameters. Those parameters include: keyname, usageMask, algo, size, Undeleteable, Unexportable, NoVersionedKey
-    .EXAMPLE
-        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
-
-        This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
-    .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
-
-        This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
-    .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
-
-        This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
-    .EXAMPLE
-        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
-
-        This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
+        This allows you to create the configuration for DPG describing the endpoints with the data protection rules for data on those endpoints.
+    .PARAMETER name
+        Name to use for the DPG policy.
+    .PARAMETER description
+        Description of the DPG policy.
+    .PARAMETER proxy_config
+        List of API urls to be added to the proxy configuration.
+#    .EXAMPLE
+#        PS> New-CMKey -keyname <keyname> -usageMask <usageMask> -algorithm <algorithm> -size <size>
+#
+#        This shows the minimum parameters necessary to create a key. By default, this key will be created as a versioned key that can be exported and can be deleted
+#    .EXAMPLE
+#        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Undeleteable
+#
+#        This shows the minimum parameters necessary to create a key that CANNOT BE DELETED. By default, this key will be created as a versioned key that can be exported
+#    .EXAMPLE
+#        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -Unexportable
+#
+#        This shows the minimum parameters necessary to create a key that CANNOT BE EXPORTED. By default, this key will be created as a versioned key that can be deleted
+#    .EXAMPLE
+#        PS> New-CMKey -keyname $keyname -usageMask $usageMask -algorithm $algorithm -size $size -NoVersionedKey
+#
+#        This shows the minimum parameters necessary to create a key with NO VERSION CONTROL. By default, this key will be created can be exported and can be deleted
     .LINK
-        https://github.com/thalescpl-io/whatever_this_repo_is
+        https://github.com/thalescpl-io/CDSP_Orchestration/tree/main/PowerShell/CipherTrustManager
 #>
 function New-CMDPGPolicy {
     param
@@ -60,7 +66,7 @@ function New-CMDPGPolicy {
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true )]
         [string] $description,
-        [Parameter(Mandatory = $true,
+        [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true )]
         [hashtable[]] $proxy_config
     )
@@ -73,15 +79,16 @@ function New-CMDPGPolicy {
 
     # Mandatory Parameters
     $body = @{
-        'name'         = $name
-        'proxy_config' = $proxy_config
+        'name'               = $name
     }
 
     # Optional Parameters
     if ($description) { $body.add('description', $description) }
+    if ($proxy_config) { $body.add('proxy_config', $proxy_config) }
 
     $jsonBody = $body | ConvertTo-Json -Depth 5
-    Write-Debug "JSON Body: $($jsonBody)"
+    Write-Debug "JSON Body: $($jsonBody)" -DEBUG
+    $jsonBody | Out-File -FilePath .\jsonBody.json
 
     Try {
         Test-CMJWT #Make sure we have an up-to-date jwt
@@ -183,7 +190,7 @@ function Remove-CMDPGPolicy {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [string] $policy_id
+        [string] $id
     )
 
     Write-Debug "Deleting a DPG Policy by ID in CM"
@@ -191,7 +198,7 @@ function Remove-CMDPGPolicy {
     Write-Debug "Endpoint: $($endpoint)"
 
     #Set ID
-    $endpoint += "/$policy_id"
+    $endpoint += "/$id"
 
     Write-Debug "Endpoint with ID: $($endpoint)"
 
@@ -317,7 +324,12 @@ function New-CMDPGJSONRequestResponse {
 
     #Mandatory
     $temp_hash.add('name', $name)
-    $temp_hash.add('operation', $operation.ToString())
+    if ([CM_ApplicationOperations]::Protect -eq $operation) {
+        $temp_hash.add('operation', 'protect')
+    }
+    if ([CM_ApplicationOperations]::Reveal -eq $operation) {
+        $temp_hash.add('operation', 'reveal')
+    }
     $temp_hash.add('protection_policy', $protection_policy)
     
     #Optional

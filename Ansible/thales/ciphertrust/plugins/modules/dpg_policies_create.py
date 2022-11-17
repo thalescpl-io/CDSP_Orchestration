@@ -97,15 +97,27 @@ def main():
     requestObj["proxy_config"]=proxyConfigs
 
     payload_json = json.dumps(requestObj)
-    result['payload'] = payload_json
     try:
       response = requests.post(cmSessionObject["url"], 
               headers=cmSessionObject["headers"], 
               json = json.loads(payload_json), 
               verify=False)
-      result['resp'] = response.json()
-      result['policyId'] = response.json()["id"]
-      result['success'] = 'DPG policy creation successfull!'
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRConflict' in codeDesc:
+              policyId=''
+              result['message'] = 'DPG Policy with same name already exists, fetching ID'
+              getDPGProfiles = requests.get(cmSessionObject["url"],
+                  headers=cmSessionObject["headers"],
+                  verify=False)
+              dpgProfiles=getDPGProfiles.json()["resources"]
+              for dpgProfile in dpgProfiles:
+                  if name in dpgProfile["name"]:
+                      dpgProfileId=dpgProfile["id"]
+              result['policyId'] = dpgProfileId
+      else:
+          result['policyId'] = response.json()["id"]
+          result['success'] = 'DPG policy creation successfull!'
     except requests.exceptions.RequestException as err:
       result['failed'] = True
       result['error'] = err

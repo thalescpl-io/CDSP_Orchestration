@@ -62,8 +62,12 @@ def main():
                   headers=cmSessionObject["headers"], 
                   json = json.loads(payload_json), 
                   verify=False)
-          result['resp'] = response.json()
-          result['success'] = 'Usersets creation successfull!'
+          if "codeDesc" in response.json():
+              codeDesc=response.json()["codeDesc"]
+              if 'NCERRConflict' in codeDesc:
+                  result['success'] = 'Usersets with same name already exists, skipping task!'
+          else:
+              result['success'] = 'Usersets creation successfull!'
         except requests.exceptions.RequestException as err:
           result['failed'] = True
           result['error'] = err

@@ -52,7 +52,6 @@ def main():
               headers=cmSessionObject_get_ca_id["headers"], 
               verify=False)
       caId = getUserResponse.json()["resources"][0]["uri"]
-      result['caId'] = caId
     except requests.exceptions.RequestException as err:
       result['getCAQueryFailed'] = True
       result['getCAQueryError'] = err
@@ -84,7 +83,12 @@ def main():
               headers=cmSessionObject_create_interface["headers"], 
               json = json.loads(payload_json), 
               verify=False)
-      result['success'] = 'NAE interface creation successfull!'
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRConflict' in codeDesc:
+              result['message'] = 'NAE interface already exists, ignoring task'
+      else:
+          result['success'] = 'NAE interface creation successfull!'
     except requests.exceptions.RequestException as err:
       result['failed'] = True
       result['error'] = err

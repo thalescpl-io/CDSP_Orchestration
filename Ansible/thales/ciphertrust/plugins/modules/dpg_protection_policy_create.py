@@ -52,7 +52,7 @@ def main():
         changed=False,
     )
 
-    #Create Character Set
+    #Create Protection Profile
     requestObj = {}
     requestObj['name'] = name
     requestObj['key'] = key
@@ -61,7 +61,10 @@ def main():
     requestObj['algorithm']=algorithm
     requestObj['allow_single_char_input']=False
     if not "CARD" in algorithm:
-        requestObj['character_set_id']=character_set_id
+        if character_set_id is None:
+            module.fail_json(msg='character_set_id should be there for CARD algorithms!!!')
+        else:
+            requestObj['character_set_id']=character_set_id
 
     cmSessionObject = CMAPIObject(
             cm_api_user=localNode["user"],
@@ -77,8 +80,22 @@ def main():
               headers=cmSessionObject["headers"], 
               json = json.loads(payload_json), 
               verify=False)
-      result['resp'] = response.json()
-      result['success'] = 'Protection policy creation successfull!'
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRConflict' in codeDesc:
+              resourceSetId=''
+              result['message'] = 'Protection Profile with same name already exists, fetching ID'
+              getProtectionProfiles = requests.get(cmSessionObject["url"],
+                  headers=cmSessionObject["headers"],
+                  verify=False)
+              protectionProfiles=getProtectionProfiles.json()["resources"]
+              for protectionProfile in protectionProfiles:
+                  if name in protectionProfile["name"]:
+                      protectionProfileId=protectionProfile["id"]
+              result['protectionProfileId'] = protectionProfileId
+      else:
+          result['protectionProfileId'] = response.json()["id"]
+          result['success'] = 'Protection policy creation successfull!'
     except requests.exceptions.RequestException as err:
       result['failed'] = True
       result['error'] = err

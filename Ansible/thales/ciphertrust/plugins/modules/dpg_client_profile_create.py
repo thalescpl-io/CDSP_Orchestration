@@ -107,14 +107,17 @@ def main():
 
 
     payload_json = json.dumps(requestObj)
-    result['payload'] = payload_json
     try:
       response = requests.post(cmSessionObject["url"], 
               headers=cmSessionObject["headers"], 
               json = json.loads(payload_json), 
               verify=False)
-      result['resp'] = response.json()
-      result['success'] = 'DPG policy creation successfull!'
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRConflict' in codeDesc:
+              result['message'] = 'DPG CLient Profile with same name already exists, skipping task!'
+      else:
+          result['success'] = 'DPG policy creation successfull!'
     except requests.exceptions.RequestException as err:
       result['failed'] = True
       result['error'] = err

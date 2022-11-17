@@ -63,8 +63,22 @@ def main():
               headers=cmSessionObject["headers"], 
               json = json.loads(payload_json), 
               verify=False)
-      result['charsetId'] = response.json()["id"]
-      result['success'] = 'Character Set creation successfull!'
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRConflict' in codeDesc:
+              resourceSetId=''
+              result['message'] = 'Character Set already exists with this name, fetching ID'
+              getResourceSets = requests.get(cmSessionObject["url"],
+                  headers=cmSessionObject["headers"],
+                  verify=False)
+              resourceSets=getResourceSets.json()["resources"]
+              for resourceSet in resourceSets:
+                  if cs_name in resourceSet["name"]:
+                      resourceSetId=resourceSet["id"]
+              result['charsetId'] = resourceSetId
+      else:
+          result['charsetId'] = response.json()["id"]
+          result['success'] = 'Character Set creation successfull!'
     except requests.exceptions.RequestException as err:
       result['failed'] = True
       result['error'] = err

@@ -76,8 +76,6 @@ def main():
     userId = ''
     try:
       getUserResponse = requests.get(cmSessionObject_user["url"], headers=cmSessionObject_user["headers"], verify=False)
-      result['response'] = getUserResponse.json()
-      #userId = getUserResponse.json()["user_id"]
     except requests.exceptions.RequestException as err:
       result['getUserQueryFailed'] = True
       result['getUserQueryError'] = err
@@ -101,7 +99,12 @@ def main():
 
     try:
       response = requests.post(cmSessionObject_key["url"], headers=cmSessionObject_key["headers"], json = json.loads(keyRequestPayload), verify=False)
-      result['success'] = 'Key creation successfull!'
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRKeyAlreadyExists' in codeDesc:
+              result['message'] = 'Key already exists, skipping the task.'
+      else:
+          result['success'] = 'Key creation successfull!'
     except requests.exceptions.RequestException as err:
       result['failed'] = True
       result['error'] = err

@@ -66,15 +66,15 @@ def main():
             cm_api_user=localNode["user"],
             cm_api_pwd=localNode["password"],
             cm_url=localNode["server_ip"],
-            cm_api_endpoint="",
+            cm_api_endpoint=cm_api_endpoint_category,
             verify=False,
         )
         #result['data'] = resourceNode["names"]
         try:
-            getResources = requests.get(cmSessionObject["url"] + cm_api_endpoint_category,
+            getResources = requests.get(cmSessionObject["url"],
                 headers=cmSessionObject["headers"],
                 verify=False)
-            result['api_resp']=getResources.json()
+            result['api_resp']=getResources.json()["resources"]
               #for item in listResources:
               #    if name in item["name"]:
               #        resourceId = item["id"]

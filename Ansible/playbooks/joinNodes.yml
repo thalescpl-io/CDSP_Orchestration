@@ -12,12 +12,12 @@
       thales.ciphertrust.cm_cluster_new:
         localNode: "{{ this_node_connection_string }}"
       register: output
-
-    - name: "Join nodes to the cluster"
-      thales.ciphertrust.cm_cluster_join:
-        localNode: "{{ this_node_connection_string }}"
-        newNodes: "{{ cluster_nodes }}"
-      register: output
+#
+#    - name: "Join nodes to the cluster"
+#      thales.ciphertrust.cm_cluster_join:
+#        localNode: "{{ this_node_connection_string }}"
+#        newNodes: "{{ cluster_nodes }}"
+#      register: output
 
     - name: Debug Output
       debug: var=output

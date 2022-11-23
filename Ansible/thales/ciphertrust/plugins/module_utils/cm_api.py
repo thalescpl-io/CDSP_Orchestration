@@ -14,6 +14,13 @@ import requests
 import urllib3
 import json
 
+def is_json(myjson):
+  try:
+    json.loads(myjson)
+  except ValueError as e:
+    return False
+  return True
+
 def getJwt(host, username, password):
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     auth_url='https://'+host+'/api/v1/auth/tokens'
@@ -24,6 +31,84 @@ def getJwt(host, username, password):
     }
     response = requests.post(auth_url, json=auth_payload, verify=False)
     return response.json()["jwt"]
+
+# This will never return the ID
+# There will be a separate call to be made to get the ID
+def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    cmSessionObject = CMAPIObject(
+            cm_api_user=cm_node["user"],
+            cm_api_pwd=cm_node["password"],
+            cm_url=cm_node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    # execute the post API call to create the resource on CM 
+    try:
+      response = requests.post(cmSessionObject["url"], headers=cmSessionObject["headers"], json = json.loads(payload), verify=False)
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRKeyAlreadyExists' in codeDesc:
+              return '4xx'
+          if 'NCERRConflict' in codeDesc:
+              return '4xx'
+      else:
+          return '2xx'
+    except requests.exceptions.RequestException as err:
+        raise
+
+def DELETEByNameOrId(name=None, cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    cmSessionObject = CMAPIObject(
+            cm_api_user=cm_node["user"],
+            cm_api_pwd=cm_node["password"],
+            cm_url=cm_node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    # execute the delete API call to delete the resource on CM
+    try:
+      response = requests.delete(cmSessionObject["url"] + "/" + name, headers=cmSessionObject["headers"], verify=False)
+      if is_json(str(response)):
+          if "codeDesc" in response.json():
+              codeDesc=response.json()["codeDesc"]
+              if 'NCERRResourceNotFound' in codeDesc:
+                  return 'no matching resource found'
+          else:
+              return 'resource deletion succesful'
+      else:
+          if '204' in str(response):
+              return 'resource deletion succesful'
+          if '405' in str(response):
+              return 'resource ID/Name is a required parameter'
+    except requests.exceptions.RequestException as err:
+        raise
+    except json.decoder.JSONDecodeError as jsonErr:
+        return jsonErr
+
+def GETIdByName(name=None, cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    cmSessionObject = CMAPIObject(
+            cm_api_user=cm_node["user"],
+            cm_api_pwd=cm_node["password"],
+            cm_url=cm_node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    # execute the delete API call to delete the resource on CM
+    ret=dict()
+    try:
+        response = requests.get(cmSessionObject["url"] + "/?skip=0&limit=1&name=" + name, headers=cmSessionObject["headers"], verify=False)
+        if len(response.json()["resources"]) > 0:
+            ret["id"]=response.json()["resources"][0]["id"]
+            ret["status"]='2xx'
+            return ret
+        else:
+            ret["status"]='4xx'
+            ret["id"]=''
+            return ret
+    except requests.exceptions.RequestException as err:
+        raise
 
 def CMAPIObject(cm_api_user=None, cm_api_pwd=None, cm_url=None, cm_api_endpoint=None, verify=None):
     """Create a Ciphertrust Manager (CM) client"""

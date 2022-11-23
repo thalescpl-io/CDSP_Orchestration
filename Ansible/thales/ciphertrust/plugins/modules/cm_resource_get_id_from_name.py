@@ -10,7 +10,7 @@ import urllib3
 import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, DELETEByNameOrId
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, GETIdByName
 
 def main():
     localNode = dict(
@@ -23,14 +23,14 @@ def main():
         )
     module = AnsibleModule(
             argument_spec=dict(
-                key=dict(type='str', required=True),
+                name=dict(type='str', required=True),
                 resource_type=dict(type='str', choices=['keys', 'protection-policies', 'access-policies', 'user-sets', 'interfaces', 'character-sets', 'users', 'dpg-policies', 'client-profiles'], required=True),
                 localNode=dict(type='dict', options=localNode, required=True),
             ),
         )
 
     localNode = module.params.get('localNode');
-    key =  module.params.get('key');
+    name =  module.params.get('name');
     resource_type = module.params.get('resource_type');
 
     result = dict(
@@ -40,33 +40,33 @@ def main():
     endpoint = '';
     #Create the API end point based on the resource_type
     if resource_type == "keys":
-        endpoint = "valut/keys2"
+        endpoint = 'vault/keys2';
     elif resource_type == "protection-policies":
-        endpoint = "data-protection/protection-policies"
+        endpoint = 'data-protection/protection-policies';
     elif resource_type == "access-policies":
-        endpoint = "data-protection/access-policies"
+        endpoint = 'data-protection/access-policies';
     elif resource_type == "user-sets":
-        endpoint = "data-protection/user-sets"
+        endpoint = 'data-protection/user-sets';
     elif resource_type == "interfaces":
-        endpoint = "configs/interfaces"
+        endpoint = 'configs/interfaces';
     elif resource_type == "character-sets":
-        endpoint = "data-protection/character-sets"
+        endpoint = 'data-protection/character-sets';
     elif resource_type == "users":
-        endpoint = "usermgmt/users"
+        endpoint = 'usermgmt/users';
     elif resource_type == "dpg-policies":
-        endpoint = "data-protection/dpg-policies"
+        endpoint = 'data-protection/dpg-policies';
     elif resource_type == "client-profiles":
-        endpoint = "data-protection/client-profiles"
+        endpoint = 'data-protection/client-profiles';
     else:
         module.fail_json(msg='resource_type not supported yet')
 
     try:
-        response = DELETEByNameOrId(
-                name=key,
+        response = GETIdByName(
+                name=name,
                 cm_node=localNode,
-                cm_api_endpoint=endpoint,
+                cm_api_endpoint=endpoint
             )
-        result['message'] = response
+        result['response'] = response
     except requests.exceptions.RequestException as err:
         result['failed'] = True
         result['error'] = err

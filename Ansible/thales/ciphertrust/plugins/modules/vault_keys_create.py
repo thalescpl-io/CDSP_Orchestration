@@ -10,7 +10,7 @@ import urllib3
 import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, POSTData
 
 def main():
     localNode = dict(
@@ -64,14 +64,6 @@ def main():
             verify=False,
         )
 
-    cmSessionObject_key = CMAPIObject(
-            cm_api_user=localNode["user"],
-            cm_api_pwd=localNode["password"],
-            cm_url=localNode["server_ip"],
-            cm_api_endpoint="vault/keys2",
-            verify=False,
-        )
-
     #Make CM API call to get the user ID for this user
     userId = ''
     try:
@@ -98,16 +90,15 @@ def main():
     keyRequestPayload = json.dumps(requestObj)
 
     try:
-      response = requests.post(cmSessionObject_key["url"], headers=cmSessionObject_key["headers"], json = json.loads(keyRequestPayload), verify=False)
-      if "codeDesc" in response.json():
-          codeDesc=response.json()["codeDesc"]
-          if 'NCERRKeyAlreadyExists' in codeDesc:
-              result['message'] = 'Key already exists, skipping the task.'
-      else:
-          result['success'] = 'Key creation successfull!'
+        response = POSTData(
+                payload=keyRequestPayload,
+                cm_node=localNode,
+                cm_api_endpoint="vault/keys2"
+            )
+        result['message']=response
     except requests.exceptions.RequestException as err:
-      result['failed'] = True
-      result['error'] = err
+        result['failed'] = True
+        result['error'] = err
 
     module.exit_json(**result)
 

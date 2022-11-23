@@ -1,0 +1,26 @@
+---
+  - name: "Ciphertrust Manager Role"
+    hosts: localhost
+    connection: local 
+
+    vars_files:
+      - variables.yaml
+
+    tasks:
+
+    - name: "Get Key ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        name: "AnsibleKey"
+        resource_type: "keys"
+      register: output
+
+    - name: "Delete key on Ciphertrust Manager"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ output['response']['id'] }}"
+        resource_type: "keys"
+
+    - name: Debug Output
+      debug: var=output
+

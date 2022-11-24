@@ -1,5 +1,5 @@
 ---
-  - name: "Create and join Ciphertrust Manager Role"
+  - name: "Ciphertrust Manager Role"
     hosts: localhost
     connection: local 
 
@@ -7,18 +7,11 @@
       - variables.yaml
 
     tasks:
-    #Skip this task if there is already a cluster with at least one member
     - name: "Create new cluster"
-      thales.ciphertrust.cm_cluster_new:
+      thales.ciphertrust.cm_cluster_new: 
         localNode: "{{ this_node_connection_string }}"
-      register: output
-
-    - name: "Join nodes to the cluster"
-      thales.ciphertrust.cm_cluster_join:
-        localNode: "{{ this_node_connection_string }}"
-        newNodes: "{{ cluster_nodes }}"
-      register: output
+      register: payload
 
     - name: Debug Output
-      debug: var=output
+      debug: var=payload
 

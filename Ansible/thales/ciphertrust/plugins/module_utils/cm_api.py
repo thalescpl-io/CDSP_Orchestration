@@ -53,7 +53,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
           if 'NCERRConflict' in codeDesc:
               return '4xx'
       else:
-          return '2xx'
+          return response.json()
     except requests.exceptions.RequestException as err:
         raise
 

@@ -25,7 +25,7 @@ def is_json(myjson):
 
 def new(node,
         activationDate="",
-        algorithm,
+        algorithm="",
         aliases=[],
         archiveDate="",
         certType="",
@@ -73,81 +73,122 @@ def new(node,
 
     if activationDate != "":
         request['activationDate']=activationDate
-	if algorithm != "":
+
+    if algorithm != "":
         request['algorithm']=algorithm
-	if len(aliases) > 0:
+  
+    if len(aliases) > 0:
         request['aliases']=aliases
-	if archiveDate != "":
+
+    if archiveDate != "":
         request['archiveDate']=archiveDate
-	if certType != "":
+
+    if certType != "":
         request['certType']=certType
-	if compromiseOccurrenceDate != "":
+
+    if compromiseOccurrenceDate != "":
         request['compromiseOccurrenceDate']=compromiseOccurrenceDate
-	if curveid != "":
+
+    if curveid != "":
         request['curveid']=curveid
-	if deactivationDate != "":
+
+    if deactivationDate != "":
         request['deactivationDate']=deactivationDate
-	if defaultIV != "":
+
+    if defaultIV != "":
         request['defaultIV']=defaultIV
-	if destroyDate != "":
+
+    if destroyDate != "":
         request['destroyDate']=destroyDate
-	if encoding != "":
+
+    if encoding != "":
         request['encoding']=encoding
-	if keyFormat != "":
+
+    if keyFormat != "":
         request['format']=keyFormat
-	request['generateKeyId']=generateKeyId
-	request['hkdfCreateParameters']=hkdfCreateParameters
-	if Id != "":
+
+    request['generateKeyId']=generateKeyId
+
+    request['hkdfCreateParameters']=hkdfCreateParameters
+
+    if Id != "":
         request['id']=Id
-	if idSize is not None:
+
+    if idSize is not None:
         request['idSize']=idSize
-	if keyId != "":
+
+    if keyId != "":
         request['keyId']=keyId
-	request['labels']=labels
-	if macSignBytes != "":
+
+    request['labels']=labels
+
+    if macSignBytes != "":
         request['macSignBytes']=macSignBytes
-	if macSignKeyIdentifier != "":
+
+    if macSignKeyIdentifier != "":
         request['macSignKeyIdentifier']=macSignKeyIdentifier
-	if macSignKeyIdentifierType != "":
+
+    if macSignKeyIdentifierType != "":
         request['macSignKeyIdentifierType']=macSignKeyIdentifierType
-	if material != "":
+
+    if material != "":
         request['material']=material
-	if ownerId != "":
+
+    if ownerId != "":
         request['ownerId']={"ownerId": ownerId}
-	if muid != "":
+
+    if muid != "":
         request['muid']=muid
-	if name != "":
+
+    if name != "":
         request['name']=name
-	if objectType != "":
+
+    if objectType != "":
         request['objectType']=objectType
-	request['padded']=padded
-	if processStartDate != "":
+
+    request['padded']=padded
+
+    if processStartDate != "":
         request['processStartDate']=processStartDate
-	if protectStopDate != "":
+
+    if protectStopDate != "":
         request['protectStopDate']=protectStopDate
-	if revocationMessage != "":
+
+    if revocationMessage != "":
         request['revocationMessage']=revocationMessage
-	if revocationReason != "":
+
+    if revocationReason != "":
         request['revocationReason']=revocationReason
-	if rotationFrequencyDays != "":
+
+    if rotationFrequencyDays != "":
         request['rotationFrequencyDays']=rotationFrequencyDays
-	if secretDataEncoding != "":
+
+    if secretDataEncoding != "":
         request['secretDataEncoding']=secretDataEncoding
-	if secretDataLink != "":
+
+    if secretDataLink != "":
         request['secretDataLink']=secretDataLink
-	if signingAlgo != "":
+
+    if signingAlgo != "":
         request['signingAlgo']=signingAlgo
-	if size is not None:
+
+    if size is not None:
         request['size']=size
-	if state != "":
+
+    if state != "":
         request['state']=state
-	request['undeletable']=undeletable
-	request['unexportable']=unexportable
-	if usageMask is not None:
+
+    request['undeletable']=undeletable
+
+    request['unexportable']=unexportable
+
+    if usageMask is not None:
         request['usageMask']=usageMask
-	if uuid != "":
+
+    if uuid != "":
         request['uuid']=uuid
-	request['xts']=xts
+
+    request['xts']=xts
 
     payload = json.dumps(request)
 
@@ -155,12 +196,12 @@ def new(node,
       response = POSTData(
               payload=payload,
               cm_node=node,
-              cm_api_endpoint="usermgmt/users",
+              cm_api_endpoint="vault/keys2",
           )
       if response == '4xx':
           result['success'] = 'User already exists with same username'
       else:
-          result['success'] = 'User Created Succesfully'
+          result['success'] = response
 
       return response
     except:

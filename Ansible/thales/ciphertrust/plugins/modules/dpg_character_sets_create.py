@@ -7,10 +7,9 @@ __metaclass__ = type
 import os
 import requests
 import urllib3
-import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject
+from ansible_collections.thales.ciphertrust.plugins.module_utils.data_protection import create_character_set
 
 def main():
     localNode = dict(
@@ -23,67 +22,33 @@ def main():
         )
     module = AnsibleModule(
             argument_spec=dict(
-                name=dict(type='str', required=True),
-                char_set_range=dict(type='list', elements='str', required=False),
                 localNode=dict(type='dict', options=localNode, required=True),
+                name=dict(type='str', required=True),
+                charsetRange=dict(type='list', element='str', required=True),
+                encoding=dict(type='str', required=False, default=""),
             ),
         )
 
     localNode = module.params.get('localNode');
-    cs_name = module.params.get('name');
-    cs_range = module.params.get('char_set_range');
-
-    # Validation and default setting
-    if cs_name is None:
-        module.fail_json(msg='Character Set Name is a mandatory parameter!!!')
-    if cs_range is None:
-        cs_range = ['0030-0039','0041-005A','0061-007A']
-
+    name = module.params.get('name');
+    charsetRange = module.params.get('charsetRange');
+    encoding = module.params.get('encoding');
+    
     result = dict(
         changed=False,
     )
 
-    #Create Character Set
-    requestObj = {}
-    requestObj['name'] = cs_name
-    requestObj['range'] = cs_range
-    requestObj['encoding'] = 'UTF-8'
+    response = create_character_set(
+        node=localNode,
+        name=name,
+        charsetRange=charsetRange,
+        encoding=encoding
+    )
 
-    cmSessionObject = CMAPIObject(
-            cm_api_user=localNode["user"],
-            cm_api_pwd=localNode["password"],
-            cm_url=localNode["server_ip"],
-            cm_api_endpoint="data-protection/character-sets",
-            verify=False,
-        )
-
-    payload_json = json.dumps(requestObj)
-    try:
-      response = requests.post(cmSessionObject["url"], 
-              headers=cmSessionObject["headers"], 
-              json = json.loads(payload_json), 
-              verify=False)
-      if "codeDesc" in response.json():
-          codeDesc=response.json()["codeDesc"]
-          if 'NCERRConflict' in codeDesc:
-              resourceSetId=''
-              result['message'] = 'Character Set already exists with this name, fetching ID'
-              getResourceSets = requests.get(cmSessionObject["url"],
-                  headers=cmSessionObject["headers"],
-                  verify=False)
-              resourceSets=getResourceSets.json()["resources"]
-              for resourceSet in resourceSets:
-                  if cs_name in resourceSet["name"]:
-                      resourceSetId=resourceSet["id"]
-              result['charsetId'] = resourceSetId
-      else:
-          result['charsetId'] = response.json()["id"]
-          result['success'] = 'Character Set creation successfull!'
-    except requests.exceptions.RequestException as err:
-      result['failed'] = True
-      result['error'] = err
+    result["response"] = response
 
     module.exit_json(**result)
 
 if __name__ == '__main__':
     main()
+

@@ -7,10 +7,9 @@ __metaclass__ = type
 import os
 import requests
 import urllib3
-import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject
+from ansible_collections.thales.ciphertrust.plugins.module_utils.data_protection import create_protection_policy
 
 def main():
     localNode = dict(
@@ -23,84 +22,48 @@ def main():
         )
     module = AnsibleModule(
             argument_spec=dict(
-                name=dict(type='str', required=True),
-                key=dict(type='str', required=True),
-                tweak=dict(type='str', required=False),
-                tweak_algorithm=dict(type='str', required=False),
-                algorithm=dict(type='str', required=True),
-                character_set_id=dict(type='str', required=False),
                 localNode=dict(type='dict', options=localNode, required=True),
+                algorithm=dict(type='str', required=True),
+                key=dict(type='str', required=True),
+                name=dict(type='str', required=True),
+                allow_single_char_input=dict(type='bool', required=False, default=False),
+                character_set_id=dict(type='str', required=False, default=""),
+                iv=dict(type='str', required=False, default=""),
+                tweak=dict(type='str', required=False, default=""),
+                tweak_algorithm=dict(type='str', required=False, default=""),
             ),
         )
 
     localNode = module.params.get('localNode');
-    name =  module.params.get('name');
-    key =  module.params.get('key');
-    tweak =  module.params.get('tweak');
-    tweak_algorithm =  module.params.get('tweak_algorithm');
-    algorithm =  module.params.get('algorithm');
-    character_set_id =  module.params.get('character_set_id');
-
-    # Validation and default setting
-    if "CARD" in algorithm:
-        if tweak is None or tweak_algorithm is None:
-            module.fail_json(msg='tweak and tweak_algorithm are required for CARD algorithms!!!')
-        if not character_set_id is None:
-            module.fail_json(msg='character_set_id should not be there for CARD algorithms!!!')
-
+    algorithm = module.params.get('algorithm');
+    key = module.params.get('key');
+    name = module.params.get('name');
+    allow_single_char_input = module.params.get('allow_single_char_input');
+    character_set_id = module.params.get('character_set_id');
+    iv = module.params.get('iv');
+    tweak = module.params.get('tweak');
+    tweak_algorithm = module.params.get('tweak_algorithm');
+    
     result = dict(
         changed=False,
     )
 
-    #Create Protection Profile
-    requestObj = {}
-    requestObj['name'] = name
-    requestObj['key'] = key
-    requestObj['tweak']=tweak
-    requestObj['tweak_algorithm']=tweak_algorithm
-    requestObj['algorithm']=algorithm
-    requestObj['allow_single_char_input']=False
-    if not "CARD" in algorithm:
-        if character_set_id is None:
-            module.fail_json(msg='character_set_id should be there for CARD algorithms!!!')
-        else:
-            requestObj['character_set_id']=character_set_id
+    response = create_protection_policy(
+        node=localNode,
+        algorithm=algorithm,
+        key=key,
+        name=name,
+        allow_single_char_input=allow_single_char_input,
+        character_set_id=character_set_id,
+        iv=iv,
+        tweak=tweak,
+        tweak_algorithm=tweak_algorithm
+    )
 
-    cmSessionObject = CMAPIObject(
-            cm_api_user=localNode["user"],
-            cm_api_pwd=localNode["password"],
-            cm_url=localNode["server_ip"],
-            cm_api_endpoint="data-protection/protection-policies",
-            verify=False,
-        )
-
-    payload_json = json.dumps(requestObj)
-    try:
-      response = requests.post(cmSessionObject["url"], 
-              headers=cmSessionObject["headers"], 
-              json = json.loads(payload_json), 
-              verify=False)
-      if "codeDesc" in response.json():
-          codeDesc=response.json()["codeDesc"]
-          if 'NCERRConflict' in codeDesc:
-              resourceSetId=''
-              result['message'] = 'Protection Profile with same name already exists, fetching ID'
-              getProtectionProfiles = requests.get(cmSessionObject["url"],
-                  headers=cmSessionObject["headers"],
-                  verify=False)
-              protectionProfiles=getProtectionProfiles.json()["resources"]
-              for protectionProfile in protectionProfiles:
-                  if name in protectionProfile["name"]:
-                      protectionProfileId=protectionProfile["id"]
-              result['protectionProfileId'] = protectionProfileId
-      else:
-          result['protectionProfileId'] = response.json()["id"]
-          result['success'] = 'Protection policy creation successfull!'
-    except requests.exceptions.RequestException as err:
-      result['failed'] = True
-      result['error'] = err
+    result["response"] = response
 
     module.exit_json(**result)
 
 if __name__ == '__main__':
     main()
+

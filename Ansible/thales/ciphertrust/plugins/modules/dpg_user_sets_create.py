@@ -7,16 +7,11 @@ __metaclass__ = type
 import os
 import requests
 import urllib3
-import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject
+from ansible_collections.thales.ciphertrust.plugins.module_utils.data_protection import create_user_set
 
 def main():
-    usersetObj = dict(
-            name=dict(type='str', required=True),
-            users=dict(type='list', elements='str', required=True),
-        )
     localNode = dict(
             server_ip=dict(type='str', required=True),
             server_private_ip=dict(type='str', required=True),
@@ -27,52 +22,33 @@ def main():
         )
     module = AnsibleModule(
             argument_spec=dict(
-                usersets=dict(type='list', elements='dict', options=usersetObj, required=True),
                 localNode=dict(type='dict', options=localNode, required=True),
+                name=dict(type='str', required=True),
+                usersetDescription=dict(type='str', required=False, default=""),
+                users=dict(type='list', element='str', required=False, default=[]),
             ),
         )
 
     localNode = module.params.get('localNode');
-    usersets =  module.params.get('usersets');
-
+    name = module.params.get('name');
+    usersetDescription = module.params.get('usersetDescription');
+    users = module.params.get('users');
+    
     result = dict(
         changed=False,
     )
 
-    cmSessionObject = CMAPIObject(
-            cm_api_user=localNode["user"],
-            cm_api_pwd=localNode["password"],
-            cm_url=localNode["server_ip"],
-            cm_api_endpoint="data-protection/user-sets",
-            verify=False,
-        )
+    response = create_user_set(
+        node=localNode,
+        name=name,
+        usersetDescription=usersetDescription,
+        users=users
+    )
 
-    for userset in usersets:
-        name = userset.get("name")
-        users = userset.get("users")
-
-        requestObj = {}
-        requestObj['name'] = name
-        requestObj['description'] = 'Userset created by Ansible ' + name
-        requestObj['users'] = users
-
-        payload_json = json.dumps(requestObj)
-        try:
-          response = requests.post(cmSessionObject["url"], 
-                  headers=cmSessionObject["headers"], 
-                  json = json.loads(payload_json), 
-                  verify=False)
-          if "codeDesc" in response.json():
-              codeDesc=response.json()["codeDesc"]
-              if 'NCERRConflict' in codeDesc:
-                  result['success'] = 'Usersets with same name already exists, skipping task!'
-          else:
-              result['success'] = 'Usersets creation successfull!'
-        except requests.exceptions.RequestException as err:
-          result['failed'] = True
-          result['error'] = err
+    result["response"] = response
 
     module.exit_json(**result)
 
 if __name__ == '__main__':
     main()
+

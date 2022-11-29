@@ -28,7 +28,7 @@ def main():
                 localNode=dict(type='dict', options=localNode, required=True),
                 activationDate=dict(type='str', required=False, default=""),
                 algorithm=dict(type='str', required=False, choices=['aes', 'tdes', 'rsa', 'ec', 'hmac-sha1', 'hmac-sha256', 'hmac-sha384', 'hmac-sha512', 'seed', 'aria', 'opaque'], default="aes"),
-                aliases=dict(type='list', element='str' required=False, default=[]),
+                aliases=dict(type='list', element='str', required=False, default=[]),
                 archiveDate=dict(type='str', required=False, default=""),
                 certType=dict(type='str', required=False, default=""),
                 compromiseDate=dict(type='str', required=False, default=""),
@@ -113,7 +113,7 @@ def main():
     state = module.params.get('state');
     undeletable = module.params.get('undeletable');
     unexportable = module.params.get('unexportable');
-    usageMaske = module.params.get('usageMask');
+    usageMask = module.params.get('usageMask');
     uuid = module.params.get('uuid');
     xts = module.params.get('xts');
 

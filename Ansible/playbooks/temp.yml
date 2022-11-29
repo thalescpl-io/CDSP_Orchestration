@@ -1,0 +1,66 @@
+---
+  - name: "Create DPG Application Playbook"
+    hosts: localhost
+    connection: local
+
+    vars_files:
+      - variables.yaml
+
+    tasks:
+
+#    - name: "User Creation"
+#      thales.ciphertrust.usermgmt_users_create:
+#        localNode: "{{ this_node_connection_string }}"
+#        username: "pagal"
+#        password: "Entrust@2018"
+#        email: "anurag@thales.com"
+#        name: "Pagal Launda"
+#      register: output
+#
+#    - name: "Create Key"
+#      thales.ciphertrust.vault_keys2_create:
+#        name: "AnsibleKey2"
+#        localNode: "{{ this_node_connection_string }}"
+#      register: output
+#    - name: "Create Interface"
+#      thales.ciphertrust.config_interface_nae_post:
+#        localNode: "{{ this_node_connection_string }}"
+#        port: 9007
+#        cert_user_field: "CN"
+#        mode: "tls-cert-pw-opt"
+#        auto_gen_ca_id: "6a508c29-a385-440c-b4f4-787b91a4a883"
+#        auto_registration: True
+#        local_trusted_cas: 
+#          - "6a508c29-a385-440c-b4f4-787b91a4a883"
+#      register: output
+#    - name: "Create Charset"
+#      thales.ciphertrust.dpg_character_sets_create:
+#        localNode: "{{ this_node_connection_string }}"
+#        name: "Ansible Charset"
+#        charsetRange:
+#          - "0030-0039"
+#          - "0041-005A"
+#          - "0061-007A"
+#        encoding: "UTF-8"
+#
+#    - name: "Create Protection Policy"
+#      thales.ciphertrust.dpg_protection_policy_create:
+#        localNode: "{{ this_node_connection_string }}"
+#        name: "Ansible Protection Policy"
+#        key: "dpgKey-ps1"
+#        tweak: "1628462495815733"
+#        tweak_algorithm: "SHA1"
+#        algorithm: "FPE/FF3/ASCII"
+#        character_set_id: "15a57e45-2b1b-46cf-a1ed-d72fe0830bf1"
+
+    - name: "Create User Set"
+      thales.ciphertrust.dpg_user_sets_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "Ansible User Set"
+        usersetDescription: "blah blah"
+        users:
+          - "anurag"
+      register: output
+
+    - name: Debug Output
+      debug: var=output

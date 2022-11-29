@@ -10,7 +10,7 @@ import urllib3
 import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject
+from ansible_collections.thales.ciphertrust.plugins.module_utils.interfaces import new
 
 def main():
     localNode = dict(
@@ -23,75 +23,72 @@ def main():
         )
     module = AnsibleModule(
             argument_spec=dict(
-                portNumber=dict(type='int', required = True),
                 localNode=dict(type='dict', options=localNode, required=True),
+                port=dict(type='int', required=True),
+                auto_gen_ca_id=dict(type='str', required=False, default=""),
+                auto_registration=dict(type='bool', required=False, default=False),
+                cert_user_field=dict(type='str', required=False, default=""),
+                custom_uid_size=dict(type='int', required=False, default=None),
+                custom_uid_v2=dict(type='bool', required=False, default=True),
+                default_connection=dict(type='str', required=False, default="local_account"),
+                interface_type=dict(type='str', required=False, choices=['web', 'kmip', 'nae', 'snmp'], default="nae"),
+                kmip_enable_hard_delete=dict(type='int', required=False, default=None),
+                maximum_tls_version=dict(type='str', required=False, choices=['tls_1_0', 'tls_1_1', 'tls_1_2', 'tls_1_3'], default="tls_1_2"),
+                minimum_tls_version=dict(type='str', required=False, choices=['tls_1_0', 'tls_1_1', 'tls_1_2', 'tls_1_3'], default="tls_1_2"),
+                mode=dict(type='str', required=False, default=""),
+                name=dict(type='str', required=False, default=""),
+                network_interface=dict(type='str', required=False, default="all"),
+                registration_token=dict(type='str', required=False, default=""),
+                external_trusted_cas=dict(type='list', element='str', required=False, default=[]),
+                local_trusted_cas=dict(type='list', element='str', required=False, default=[]),
             ),
         )
 
     localNode = module.params.get('localNode');
-    portNumber = module.params.get('portNumber');
+    port = module.params.get('port');
+    auto_gen_ca_id = module.params.get('auto_gen_ca_id');
+    auto_registration = module.params.get('auto_registration');
+    cert_user_field = module.params.get('cert_user_field');
+    custom_uid_size = module.params.get('custom_uid_size');
+    custom_uid_v2 = module.params.get('custom_uid_v2');
+    default_connection = module.params.get('default_connection');
+    interface_type = module.params.get('interface_type');
+    kmip_enable_hard_delete = module.params.get('kmip_enable_hard_delete');
+    maximum_tls_version = module.params.get('maximum_tls_version');
+    minimum_tls_version = module.params.get('minimum_tls_version');
+    mode = module.params.get('mode');
+    name = module.params.get('name');
+    network_interface = module.params.get('network_interface');
+    registration_token = module.params.get('registration_token');
+    external_trusted_cas = module.params.get('external_trusted_cas');
+    local_trusted_cas = module.params.get('local_trusted_cas');
 
     result = dict(
         changed=False,
     )
 
-    caId = ''
+    response = new(
+        node=localNode,
+        port=port,
+        auto_gen_ca_id=auto_gen_ca_id,
+        auto_registration=auto_registration,
+        cert_user_field=cert_user_field,
+        custom_uid_size=custom_uid_size,
+        custom_uid_v2=custom_uid_v2,
+        default_connection=default_connection,
+        interface_type=interface_type,
+        kmip_enable_hard_delete=kmip_enable_hard_delete,
+        maximum_tls_version=maximum_tls_version,
+        minimum_tls_version=minimum_tls_version,
+        mode=mode,
+        name=name,
+        network_interface=network_interface,
+        registration_token=registration_token,
+        external_trusted_cas=external_trusted_cas,
+        local_trusted_cas=local_trusted_cas,
+    )
 
-    # Get Local CA ID
-    # https://$kms/api/v1/ca/local-cas?subject=/C=US/ST=TX/L=Austin/O=Thales/CN=CipherTrust Root CA
-    cmSessionObject_get_ca_id = CMAPIObject(
-            cm_api_user=localNode["user"],
-            cm_api_pwd=localNode["password"],
-            cm_url=localNode["server_ip"],
-            cm_api_endpoint="ca/local-cas",
-            verify=False,
-        )
-
-    try:
-      getUserResponse = requests.get(cmSessionObject_get_ca_id["url"] + "?subject=/C=US/ST=TX/L=Austin/O=Thales/CN=CipherTrust Root CA", 
-              headers=cmSessionObject_get_ca_id["headers"], 
-              verify=False)
-      caId = getUserResponse.json()["resources"][0]["uri"]
-    except requests.exceptions.RequestException as err:
-      result['getCAQueryFailed'] = True
-      result['getCAQueryError'] = err
-
-    #Create NAE Interface
-    requestObj = dict(
-            cert_user_field='CN',
-            mode='tls-cert-pw-opt',
-            auto_gen_ca_id=caId,
-            port=portNumber,
-            network_interface='all',
-            trusted_cas=dict(
-                external=[],
-                local=[caId],
-            ),
-        )
-
-    cmSessionObject_create_interface = CMAPIObject(
-            cm_api_user=localNode["user"],
-            cm_api_pwd=localNode["password"],
-            cm_url=localNode["server_ip"],
-            cm_api_endpoint="configs/interfaces",
-            verify=False,
-        )
-
-    payload_json = json.dumps(requestObj)
-    try:
-      response = requests.post(cmSessionObject_create_interface["url"], 
-              headers=cmSessionObject_create_interface["headers"], 
-              json = json.loads(payload_json), 
-              verify=False)
-      if "codeDesc" in response.json():
-          codeDesc=response.json()["codeDesc"]
-          if 'NCERRConflict' in codeDesc:
-              result['message'] = 'NAE interface already exists, ignoring task'
-      else:
-          result['success'] = 'NAE interface creation successfull!'
-    except requests.exceptions.RequestException as err:
-      result['failed'] = True
-      result['error'] = err
+    result['response'] = response
 
     module.exit_json(**result)
 

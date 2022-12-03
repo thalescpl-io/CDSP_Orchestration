@@ -14,10 +14,10 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.data_protection
 
 def main():
     user_set_policy = dict(
-            user_set_id=dict(type='str', required=False, default=""),
+            user_set_name=dict(type='str', required=False, default=""),
             error_replacement_value=dict(type='str', required=False, default=""),
-            reveal_type=dict(type='str', choices=['Error Replacement Value', 'Masked Value', 'Ciphertext', 'Plaintext'], required=false, default=""),
-            masking_format_id=dict(type='str', required=False, default=""),
+            reveal_type=dict(type='str', choices=['Error Replacement Value', 'Masked Value', 'Ciphertext', 'Plaintext'], required=False, default=""),
+            masking_format_name=dict(type='str', required=False, default=""),
         )
     localNode = dict(
             server_ip=dict(type='str', required=True),
@@ -32,7 +32,7 @@ def main():
                 user_set_policy=dict(type='list', elements='dict', options=user_set_policy, required=False, default=[]),
                 default_error_replacement_value=dict(type='str', required=False, default=""),
                 default_masking_format_id=dict(type='str', required=False, default=""),
-                default_reveal_type=dict(type='str', choices=['Error Replacement Value', 'Masked Value', 'Ciphertext', 'Plaintext'], required=false, default=""),
+                default_reveal_type=dict(type='str', choices=['Error Replacement Value', 'Masked Value', 'Ciphertext', 'Plaintext'], required=False, default=""),
                 access_policy_description=dict(type='str', required=False, default=""),
                 name=dict(type='str', required=False, default=""),
                 localNode=dict(type='dict', options=localNode, required=True),

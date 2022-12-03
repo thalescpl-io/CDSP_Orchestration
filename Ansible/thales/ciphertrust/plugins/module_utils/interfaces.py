@@ -99,6 +99,8 @@ def new(
               cm_api_endpoint="configs/interfaces",
           )
       result['success'] = 'Interface creation success!'
+      result['payload'] = payload
+      result['response'] = response
       return result
     except:
       result['failed'] = True

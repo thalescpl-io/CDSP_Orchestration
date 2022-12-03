@@ -10,13 +10,14 @@ import urllib3
 import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject
+from ansible_collections.thales.ciphertrust.plugins.module_utils.data_protection import create_access_policy
 
 def main():
     user_set_policy = dict(
-            user_set_name=dict(type='str', required=True),
-            reveal_type=dict(type='str', required=True),
-            masking_format_name=dict(type='str', required=False),
+            user_set_id=dict(type='str', required=False, default=""),
+            error_replacement_value=dict(type='str', required=False, default=""),
+            reveal_type=dict(type='str', choices=['Error Replacement Value', 'Masked Value', 'Ciphertext', 'Plaintext'], required=false, default=""),
+            masking_format_id=dict(type='str', required=False, default=""),
         )
     localNode = dict(
             server_ip=dict(type='str', required=True),
@@ -28,10 +29,12 @@ def main():
         )
     module = AnsibleModule(
             argument_spec=dict(
-                userSetPolicies=dict(type='list', elements='dict', options=user_set_policy, required=True),
-                name=dict(type='str', required=True),
-                default_reveal_type=dict(type='str', required=True),
-                default_error_replacement_value=dict(type='str', required=True),
+                user_set_policy=dict(type='list', elements='dict', options=user_set_policy, required=False, default=[]),
+                default_error_replacement_value=dict(type='str', required=False, default=""),
+                default_masking_format_id=dict(type='str', required=False, default=""),
+                default_reveal_type=dict(type='str', choices=['Error Replacement Value', 'Masked Value', 'Ciphertext', 'Plaintext'], required=false, default=""),
+                access_policy_description=dict(type='str', required=False, default=""),
+                name=dict(type='str', required=False, default=""),
                 localNode=dict(type='dict', options=localNode, required=True),
             ),
         )
@@ -40,96 +43,24 @@ def main():
     name =  module.params.get('name');
     default_reveal_type = module.params.get('default_reveal_type');
     default_error_replacement_value = module.params.get('default_error_replacement_value');
-    userSetPolicies = module.params.get('userSetPolicies');
+    user_set_policy = module.params.get('user_set_policy');
+    default_masking_format_id = module.params.get('default_masking_format_id');
+    access_policy_description = module.params.get('access_policy_description');
+
 
     result = dict(
         changed=False,
     )
 
-    cmSessionObject = CMAPIObject(
-            cm_api_user=localNode["user"],
-            cm_api_pwd=localNode["password"],
-            cm_url=localNode["server_ip"],
-            cm_api_endpoint="data-protection/access-policies",
-            verify=False,
+    response = create_access_policy(
+            node=localNode,
+            name=name,
+            default_reveal_type=default_reveal_type,
+            default_error_replacement_value=default_error_replacement_value,
+            user_set_policy=user_set_policy,
+            default_masking_format_id=default_masking_format_id,
+            access_policy_description=access_policy_description
         )
-
-    requestObj=dict(
-        )
-
-    requestObj['name'] = name
-    requestObj['default_reveal_type'] = default_reveal_type
-    #requestObj['default_error_replacement_value'] = default_error_replacement_value
-    arrUsersetPolicies = []
-
-    #Creating the user_set_policy json object
-    for userSetPolicy in userSetPolicies:
-        dictUsersetPolicy=dict()
-        dictUsersetPolicy["reveal_type"] = userSetPolicy["reveal_type"]
-        
-        #Convert userset name to userset ID to attach to the access policy
-        cmSessionObject_getUsersetId = CMAPIObject(
-            cm_api_user=localNode["user"],
-            cm_api_pwd=localNode["password"],
-            cm_url=localNode["server_ip"],
-            cm_api_endpoint="data-protection/user-sets",
-            verify=False,
-        )
-        
-        response = requests.get(cmSessionObject_getUsersetId["url"],
-              headers=cmSessionObject_getUsersetId["headers"],
-              verify=False)
-        
-        resources = response.json()["resources"]
-        
-        for resource in resources:
-            #we found the user set with name provided in the task params
-            if userSetPolicy["user_set_name"] in resource["name"]:
-                user_set_id = resource["id"]
-                dictUsersetPolicy["user_set_id"] = user_set_id
-
-        #For the Masked Value reveal_type, add the masking format
-        #Fetch the masking_format ID from the name provided in the playbook vars
-        if "Masked Value" in userSetPolicy["reveal_type"]:
-            cmSessionObject_getMaskFormatId = CMAPIObject(
-                    cm_api_user=localNode["user"],
-                    cm_api_pwd=localNode["password"],
-                    cm_url=localNode["server_ip"],
-                    cm_api_endpoint="data-protection/masking-formats",
-                    verify=False,
-                )
-
-            response = requests.get(cmSessionObject_getMaskFormatId["url"],
-                    headers=cmSessionObject_getMaskFormatId["headers"],
-                    verify=False)
-
-            resources = response.json()["resources"]
-
-            for resource in resources:
-                #we found the masking format with name provided in the task params
-                if userSetPolicy["masking_format_name"] in resource["name"]:
-                    masking_format_id = resource["id"]
-                    dictUsersetPolicy["masking_format_id"] = masking_format_id
-
-        arrUsersetPolicies.append(dictUsersetPolicy)
-
-    requestObj["user_set_policy"] = arrUsersetPolicies
-
-    payload_json = json.dumps(requestObj)
-    try:
-      response = requests.post(cmSessionObject["url"], 
-              headers=cmSessionObject["headers"], 
-              json = json.loads(payload_json), 
-              verify=False)
-      if "codeDesc" in response.json():
-          codeDesc=response.json()["codeDesc"]
-          if 'NCERRConflict' in codeDesc:
-              result['message'] = 'Access Profile with same name already exists, skipping task!'
-      else:
-          result['success'] = 'Access policy creation successfull!'
-    except requests.exceptions.RequestException as err:
-      result['failed'] = True
-      result['error'] = err
 
     module.exit_json(**result)
 

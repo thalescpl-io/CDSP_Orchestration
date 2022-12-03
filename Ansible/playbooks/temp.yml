@@ -22,17 +22,19 @@
 #        name: "AnsibleKey2"
 #        localNode: "{{ this_node_connection_string }}"
 #      register: output
+#
 #    - name: "Create Interface"
 #      thales.ciphertrust.config_interface_nae_post:
 #        localNode: "{{ this_node_connection_string }}"
 #        port: 9007
 #        cert_user_field: "CN"
 #        mode: "tls-cert-pw-opt"
-#        auto_gen_ca_id: "6a508c29-a385-440c-b4f4-787b91a4a883"
+#        auto_gen_ca_id: "kylo:kylo:naboo:localca:6a508c29-a385-440c-b4f4-787b91a4a883"
 #        auto_registration: True
 #        local_trusted_cas: 
-#          - "6a508c29-a385-440c-b4f4-787b91a4a883"
+#          - "kylo:kylo:naboo:localca:6a508c29-a385-440c-b4f4-787b91a4a883"
 #      register: output
+#
 #    - name: "Create Charset"
 #      thales.ciphertrust.dpg_character_sets_create:
 #        localNode: "{{ this_node_connection_string }}"
@@ -52,14 +54,49 @@
 #        tweak_algorithm: "SHA1"
 #        algorithm: "FPE/FF3/ASCII"
 #        character_set_id: "15a57e45-2b1b-46cf-a1ed-d72fe0830bf1"
-
-    - name: "Create User Set"
-      thales.ciphertrust.dpg_user_sets_create:
+#
+#    - name: "Create User Set"
+#      thales.ciphertrust.dpg_user_sets_create:
+#        localNode: "{{ this_node_connection_string }}"
+#        name: "Ansible User Set"
+#        usersetDescription: "blah blah"
+#        users:
+#          - "anurag"
+#      register: output
+    - name: "Create DPG Policy"
+      thales.ciphertrust.dpg_policies_create:
         localNode: "{{ this_node_connection_string }}"
-        name: "Ansible User Set"
-        usersetDescription: "blah blah"
-        users:
-          - "anurag"
+        name: "{{ dpg_policy_name }}"
+        proxy_config:
+          - rest_op_type: "post"
+            api_url: "/tmp/abc"
+            tokens:
+              - name: "details.ssn"
+                operation: "protect"
+                protection_policy: "text_ProtectionPolicy-ps101"
+              - name: "details.dob"
+                operation: "protect"
+                protection_policy: "text_ProtectionPolicy-ps101"
+          - rest_op_type: "post"
+            api_url: "/tmp/card"
+            tokens:
+              - name: "ccnumber"
+                operation: "protect"
+                protection_policy: "text_ProtectionPolicy-ps101"
+              - name: "cvv"
+                operation: "protect"
+                protection_policy: "text_ProtectionPolicy-ps101"
+      register: policy
+
+    - name: "Create Client Profile"
+      thales.ciphertrust.dpg_client_profile_create:
+        name: "{{ client_profile_name }}"
+        nae_iface_port: "{{ nae_port_number }}"
+        app_connector_type: "DPG"
+        csr_parameters: "{{ csr_params }}"
+        configurations: "{{ dpg_client_profile_configuration }}"
+        policy_id: "fc778228-4e6d-4dfb-af96-6bf231083332"
+        localNode: "{{ this_node_connection_string }}"
       register: output
 
     - name: Debug Output

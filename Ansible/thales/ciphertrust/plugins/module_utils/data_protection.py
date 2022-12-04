@@ -130,30 +130,33 @@ def create_access_policy(
         name="",
         default_reveal_type="",
         default_error_replacement_value="",
-        user_set_policy=[],
+        user_set_policies=[],
         default_masking_format_id="",
         access_policy_description=""
         ):
     result = dict()
     request = {}
-    request['user_set_policy']=user_set_policy;
+    request['user_set_policy']=user_set_policies;
     if name != "":
         request['name'] = name;
 
     if default_reveal_type != "":
         request['default_reveal_type'] = default_reveal_type;
 
-    if default_error_replacement_value != "":
-        request['default_error_replacement_value'] = default_error_replacement_value;
+    if default_reveal_type == 'Error Replacement Value':
+        if default_error_replacement_value != "":
+            request['default_error_replacement_value'] = default_error_replacement_value;
 
-    if default_masking_format_id != "":
-        request['default_masking_format_id'] = default_masking_format_id;
+    if default_reveal_type == 'Masked Value':
+        if default_masking_format_id != "":
+            request['default_masking_format_id'] = default_masking_format_id;
 
     if access_policy_description != "":
         request['access_policy_description'] = access_policy_description;
 
     payload = json.dumps(request)
-
+    #result['payload'] = payload
+    #return result
     try:
       response = POSTData(
               payload=payload,
@@ -161,6 +164,8 @@ def create_access_policy(
               cm_api_endpoint="data-protection/access-policies",
           )
       result['success'] = 'Access Policy creation success!'
+      result['payload'] = payload
+      result['response'] = response
       return result
     except:
       result['failed'] = True

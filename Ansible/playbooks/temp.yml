@@ -93,14 +93,49 @@
         algorithm: "FPE/FF1v2/UNICODE"
         character_set_id: "{{ charset['response']['id'] }}"
 
+    - name: "Fetch userset policy ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        name: "plaintextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_plaintext
+
+    - name: "Fetch userset policy ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        name: "maskedtextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_maskedtext
+
+    - name: "Fetch userset policy ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        name: "enctextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_enctext
+
+    - name: "Fetch masking format ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        name: "SHOW_LAST_FOUR"
+        resource_type: "masking-formats"
+      register: mask_format
+
     - name: "Create Access Policy"
       thales.ciphertrust.dpg_access_policy_create:
         localNode: "{{ this_node_connection_string }}"
         name: "{{ access_policy_name }}"
         default_reveal_type: "Ciphertext"
         default_error_replacement_value: 000000
-        user_set_policy: "{{ var_usersetPolicies }}"
-
+        user_set_policies:
+          - user_set_id: "{{ userset_plaintext['response']['id'] }}"
+            reveal_type: "Plaintext"
+          - user_set_id: "{{ userset_maskedtext['response']['id'] }}"
+            reveal_type: "Masked Value"
+            masking_format_id: "{{ mask_format['response']['id'] }}"
+          - user_set_id: "{{ userset_enctext['response']['id'] }}"
+            reveal_type: "Ciphertext"
+              
     - name: "Create DPG Policy"
       thales.ciphertrust.dpg_policies_create:
         localNode: "{{ this_node_connection_string }}"

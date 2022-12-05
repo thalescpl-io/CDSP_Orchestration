@@ -30,7 +30,7 @@ def main():
                 character_set_id=dict(type='str', required=False, default=""),
                 iv=dict(type='str', required=False, default=""),
                 tweak=dict(type='str', required=False, default=""),
-                tweak_algorithm=dict(type='str', required=False, default=""),
+                tweak_algorithm=dict(type='str', choices=['SHA1', 'SHA256', 'None'], required=False, default=""),
             ),
         )
 

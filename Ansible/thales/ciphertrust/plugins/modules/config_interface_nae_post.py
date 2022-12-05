@@ -27,15 +27,15 @@ def main():
                 port=dict(type='int', required=True),
                 auto_gen_ca_id=dict(type='str', required=False, default=""),
                 auto_registration=dict(type='bool', required=False, default=False),
-                cert_user_field=dict(type='str', required=False, default=""),
+                cert_user_field=dict(type='str', options=['CN','SN','E','E_ND','UID','OU'], required=False, default="CN"),
                 custom_uid_size=dict(type='int', required=False, default=None),
                 custom_uid_v2=dict(type='bool', required=False, default=True),
                 default_connection=dict(type='str', required=False, default="local_account"),
                 interface_type=dict(type='str', required=False, choices=['web', 'kmip', 'nae', 'snmp'], default="nae"),
-                kmip_enable_hard_delete=dict(type='int', required=False, default=None),
+                kmip_enable_hard_delete=dict(type='int', options=[0,1], required=False, default=0),
                 maximum_tls_version=dict(type='str', required=False, choices=['tls_1_0', 'tls_1_1', 'tls_1_2', 'tls_1_3'], default="tls_1_2"),
                 minimum_tls_version=dict(type='str', required=False, choices=['tls_1_0', 'tls_1_1', 'tls_1_2', 'tls_1_3'], default="tls_1_2"),
-                mode=dict(type='str', required=False, default=""),
+                mode=dict(type='str', choices=['no-tls-pw-opt','no-tls-pw-req','unauth-tls-pw-opt','unauth-tls-pw-req','tls-cert-opt-pw-opt','tls-pw-opt','tls-pw-req','tls-cert-pw-opt','tls-cert-and-pw'], required=False, default=""),
                 name=dict(type='str', required=False, default=""),
                 network_interface=dict(type='str', required=False, default="all"),
                 registration_token=dict(type='str', required=False, default=""),
@@ -62,6 +62,21 @@ def main():
     registration_token = module.params.get('registration_token');
     external_trusted_cas = module.params.get('external_trusted_cas');
     local_trusted_cas = module.params.get('local_trusted_cas');
+
+    if interface_type == 'web' and mode != 'tls-cert-opt-pw-opt':
+        module.fail_json(msg="interface type web should have mode tls-cert-opt-pw-opt")
+
+    if interface_type == 'kmip' and mode not in ['tls-pw-opt', 'tls-pw-req', 'tls-cert-pw-opt', 'tls-cert-and-pw']:
+        module.fail_json(msg="interface type kmip should have mode tls-pw-opt, tls-pw-req, tls-cert-pw-opt or tls-cert-and-pw")
+
+    if interface_type == 'snmp' and mode != '':
+        mode = '';
+
+    if interface_type == 'ssh' and mode != '':
+        mode = '';
+
+    if interface_type == 'nae' and name != '':
+        name = '';
 
     result = dict(
         changed=False,

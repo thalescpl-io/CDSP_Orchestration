@@ -91,8 +91,8 @@ def main():
             argument_spec=dict(
                 #name=dict(type='str', required=True),
                 resource_type=dict(type='str', choices=['keys', 'protection-policies', 'access-policies', 'user-sets', 'interfaces', 'character-sets', 'users', 'dpg-policies', 'client-profiles', 'masking-formats'], required=True),
-                query_param=dict(type='str', choices=['name', 'username', 'email', 'status'], required=False, default='name'),
-                query_param_value=dict(type='str', required=False),
+                query_param=dict(type='str', choices=['name', 'username', 'email', 'status'], required=True),
+                query_param_value=dict(type='str', required=True),
                 localNode=dict(type='dict', options=localNode, required=True),
             ),
         )

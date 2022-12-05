@@ -24,7 +24,7 @@ import urllib3
 import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, GETIdByName
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, GETIdByQueryParam
 
 DOCUMENTATION = '''
 ---
@@ -89,15 +89,19 @@ def main():
         )
     module = AnsibleModule(
             argument_spec=dict(
-                name=dict(type='str', required=True),
+                #name=dict(type='str', required=True),
                 resource_type=dict(type='str', choices=['keys', 'protection-policies', 'access-policies', 'user-sets', 'interfaces', 'character-sets', 'users', 'dpg-policies', 'client-profiles', 'masking-formats'], required=True),
+                query_param=dict(type='str', choices=['name', 'username', 'email', 'status'], required=False, default='name'),
+                query_param_value=dict(type='str', required=False),
                 localNode=dict(type='dict', options=localNode, required=True),
             ),
         )
 
     localNode = module.params.get('localNode');
-    name =  module.params.get('name');
+    #name =  module.params.get('name');
     resource_type = module.params.get('resource_type');
+    query_param = module.params.get('query_param');
+    query_param_value = module.params.get('query_param_value');
 
     result = dict(
         changed=False,
@@ -129,8 +133,9 @@ def main():
         module.fail_json(msg='resource_type not supported yet')
 
     try:
-        response = GETIdByName(
-                name=name,
+        response = GETIdByQueryParam(
+                param=query_param,
+                value=query_param_value,
                 cm_node=localNode,
                 cm_api_endpoint=endpoint
             )

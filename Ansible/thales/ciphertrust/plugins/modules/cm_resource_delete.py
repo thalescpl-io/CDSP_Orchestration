@@ -91,7 +91,7 @@ def main():
     module = AnsibleModule(
             argument_spec=dict(
                 key=dict(type='str', required=True),
-                resource_type=dict(type='str', choices=['keys', 'protection-policies', 'access-policies', 'user-sets', 'interfaces', 'character-sets', 'users', 'dpg-policies', 'client-profiles'], required=True),
+                resource_type=dict(type='str', choices=['keys', 'protection-policies', 'access-policies', 'user-sets', 'interfaces', 'character-sets', 'users', 'dpg-policies', 'client-profiles', 'masking-formats'], required=True),
                 localNode=dict(type='dict', options=localNode, required=True),
             ),
         )
@@ -124,6 +124,8 @@ def main():
         endpoint = 'data-protection/dpg-policies';
     elif resource_type == "client-profiles":
         endpoint = 'data-protection/client-profiles';
+    elif resource_type == "masking-formats":
+        endpoint = 'data-protection/masking-formats';
     else:
         module.fail_json(msg='resource_type not supported yet')
 

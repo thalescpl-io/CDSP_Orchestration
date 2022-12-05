@@ -86,6 +86,7 @@ def DELETEByNameOrId(name=None, cm_node=None, cm_api_endpoint=None):
     except json.decoder.JSONDecodeError as jsonErr:
         return jsonErr
 
+# Below method is outdated...need to be cleaned up later
 def GETIdByName(name=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
     cmSessionObject = CMAPIObject(
@@ -101,6 +102,39 @@ def GETIdByName(name=None, cm_node=None, cm_api_endpoint=None):
         response = requests.get(cmSessionObject["url"] + "/?skip=0&limit=1&name=" + name, headers=cmSessionObject["headers"], verify=False)
         if len(response.json()["resources"]) > 0:
             ret["id"]=response.json()["resources"][0]["id"]
+            ret["status"]='2xx'
+            return ret
+        else:
+            ret["status"]='4xx'
+            ret["id"]=''
+            return ret
+    except requests.exceptions.RequestException as err:
+        raise
+
+def GETIdByQueryParam(param=None, value=None, cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    cmSessionObject = CMAPIObject(
+            cm_api_user=cm_node["user"],
+            cm_api_pwd=cm_node["password"],
+            cm_url=cm_node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    ret=dict()
+    try:
+        response = requests.get(
+                cmSessionObject["url"] + "/?skip=0&limit=1&" + param + "=" + value, 
+                headers=cmSessionObject["headers"], 
+                verify=False)
+        if response.json()["resources"] == None:
+            ret["status"]='4xx'
+            ret["id"]=''
+            return ret
+        if len(response.json()["resources"]) > 0:
+            if cm_api_endpoint == "usermgmt/users":
+                ret["id"]=response.json()["resources"][0]["user_id"]
+            else:
+                ret["id"]=response.json()["resources"][0]["id"]
             ret["status"]='2xx'
             return ret
         else:

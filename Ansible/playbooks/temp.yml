@@ -69,7 +69,8 @@
     - name: "Fetching Charset ID"
       thales.ciphertrust.cm_resource_get_id_from_name:
         localNode: "{{ this_node_connection_string }}"
-        name: "{{ char_set_name }}"
+        query_param: "name"
+        query_param_value: "{{ char_set_name }}"
         resource_type: "character-sets"
       register: charset
 
@@ -96,28 +97,32 @@
     - name: "Fetch userset policy ID"
       thales.ciphertrust.cm_resource_get_id_from_name:
         localNode: "{{ this_node_connection_string }}"
-        name: "plaintextuserset-ansible"
+        query_param: "name"
+        query_param_value: "plaintextuserset-ansible"
         resource_type: "user-sets"
       register: userset_plaintext
 
     - name: "Fetch userset policy ID"
       thales.ciphertrust.cm_resource_get_id_from_name:
         localNode: "{{ this_node_connection_string }}"
-        name: "maskedtextuserset-ansible"
+        query_param: "name"
+        query_param_value: "maskedtextuserset-ansible"
         resource_type: "user-sets"
       register: userset_maskedtext
 
     - name: "Fetch userset policy ID"
       thales.ciphertrust.cm_resource_get_id_from_name:
         localNode: "{{ this_node_connection_string }}"
-        name: "enctextuserset-ansible"
+        query_param: "name"
+        query_param_value: "enctextuserset-ansible"
         resource_type: "user-sets"
       register: userset_enctext
 
     - name: "Fetch masking format ID"
       thales.ciphertrust.cm_resource_get_id_from_name:
         localNode: "{{ this_node_connection_string }}"
-        name: "SHOW_LAST_FOUR"
+        query_param: "name"
+        query_param_value: "SHOW_LAST_FOUR"
         resource_type: "masking-formats"
       register: mask_format
 
@@ -165,7 +170,8 @@
     - name: "Fetching DPG policy ID"
       thales.ciphertrust.cm_resource_get_id_from_name:
         localNode: "{{ this_node_connection_string }}"
-        name: "{{ dpg_policy_name }}"
+        query_param: "name"
+        query_param_value: "{{ dpg_policy_name }}"
         resource_type: "dpg-policies"
       register: policy
 

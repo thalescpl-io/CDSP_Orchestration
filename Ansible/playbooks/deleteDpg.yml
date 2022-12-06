@@ -1,0 +1,165 @@
+---
+  - name: "Create DPG Application Playbook"
+    hosts: localhost
+    connection: local
+
+    vars_files:
+      - variables.yaml
+
+    tasks:
+
+    # Delete Client Profile
+    - name: "Fetching DPG Client Profile"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "{{ client_profile_name }}"
+        resource_type: "client-profiles"
+      register: clientProfile
+
+    - name: "Delete DPG client Profile"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ clientProfile['response']['id'] }}"
+        resource_type: "client-profiles"
+
+    # Delete DPG Policy
+    - name: "Fetching DPG Policy"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "{{ dpg_policy_name }}"
+        resource_type: "dpg-policies"
+      register: dpgPolicy
+
+    - name: "Delete DPG Policy"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ dpgPolicy['response']['id'] }}"
+        resource_type: "dpg-policies"
+
+    # Delete Access Policy
+    - name: "Fetching Access Policy"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "{{ access_policy_name }}"
+        resource_type: "access-policies"
+      register: accessPolicy
+
+    - name: "Delete Access Policy"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ accessPolicy['response']['id'] }}"
+        resource_type: "access-policies"
+
+    # Delete UserSets
+    - name: "Fetching Userset"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "plaintextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_plaintext
+
+    - name: "Delete Userset"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ userset_plaintext['response']['id'] }}"
+        resource_type: "user-sets"
+
+    - name: "Fetch userset"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "maskedtextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_maskedtext
+
+    - name: "Delete Userset"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ userset_maskedtext['response']['id'] }}"
+        resource_type: "user-sets"
+
+    - name: "Fetch userset"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "enctextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_enctext
+
+    - name: "Delete Userset"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ userset_enctext['response']['id'] }}"
+        resource_type: "user-sets"
+
+    # Delete Users
+    - name: "Fetch user"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "username"
+        query_param_value: "pagal"
+        resource_type: "users"
+      register: user
+
+    - name: "Delete user"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ user['response']['id'] }}"
+        resource_type: "users"
+
+    # Delete Protection Profile
+    - name: "Delete Prot Profile"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ fpe_card_protection_policy_name }}"
+        resource_type: "protection-policies"
+
+    - name: "Delete Prot Profile"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ non_card_protection_policy_name }}"
+        resource_type: "protection-policies"
+
+    # Delete Charset
+    - name: "Fetch charset"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "{{ char_set_name }}"
+        resource_type: "character-sets"
+      register: charset
+
+    - name: "Delete Character Set"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ charset['response']['id'] }}"
+        resource_type: "character-sets"
+
+    # Delete Interface
+    - name: "Delete NAE Interface"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "nae_all_{{ nae_port_number }}"
+        resource_type: "interfaces"
+
+    # Delete Key
+    - name: "Fetch Key"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "{{ dpg_key_name }}"
+        resource_type: "keys"
+      register: key
+
+    - name: "Delete Key"
+      thales.ciphertrust.cm_resource_delete:
+        localNode: "{{ this_node_connection_string }}"
+        key: "{{ key['response']['id'] }}"
+        resource_type: "keys"
+
+    - name: Debug Output
+      debug: var=output

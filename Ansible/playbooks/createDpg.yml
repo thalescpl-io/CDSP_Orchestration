@@ -1,0 +1,190 @@
+---
+  - name: "Create DPG Application Playbook"
+    hosts: localhost
+    connection: local
+
+    vars_files:
+      - variables.yaml
+
+    tasks:
+
+    - name: "User Creation"
+      thales.ciphertrust.usermgmt_users_create:
+        localNode: "{{ this_node_connection_string }}"
+        username: "pagal"
+        password: "cmPassw0rd!"
+        email: "anurag@thales.com"
+        name: "Pagal Launda"
+
+    - name: "Create Key"
+      thales.ciphertrust.vault_keys2_create:
+        name: "{{ dpg_key_name }}"
+        localNode: "{{ this_node_connection_string }}"
+
+    - name: "Create Interface"
+      thales.ciphertrust.config_interface_nae_post:
+        localNode: "{{ this_node_connection_string }}"
+        port: "{{ nae_port_number }}"
+        cert_user_field: "CN"
+        mode: "tls-cert-pw-opt"
+        auto_gen_ca_id: "kylo:kylo:naboo:localca:6a508c29-a385-440c-b4f4-787b91a4a883"
+        auto_registration: True
+        local_trusted_cas: 
+          - "kylo:kylo:naboo:localca:6a508c29-a385-440c-b4f4-787b91a4a883"
+
+    - name: "Create PlainText User Set"
+      thales.ciphertrust.dpg_user_sets_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "plaintextuserset-ansible"
+        usersetDescription: "by ansible"
+        users:
+          - "anurag"
+
+    - name: "Create MaskeText User Set"
+      thales.ciphertrust.dpg_user_sets_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "maskedtextuserset-ansible"
+        usersetDescription: "by ansible"
+        users:
+          - "user1"
+
+    - name: "Create EncryptedText User Set"
+      thales.ciphertrust.dpg_user_sets_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "enctextuserset-ansible"
+        usersetDescription: "by ansible"
+        users:
+          - "user2"
+
+    - name: "Create Charset"
+      thales.ciphertrust.dpg_character_sets_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ char_set_name }}"
+        charsetRange:
+          - "0030-0039"
+          - "0041-005A"
+          - "0061-007A"
+        encoding: "UTF-8"
+
+    - name: "Fetching Charset ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "{{ char_set_name }}"
+        resource_type: "character-sets"
+      register: charset
+
+    - name: "Create Protection Policy for CC Number"
+      thales.ciphertrust.dpg_protection_policy_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ fpe_card_protection_policy_name }}"
+        key: "{{ dpg_key_name }}"
+        tweak: "9828462495846783"
+        tweak_algorithm: "SHA1"
+        algorithm: "FPE/AES/CARD10"
+        allow_single_char_input: False
+
+    - name: "Create Protection Policy for non CC Number"
+      thales.ciphertrust.dpg_protection_policy_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ non_card_protection_policy_name }}"
+        key: "{{ dpg_key_name }}"
+        tweak: "1628462495815733"
+        tweak_algorithm: "SHA1"
+        algorithm: "FPE/FF1v2/UNICODE"
+        character_set_id: "{{ charset['response']['id'] }}"
+
+    - name: "Fetch userset policy ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "plaintextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_plaintext
+
+    - name: "Fetch userset policy ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "maskedtextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_maskedtext
+
+    - name: "Fetch userset policy ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "enctextuserset-ansible"
+        resource_type: "user-sets"
+      register: userset_enctext
+
+    - name: "Fetch masking format ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "SHOW_LAST_FOUR"
+        resource_type: "masking-formats"
+      register: mask_format
+
+    - name: "Create Access Policy"
+      thales.ciphertrust.dpg_access_policy_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ access_policy_name }}"
+        default_reveal_type: "Ciphertext"
+        default_error_replacement_value: 000000
+        user_set_policies:
+          - user_set_id: "{{ userset_plaintext['response']['id'] }}"
+            reveal_type: "Plaintext"
+          - user_set_id: "{{ userset_maskedtext['response']['id'] }}"
+            reveal_type: "Masked Value"
+            masking_format_id: "{{ mask_format['response']['id'] }}"
+          - user_set_id: "{{ userset_enctext['response']['id'] }}"
+            reveal_type: "Ciphertext"
+              
+    - name: "Create DPG Policy"
+      thales.ciphertrust.dpg_policies_create:
+        localNode: "{{ this_node_connection_string }}"
+        name: "{{ dpg_policy_name }}"
+        proxy_config:
+          - rest_op_type: "post"
+            api_url: "/api/order-mgmt/order/create"
+            tokens:
+              - name: "card.cardNumber"
+                operation: "protect"
+                protection_policy: "{{ fpe_card_protection_policy_name }}"
+              - name: "card.cvv"
+                operation: "protect"
+                protection_policy: "{{ non_card_protection_policy_name }}"
+          - rest_op_type: "get"
+            api_url: "/api/order-mgmt/order/list"
+            tokens:
+              - name: "data.[*].card.cvv"
+                operation: "reveal"
+                protection_policy: "{{ non_card_protection_policy_name }}"
+                access_policy: "{{ access_policy_name }}"
+              - name: "data.[*].card.cardNumber"
+                operation: "reveal"
+                protection_policy: "{{ fpe_card_protection_policy_name }}"
+                access_policy: "{{ access_policy_name }}"
+    
+    - name: "Fetching DPG policy ID"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        localNode: "{{ this_node_connection_string }}"
+        query_param: "name"
+        query_param_value: "{{ dpg_policy_name }}"
+        resource_type: "dpg-policies"
+      register: policy
+
+    - name: "Create Client Profile"
+      thales.ciphertrust.dpg_client_profile_create:
+        name: "{{ client_profile_name }}"
+        nae_iface_port: "{{ nae_port_number }}"
+        app_connector_type: "DPG"
+        csr_parameters: "{{ csr_params }}"
+        configurations: "{{ dpg_client_profile_configuration }}"
+        policy_id: "{{ policy['response']['id'] }}"
+        localNode: "{{ this_node_connection_string }}"
+      register: output
+
+    - name: Debug Output
+      debug: var=output

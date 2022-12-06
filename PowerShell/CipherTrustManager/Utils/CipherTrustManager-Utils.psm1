@@ -91,7 +91,7 @@ function Test-CMJWT {
 
         Display contents of Hashtable Array when DEBUG mode is on
     .EXAMPLE
-        PS> Write-HashtableArray $hashtable_array -DEBUG
+        PS> Write-HashtableArray $hashtable_array
 
         Force the display even if the code being run is NOT in DEBUG mode 
     .NOTES

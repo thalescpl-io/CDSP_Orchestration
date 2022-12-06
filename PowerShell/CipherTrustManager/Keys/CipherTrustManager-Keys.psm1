@@ -378,7 +378,7 @@ function New-CMKey {
     .PARAMETER size
         Deprecated: Use 'sizes'. Filters results to those with matching size.
     .PARAMETER Unexportable
-        Find keys with the specified value of the `unexportable` attribute (opposite of the KMIP `Extractable` attribute).    
+        Find keys with the specified value of the `unexportable` parameter (opposite of the KMIP `Extractable` parameter).    
     .PARAMETER skip
         The index of the first resource to return. Equivalent to `offset` in SQL.
     .PARAMETER limit

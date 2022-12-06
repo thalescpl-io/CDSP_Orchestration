@@ -87,7 +87,7 @@ function New-CMDPGPolicy {
     if ($proxy_config) { $body.add('proxy_config', $proxy_config) }
 
     $jsonBody = $body | ConvertTo-Json -Depth 5
-    Write-Debug "JSON Body: $($jsonBody)" -DEBUG
+    Write-Debug "JSON Body: $($jsonBody)"
     $jsonBody | Out-File -FilePath .\jsonBody.json
 
     Try {

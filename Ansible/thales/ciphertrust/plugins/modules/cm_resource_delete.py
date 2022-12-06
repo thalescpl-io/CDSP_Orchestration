@@ -38,7 +38,7 @@ options:
     localNode:
         description:
             - This is a dictionary type of object that contains CipherTrust Manager Instance FQDN and credentials
-        default: null
+        required: true
         type: dict
         elements:
             - str
@@ -46,14 +46,24 @@ options:
     key:
         description:
             - This is a string type of option that can have either the name of the ID of the resource to be deleted
-        default: null
+        required: true
         type: str
     resource_type:
         description:
-            - This is a string type of option that can hold the resource type. 
-        default: null
+            - This is a string type of option that can hold the resource type.
+        required: true
+        choices:
+            - keys
+            - protection-policies
+            - access-policies
+            - user-sets
+            - interfaces
+            - character-sets
+            - users
+            - dpg-policies
+            - client-profiles
+            - masking-formats
         type: str
-
 '''
 
 EXAMPLES = '''
@@ -67,7 +77,7 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    key: "fake-id"
+    key: "AnsibleKey"
     resource_type: "keys"
 '''
 

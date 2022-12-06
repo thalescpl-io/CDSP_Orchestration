@@ -38,20 +38,41 @@ options:
     localNode:
         description:
             - This is a dictionary type of object that contains CipherTrust Manager Instance FQDN and credentials
-        default: null
+        required: true
         type: dict
         elements:
             - str
             - bool
-    name:
+    query_param:
         description:
-            - This is a string type of option that holds the "name" filter value
-        default: null
+            - This is a string type of option that holds the query parameter type to be used to filter the list resources API response
+        required: true
+        choices:
+            - name
+            - username
+            - email
+            - status
         type: str
     resource_type:
         description:
-            - This is a string type of option that can hold the resource type. 
-        default: null
+            - This is a string type of option that can hold the resource type.
+        required: true
+        choices:
+            - keys
+            - protection-policies
+            - access-policies
+            - user-sets
+            - interfaces
+            - character-sets
+            - users
+            - dpg-policies
+            - client-profiles
+            - masking-formats
+        type: str
+    query_param_value:
+        description:
+            - This is a string type of option that will hold the value of filter query parameter
+        required: true
         type: str
 '''
 
@@ -66,7 +87,8 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    name: "AnsibleKey"
+    query_param: "name"
+    query_param_value: "AnsibleKey"
     resource_type: "keys"
 '''
 

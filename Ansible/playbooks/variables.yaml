@@ -1,13 +1,15 @@
-this_node_address: 10.10.10.10
+this_node_address: 20.102.80.224
 this_node_private_ip: 10.0.0.4
 this_node_username: admin
-this_node_password: ChangeIt!
+this_node_password: KeySecure01!
 
 cluster_nodes:
-  - public_address: 20.20.20.20
-    private_address: 10.0.0.7
-    username: admin
-    password: ChangeIt!
+  - server_ip: 20.232.155.216
+    server_private_ip: 10.0.0.5
+    server_port: 5432
+    user: admin
+    password: cmP@ssw0rd!
+    verify: False
       
 this_node_connection_string:
   server_ip: "{{ this_node_address }}"
@@ -15,7 +17,22 @@ this_node_connection_string:
   server_port: 5432
   user: "{{ this_node_username }}"
   password: "{{ this_node_password }}"
-  verify: false
+  verify: False
+
+
+csr_params:
+  csr_cn: "admin"
+
+
+dpg_client_profile_configuration:
+  verify_ssl_certificate: False
+  use_persistent_connections: True
+  log_level: "DEBUG"
+  tls_to_appserver:
+    tls_skip_verify: True
+    tls_enabled: True
+  auth_method_used:
+    scheme_name: 'Basic'
 
 dpg_key_name: AnsibleKey
 nae_port_number: 9006
@@ -23,11 +40,13 @@ char_set_name: AnsibleCharset
 fpe_card_protection_policy_name: "AnsibleProtPolicyCard"
 non_card_protection_policy_name: "AnsibleProtPolicyNonCard"
 access_policy_name: AnsibleAccessPolicy
+
 var_users:
   - username: "AnsibleUser1"
     password: "KeySecure01!"
   - username: "AnsibleUser2"
     password: "KeySecure01!"
+
 var_usersets:
   - name: "AnsibleUserset101"
     users:
@@ -36,11 +55,15 @@ var_usersets:
     users:
       - AnsibleUser1
       - AnsibleUser2
+
 var_usersetPolicies:
-  - user_set_name: "AnsibleUserset101"
+  - user_set_name: "plaintextuserset-ansible"
     reveal_type: "Plaintext"
-  - user_set_name: "AnsibleUserset102"
+  - user_set_name: "maskedtextuserset-ansible"
     reveal_type: "Masked Value"
     masking_format_name: "SHOW_LAST_FOUR"
-dpg_policy_name: AnsibleDpgPolicy
-client_profile_name: AnsibleClientProfile
+  - user_set_name: "enctextuserset-ansible"
+    reveal_type: "Ciphertext"
+
+dpg_policy_name: AnsibleDpgPolicy001
+client_profile_name: AnsibleClientProfile001

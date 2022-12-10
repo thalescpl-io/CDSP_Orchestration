@@ -1,10 +1,10 @@
-this_node_address: 10.10.10.10
+this_node_address: 20.102.80.224
 this_node_private_ip: 10.0.0.4
 this_node_username: admin
-this_node_password: cmP@ssw0rd!
+this_node_password: KeySecure01!
 
 cluster_nodes:
-  - server_ip: 20.20.20.20
+  - server_ip: 20.172.182.174
     server_private_ip: 10.0.0.5
     server_port: 5432
     user: admin

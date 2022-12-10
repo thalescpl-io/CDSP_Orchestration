@@ -1,5 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#
+# (c) 2022 Thales Group. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
@@ -11,6 +26,86 @@ import json
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.data_protection import create_access_policy
+
+DOCUMENTATION = '''
+---
+module: dpg_access_policy_create
+short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
+description:
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with create DPG Access Policy API
+version_added: "1.0.0"
+author: Anurag Jain, Developer Advocate Thales Group
+options:
+    localNode:
+        description:
+            - This is a dictionary type of object that contains CipherTrust Manager Instance FQDN and credentials
+        required: true
+        type: dict
+        elements:
+            - str
+            - bool
+    name:
+        description: name of the DPG policy
+        required: false
+        type: str
+        default: null
+    user_set_policies:
+        description: List of policies to be added to the access policy.
+        required: false
+        type: list
+        default: empty
+    default_error_replacement_value:
+        description: Value to be revealed if the type is 'Error Replacement Value'.
+        required: true, if default_reveal_type is 'Error Replacement Value
+        type: str
+        default: null
+    default_masking_format_id:
+        description: Masking format used to reveal if the type is 'Masked Value'.
+        required: true, if default_reveal_type is 'Masked Value'
+        type: str
+        default: null
+    default_reveal_type:
+        description: Value using which data should be revealed.
+        options:
+            - Error Replacement Value
+            - Masked Value
+            - Ciphertext
+            - Plaintext
+        required: false
+        type: str
+        default: null
+    access_policy_description:
+        description: Description of the Access Policy
+        required: false
+        type: str
+        default: null
+'''
+
+EXAMPLES = '''
+- name: "Create DPG Access Policy"
+  thales.ciphertrust.dpg_access_policy_create:
+    localNode:
+        server_ip: "IP/FQDN of CipherTrust Manager"
+        server_private_ip: "Privare IP in case that is different from above"
+        server_port: 5432
+        user: "CipherTrust Manager Username"
+        password: "CipherTrust Manager Password"
+        verify: false
+    name: "ACCESS-POLICY"
+    default_reveal_type: "Ciphertext"
+    user_set_policies:
+        - user_set_id: "USERSET-ID"
+          reveal_type: "Plaintext"
+        - user_set_id: "USERSET-ID"
+          reveal_type: "Masked Value"
+          masking_format_id: "MASKING-FORMAT-ID"
+        - user_set_id: "USERSET-ID"
+          reveal_type: "Ciphertext"
+'''
+
+RETURN = '''
+
+'''
 
 def main():
     user_set_policy = dict(

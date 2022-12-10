@@ -1,5 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#
+# (c) 2022 Thales Group. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
@@ -11,6 +26,105 @@ import json
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.data_protection import create_dpg_client_profile
+
+DOCUMENTATION = '''
+---
+module: dpg_client_profile_create
+short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
+description:
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with create DPG Client Profile API
+version_added: "1.0.0"
+author: Anurag Jain, Developer Advocate Thales Group
+options:
+    localNode:
+        description:
+            - This is a dictionary type of object that contains CipherTrust Manager Instance FQDN and credentials
+        required: true
+        type: dict
+        elements:
+            - str
+            - bool
+    name:
+        description: Unique name for the protection policy.
+        required: true
+        type: str
+    app_connector_type:
+        description: App connector type for which the client profile is created.
+        options:
+            - DPG
+        required: true
+        type: str
+    ca_id:
+        description: Local CA mapped with client profile.
+        required: false
+        type: str
+        default: null
+    cert_duration:
+        description: Duration for which client credentials are valid.
+        required: false
+        type: int
+    configurations:
+        description: Parameters required to initialize connector.
+        type: dict
+        required: false
+    csr_parameters:
+        description: Client certificate parameters to be updated.
+        type: dict
+        required: false
+    heartbeat_threshold:
+        description: The Threshold by which client's connectivity_status will be moved to Error if not herabeat is received
+        required: false
+        type: int
+    lifetime:
+        description: Validity of registration token.
+        required: false
+        type: str
+        default: null
+    max_clients:
+        description: Number of clients that can register using a registration token.
+        required: false
+        type: int
+    nae_iface_port:
+        description: Nae interface mapped with client profile.
+        required: false
+        type: int
+    policy_id:
+        description: Policy mapped with client profile.
+        required: false
+        type: str
+        default: null
+'''
+
+EXAMPLES = '''
+- name: "Create Client Profile"
+    thales.ciphertrust.dpg_client_profile_create:
+      localNode:
+        server_ip: "IP/FQDN of CipherTrust Manager"
+        server_private_ip: "Privare IP in case that is different from above"
+        server_port: 5432
+        user: "CipherTrust Manager Username"
+        password: "CipherTrust Manager Password"
+        verify: false
+      name: "Ansible-Client-profile"
+      nae_iface_port: "9005"
+      app_connector_type: "DPG"
+      csr_parameters: 
+        csr_cn: "admin"
+      configurations: 
+        verify_ssl_certificate: False
+        use_persistent_connections: True
+        log_level: "DEBUG"
+        tls_to_appserver:
+          tls_skip_verify: True
+          tls_enabled: True
+        auth_method_used:
+          scheme_name: 'Basic'
+      policy_id: "DPG-POLICY-ID"
+'''
+
+RETURN = '''
+
+'''
 
 def main():
     csr_params = dict(

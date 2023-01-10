@@ -283,3 +283,23 @@ def client_add_guardpoint(node,
       return response
     except:
       result['failed'] = True
+
+def create_policy(node,
+        name,
+        policyDescription,
+        policy_type,
+        data_transform_rules,
+        idt_key_rules,
+        key_rules,
+        ldt_key_rules,
+        metadata,
+        never_deny,
+        security_rules
+    ):
+
+    result = dict()
+    request = {}
+
+    request['name'] = name
+    request['policy_type'] = policy_type
+    

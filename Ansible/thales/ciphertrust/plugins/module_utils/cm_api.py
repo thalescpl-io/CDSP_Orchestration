@@ -45,7 +45,39 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
         )
     # execute the post API call to create the resource on CM 
     try:
-      response = requests.post(cmSessionObject["url"], headers=cmSessionObject["headers"], json = json.loads(payload), verify=False)
+      response = requests.post(
+        cmSessionObject["url"], 
+        headers=cmSessionObject["headers"], 
+        json = json.loads(payload), 
+        verify=False)
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRKeyAlreadyExists' in codeDesc:
+              return '4xx'
+          if 'NCERRConflict' in codeDesc:
+              return '4xx'
+      else:
+          return response.json()
+    except requests.exceptions.RequestException as err:
+        raise
+
+# This will never return the ID
+# There will be a separate call to be made to get the ID
+def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    cmSessionObject = CMAPIObject(
+            cm_api_user=cm_node["user"],
+            cm_api_pwd=cm_node["password"],
+            cm_url=cm_node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    # execute the post API call to create the resource on CM 
+    try:
+      response = requests.post(
+        cmSessionObject["url"], 
+        headers=cmSessionObject["headers"], 
+        verify=False)
       if "codeDesc" in response.json():
           codeDesc=response.json()["codeDesc"]
           if 'NCERRKeyAlreadyExists' in codeDesc:
@@ -85,6 +117,54 @@ def DELETEByNameOrId(name=None, cm_node=None, cm_api_endpoint=None):
         raise
     except json.decoder.JSONDecodeError as jsonErr:
         return jsonErr
+
+def DeleteWithoutData(cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    cmSessionObject = CMAPIObject(
+            cm_api_user=cm_node["user"],
+            cm_api_pwd=cm_node["password"],
+            cm_url=cm_node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    # execute the delete API call to delete the resource on CM
+    try:
+      response = requests.delete(cmSessionObject["url"], headers=cmSessionObject["headers"], verify=False)
+      if is_json(str(response)):
+          if "codeDesc" in response.json():
+              codeDesc=response.json()["codeDesc"]
+              if 'NCERRResourceNotFound' in codeDesc:
+                  return 'no matching resource found'
+          else:
+              return 'resource deletion succesful'
+      else:
+          if '204' in str(response):
+              return 'resource deletion succesful'
+          if '405' in str(response):
+              return 'resource ID/Name is a required parameter'
+    except requests.exceptions.RequestException as err:
+        raise
+    except json.decoder.JSONDecodeError as jsonErr:
+        return jsonErr
+
+def GETData(cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    cmSessionObject = CMAPIObject(
+            cm_api_user=cm_node["user"],
+            cm_api_pwd=cm_node["password"],
+            cm_url=cm_node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    # execute the delete API call to delete the resource on CM
+    try:
+        response = requests.get(cmSessionObject["url"], headers=cmSessionObject["headers"], verify=False)
+        if is_json(str(response)):
+            return response
+        else:
+            return '4xx'
+    except requests.exceptions.RequestException as err:
+        raise
 
 # Below method is outdated...need to be cleaned up later
 def GETIdByName(name=None, cm_node=None, cm_api_endpoint=None):

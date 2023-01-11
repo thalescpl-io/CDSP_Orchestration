@@ -89,6 +89,33 @@ def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
     except requests.exceptions.RequestException as err:
         raise
 
+def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    cmSessionObject = CMAPIObject(
+            cm_api_user=cm_node["user"],
+            cm_api_pwd=cm_node["password"],
+            cm_url=cm_node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    # execute the patch API call to update the resource on CM 
+    try:
+      response = requests.patch(
+        cmSessionObject["url"], 
+        headers=cmSessionObject["headers"], 
+        json = json.loads(payload), 
+        verify=False)
+      if "codeDesc" in response.json():
+          codeDesc=response.json()["codeDesc"]
+          if 'NCERRKeyAlreadyExists' in codeDesc:
+              return '4xx'
+          if 'NCERRConflict' in codeDesc:
+              return '4xx'
+      else:
+          return response.json()
+    except requests.exceptions.RequestException as err:
+        raise
+
 def DELETEByNameOrId(name=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
     cmSessionObject = CMAPIObject(

@@ -302,4 +302,171 @@ def create_policy(node,
 
     request['name'] = name
     request['policy_type'] = policy_type
-    
+    request['description'] = policyDescription
+    request['data_transform_rules'] = data_transform_rules
+    request['idt_key_rules'] = idt_key_rules
+    request['key_rules'] = key_rules
+    request['ldt_key_rules'] = ldt_key_rules
+    request['metadata'] = metadata
+    request['never_deny'] = never_deny
+    request['security_rules'] = security_rules
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint="transparent-encryption/policies",
+          )
+      if response == '4xx':
+          result['success'] = 'Error'
+      else:
+          result['success'] = response
+
+      return response
+    except:
+      result['failed'] = True
+
+# Create Process Set
+def createProcessSet(node,
+        name,
+        processSetDescription,
+        processes
+    ):
+
+    result = dict()
+    request = {}
+    arrProcess = []
+
+    for p in processes:
+        process["directory"] = p["directory"]
+        process["file"] = p["processSetFile"]
+        process["signature"] = p["directory"]
+        arrProcess.append(process)
+
+    request['name'] = name
+    request['description'] = processSetDescription
+    request['processes'] = arrProcess
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint="transparent-encryption/processsets",
+          )
+      if response == '4xx':
+          result['success'] = 'Error'
+      else:
+          result['success'] = response
+
+      return response
+    except:
+      result['failed'] = True
+
+# Create Resource Set
+def createResourceSet(node,
+        name,
+        description,
+        classification_tags,
+        resources,
+        resourceType
+    ):
+    result = dict()
+    request = {}
+
+    request['name'] = name
+    request['description'] = description
+    request['classification_tags'] = classification_tags
+    request['resources'] = resources
+    request['resourceType'] = resourceType
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint="transparent-encryption/resourcesets",
+          )
+      if response == '4xx':
+          result['success'] = 'Error'
+      else:
+          result['success'] = response
+
+      return response
+    except:
+      result['failed'] = True
+
+# Create CTE Profile
+def create_cte_profile(node,
+        name,
+        profileDescription,
+        cache_settings,
+        concise_logging,
+        connect_timeout,
+        duplicate_settings,
+        file_settings,
+        ldt_qos_cap_cpu_allocation,
+        ldt_qos_cpu_percent,
+        ldt_qos_rekey_option,
+        ldt_qos_rekey_rate,
+        ldt_qos_schedule,
+        management_service_logger,
+        metadata_scan_interval,
+        mfa_exempt_user_set_id,
+        oidc_connection_id,
+        policy_evaluation_logger,
+        qos_schedules,
+        security_admin_logger,
+        server_settings,
+        syslog_settings,
+        system_admin_logger,
+        upload_settings
+    ):
+
+    result = dict()
+    request = {}
+
+    request['name'] = name
+    request['description'] = profileDescription
+    request['cache_settings'] = cache_settings
+    request['concise_logging'] = concise_logging
+    request['connect_timeout'] = connect_timeout
+    request['duplicate_settings'] = duplicate_settings
+    request['file_settings'] = file_settings
+    request['ldt_qos_cap_cpu_allocation'] = ldt_qos_cap_cpu_allocation
+    request['ldt_qos_cpu_percent'] = ldt_qos_cpu_percent
+    request['ldt_qos_rekey_option'] = ldt_qos_rekey_option
+    request['ldt_qos_rekey_rate'] = ldt_qos_rekey_rate
+    request['ldt_qos_schedule'] = ldt_qos_schedule
+    request['management_service_logger'] = management_service_logger
+    request['metadata_scan_interval'] = metadata_scan_interval
+    request['mfa_exempt_user_set_id'] = mfa_exempt_user_set_id
+    request['oidc_connection_id'] = oidc_connection_id
+    request['policy_evaluation_logger'] = policy_evaluation_logger
+    request['qos_schedules'] = qos_schedules
+    request['security_admin_logger'] = security_admin_logger
+    request['server_settings'] = server_settings
+    request['syslog_settings'] = syslog_settings
+    request['system_admin_logger'] = system_admin_logger
+    request['upload_settings'] = upload_settings
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint="transparent-encryption/profiles",
+          )
+      if response == '4xx':
+          result['success'] = 'Error'
+      else:
+          result['success'] = response
+
+      return response
+    except:
+      result['failed'] = True

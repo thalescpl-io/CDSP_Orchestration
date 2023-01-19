@@ -14,7 +14,7 @@ import requests
 import urllib3
 import json
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData
 
 def is_json(myjson):
   try:
@@ -45,6 +45,77 @@ def create(node,
               payload=payload,
               cm_node=node,
               cm_api_endpoint="usermgmt/connections",
+          )
+      if response == '4xx':
+          result['success'] = 'Connection already exists with same name'
+      else:
+          result['success'] = 'Connection Created Succesfully'
+
+      return response
+    except:
+      result['failed'] = True
+
+def createSyslogConnection(node,
+           name,
+           syslog_params,
+           conn_description,
+           host,
+           port,
+           products):
+    result = dict()
+    meta = dict()
+    request = {
+            "name": name,
+            "description": conn_description,
+            "syslog_params": syslog_params,
+            "host": host,
+            "port": port,
+            "meta": meta,
+            "products": products,
+        }
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint="connectionmgmt/services/log-forwarders/syslog/connections",
+          )
+      if response == '4xx':
+          result['success'] = 'Connection already exists with same name'
+      else:
+          result['success'] = 'Connection Created Succesfully'
+
+      return response
+    except:
+      result['failed'] = True
+
+def patchSyslogConnection(node,
+           connectionId,
+           syslog_params,
+           conn_description,
+           host,
+           port,
+           products):
+    result = dict()
+    meta = dict()
+    request = {
+            "description": conn_description,
+            "syslog_params": syslog_params,
+            "host": host,
+            "port": port,
+            "meta": meta,
+            "products": products,
+        }
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint="connectionmgmt/services/log-forwarders/syslog/connections/" + connectionId,
           )
       if response == '4xx':
           result['success'] = 'Connection already exists with same name'

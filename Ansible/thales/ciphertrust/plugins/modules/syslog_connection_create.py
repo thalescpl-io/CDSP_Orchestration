@@ -25,14 +25,14 @@ import urllib3
 import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.smtp import addServer
+from ansible_collections.thales.ciphertrust.plugins.module_utils.connections import createSyslogConnection
 
 DOCUMENTATION = '''
 ---
-module: smtp_server_add
+module: syslog_connection_create
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with SMTP Server API
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Syslog Connection API
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -44,35 +44,35 @@ options:
         elements:
             - str
             - bool
-    email_from:
-        description: address to put in the email's "from" field
+    name:
+        description: Unique connection name
         required: true
+        type: str
+    syslog_params:
+        description: Params
+        required: true
+        type: dict
+    conn_description:
+        description: Description about the connection
+        required: false
+        type: str
+    host:
+        description: Host of the log-forwarder server
+        required: false
         type: str
     port:
-        description: SMTP server port
-        required: true
+        description: The port to use for the connection. Defaults to 514 for udp, 601 for tcp and 6514 for tls
+        required: false
         type: int
-    server:
-        description: SMTP server address
-        required: true
-        type: str
-    allow_tcp:
-        description: allow less secure tcp connection
+    products:
+        description: Array of the CipherTrust products associated with the connection
         required: false
-        type: bool
-    password:
-        description: SMTP server password
-        required: false
-        type: str
-    username:
-        description: SMTP server username
-        required: false
-        type: str
+        type: list
 '''
 
 EXAMPLES = '''
 - name: "Create CTE CSI Storage Group"
-  thales.ciphertrust.smtp_server_add:
+  thales.ciphertrust.syslog_connection_create:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
@@ -95,38 +95,43 @@ def main():
             password=dict(type='str', required=True),
             verify=dict(type='bool', required=True),
         )
+    syslogParams = dict(
+        transport=dict(type='str', required=True),
+        ca_cert=dict(type='str', required=False),
+        message_format=dict(type='str', required=False),
+    )
     module = AnsibleModule(
             argument_spec=dict(
                 localNode=dict(type='dict', options=localNode, required=True),
-                email_from=dict(type='str', required=True),
-                port=dict(type='int', required=True),
-                server=dict(type='str', required=True),
-                allow_tcp=dict(type='bool', required=False),
-                password=dict(type='str', required=False),
-                username=dict(type='str', required=False),
+                name=dict(type='str', required=True),
+                syslog_params=dict(type='dict', options=syslogParams, required=True),
+                conn_description=dict(type='str', required=False),
+                host=dict(type='str', required=False),
+                port=dict(type='int', required=False),
+                products=dict(type='list', element='str', required=False, default=[]),
             ),
         )
 
     localNode = module.params.get('localNode');
-    email_from =  module.params.get('email_from');
+    name =  module.params.get('name');
+    syslog_params =  module.params.get('syslog_params');
+    conn_description =  module.params.get('conn_description');
+    host =  module.params.get('host');
     port =  module.params.get('port');
-    server =  module.params.get('server');
-    allow_tcp =  module.params.get('allow_tcp');
-    password =  module.params.get('password');
-    username =  module.params.get('username');
+    products =  module.params.get('products');
 
     result = dict(
         changed=False,
     )
 
-    response = addServer(
+    response = createSyslogConnection(
         node=localNode,
-        email_from=email_from,
+        syslog_params=syslog_params,
+        name=name,
+        conn_description=conn_description,
+        host=host,
         port=port,
-        server=server,
-        allow_tcp=allow_tcp,
-        password=password,
-        username=username
+        products=products
     )
     result['response'] = response
 

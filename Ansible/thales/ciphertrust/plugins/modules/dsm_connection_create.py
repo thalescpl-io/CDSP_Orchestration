@@ -25,7 +25,7 @@ import urllib3
 import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.connections import createAzureConnection
+from ansible_collections.thales.ciphertrust.plugins.module_utils.connections import createDSMConnection
 
 DOCUMENTATION = '''
 ---
@@ -137,6 +137,10 @@ RETURN = '''
 '''
 
 def main():
+    node = dict(
+        hostname=dict(type='str', required=True),
+        server_certificate=dict(type='str', required=True),
+    )
     localNode = dict(
             server_ip=dict(type='str', required=True),
             server_private_ip=dict(type='str', required=True),
@@ -149,64 +153,37 @@ def main():
             argument_spec=dict(
                 localNode=dict(type='dict', options=localNode, required=True),
                 name=dict(type='str', required=True),
-                client_id=dict(type='str', required=True),
-                tenant_id=dict(type='str', required=True),
-                active_directory_endpoint=dict(type='str', required=False),
-                azure_stack_connection_type=dict(type='str', options=['AAD', 'ADFS'], required=False),
-                azure_stack_server_cert=dict(type='str', required=False),
-                cert_duration=dict(type='int', default=730, required=False),
-                client_secret=dict(type='str', required=False),
-                cloud_name=dict(type='str', options=['AzureCloud', 'AzureChinaCloud', 'AzureUSGovernment', 'AzureStack'], required=False),
                 description=dict(type='str', required=False),
-                is_certificate_used=dict(type='bool', required=False),
-                key_vault_dns_suffix=dict(type='str', required=False),
-                management_url=dict(type='str', required=False),
-                resource_manager_url=dict(type='str', required=False),
-                vault_resource_url=dict(type='str', required=False),
                 products=dict(type='list', element='str', required=False),
+                nodes=dict(type='list', element='dict', options=node, required=True),
+                password=dict(type='str', required=True),
+                username=dict(type='str', required=True),
+                domain_id=dict(type='str', required=False),
             ),
         )
 
     localNode = module.params.get('localNode');
     name =  module.params.get('name');
     description =  module.params.get('description');
-    client_id =  module.params.get('client_id');
-    tenant_id =  module.params.get('tenant_id');
-    active_directory_endpoint =  module.params.get('active_directory_endpoint');
-    azure_stack_connection_type =  module.params.get('azure_stack_connection_type');
-    azure_stack_server_cert =  module.params.get('azure_stack_server_cert');
-    cert_duration =  module.params.get('cert_duration');
-    client_secret =  module.params.get('client_secret');
-    cloud_name =  module.params.get('cloud_name');
-    is_certificate_used =  module.params.get('is_certificate_used');
     products =  module.params.get('products');
-    key_vault_dns_suffix =  module.params.get('key_vault_dns_suffix');
-    management_url =  module.params.get('management_url');
-    resource_manager_url =  module.params.get('resource_manager_url');
-    vault_resource_url =  module.params.get('vault_resource_url');
-
+    nodes =  module.params.get('nodes');
+    password =  module.params.get('password');
+    username =  module.params.get('username');
+    domain_id =  module.params.get('domain_id');
+    
     result = dict(
         changed=False,
     )
 
-    response = createAzureConnection(
+    response = createDSMConnection(
             node=localNode,
             name=name,
             description=description,
-            client_id=client_id,
-            tenant_id=tenant_id,
-            active_directory_endpoint=active_directory_endpoint,
-            azure_stack_connection_type=azure_stack_connection_type,
-            azure_stack_server_cert=azure_stack_server_cert,
-            cert_duration=cert_duration,
-            client_secret=client_secret,
-            cloud_name=cloud_name,
             products=products,
-            is_certificate_used=is_certificate_used,
-            key_vault_dns_suffix=key_vault_dns_suffix,
-            management_url=management_url,
-            resource_manager_url=resource_manager_url,
-            vault_resource_url=vault_resource_url
+            nodes=nodes,
+            password=password,
+            username=username,
+            domain_id=domain_id
         )
     result['response'] = response
 

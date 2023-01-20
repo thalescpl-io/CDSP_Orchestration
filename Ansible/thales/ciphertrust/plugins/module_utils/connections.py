@@ -227,3 +227,42 @@ def createAzureConnection(node,
       return response
     except:
       result['failed'] = True
+
+# DSM Connection Creation
+def createDSMConnection(node,
+      name,
+      description,
+      products,
+      nodes,
+      password,
+      username,
+      domain_id):
+    result = dict()
+    meta = dict()
+    request = {
+      "name": name,
+      "description": description,
+      "products": products,
+      "meta": meta,
+      "nodes": nodes,
+      "password": password,
+      "username": username,
+      "domain_id": domain_id,
+    }
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+        payload=payload,
+        cm_node=node,
+        cm_api_endpoint="connectionmgmt/services/dsm/connections",
+      )
+      if response == '4xx':
+          result['success'] = 'Connection already exists with same name'
+      else:
+          result['success'] = 'Connection Created Succesfully'
+
+      return response
+    except:
+      result['failed'] = True

@@ -146,7 +146,7 @@ def main():
             argument_spec=dict(
                 localNode=dict(type='dict', options=localNode, required=True),
                 name=dict(type='str', required=True),
-                strategy=dict(type='str', options=['ldap', 'oidc'] required=True),
+                strategy=dict(type='str', options=['ldap', 'oidc'], required=True),
                 ldap_options=dict(type='dict', options=ldapOptions, required=False),
                 oidc_options=dict(type='dict', options=oidcOptions, required=False),
                 options=dict(type='dict', options=optionsDeprecated, required=False),

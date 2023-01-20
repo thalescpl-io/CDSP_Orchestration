@@ -400,6 +400,36 @@ def createResourceSet(node,
     except:
       result['failed'] = True
 
+# Create Signature Set
+def createSignatureSet(node,
+        name,
+        description,
+        source_list
+    ):
+    result = dict()
+    request = {}
+
+    request['name'] = name
+    request['description'] = description
+    request['source_list'] = source_list
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint="transparent-encryption/signaturesets",
+          )
+      if response == '4xx':
+          result['success'] = 'Error'
+      else:
+          result['success'] = response
+
+      return response
+    except:
+      result['failed'] = True
+
 # Create CTE Profile
 def create_cte_profile(node,
         name,

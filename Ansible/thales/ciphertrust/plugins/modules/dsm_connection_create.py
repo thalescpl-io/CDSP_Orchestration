@@ -29,10 +29,10 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.connections imp
 
 DOCUMENTATION = '''
 ---
-module: azure_connection_create
+module: dsm_connection_create
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with create Azure Connection API
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with create DSM Connection API
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -48,80 +48,37 @@ options:
         description: Unique connection name
         required: true
         type: str
+    nodes:
+        description: List of nodes
+        required: true
+        type: list
+    password:
+        description: Password of DSM server
+        required: true
+        type: str
+    username:
+        description: Username for accessing DSM server
+        required: true
+        type: str
     description:
         description: Description about the connection
+        required: false
+        type: str
+    domain_id:
+        description: If DSM user is restricted to a domain, provide domain id.
         required: false
         type: str
     products:
         description: Array of the CipherTrust products associated with the connection
         required: false
         type: str
-    client_id:
-        description: Unique Identifier (client ID) for the Azure application
-        required: false
-        type: str
-    tenant_id:
-        description: Tenant ID of the Azure application.
-        required: false
-        type: str
-    active_directory_endpoint:
-        description: Azure stack active directory authority URL
-        required: false
-        type: str
-    azure_stack_connection_type:
-        description: Azure stack connection type
-        required: false
-        type: str
         choices:
-            - AAD
-            - ADFS
-    azure_stack_server_cert:
-        description: Azure stack server certificate
-        required: false
-        type: str
-    cert_duration:
-        description: Duration in days for which the azure certificate is valid, default (730 i.e. 2 Years).
-        required: false
-        type: int
-        default: 730
-    client_secret:
-        description: Secret key for the Azure application. Required in Azure Stack connection.
-        required: false
-        type: str
-    cloud_name:
-        description: Name of the cloud.
-        required: false
-        type: str
-        choices:
-            - AzureCloud
-            - AzureChinaCloud
-            - AzureUSGovernment
-            - AzureStack
-    is_certificate_used:
-        description: User has the option to choose the Certificate Authentication method instead of Client Secret for Azure Cloud connection. In order to use the Certificate, set it to true. Once the connection is created, in the response user will get a certificate. By default, the certificate is valid for 2 Years. User can update the certificate in the existing connection by setting it to true in Update (PATCH) API call.
-        required: false
-        type: bool
-    key_vault_dns_suffix:
-        description: Azure stack key vault dns suffix
-        required: false
-        type: str
-    management_url:
-        description: Azure stack management URL
-        required: false
-        type: str
-    resource_manager_url:
-        description: Azure stack resource manager URL
-        required: false
-        type: str
-    vault_resource_url:
-        description: Azure stack vault service resource URL
-        required: false
-        type: str
+            - CCKM
 '''
 
 EXAMPLES = '''
 - name: "Create Azure Connection"
-  thales.ciphertrust.azure_connection_create:
+  thales.ciphertrust.dsm_connection_create:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"

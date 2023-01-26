@@ -36,7 +36,8 @@ def getJwt(host, username, password):
 # There will be a separate call to be made to get the ID
 def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
-    node = json.loads(cm_node)
+    cm_node_json = cm_node.replace("\'", "\"")
+    node = json.loads(cm_node_json)
     cmSessionObject = CMAPIObject(
             cm_api_user=node["user"],
             cm_api_pwd=node["password"],

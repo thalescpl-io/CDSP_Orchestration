@@ -95,18 +95,23 @@ class ThalesCipherTrustModule:
     def boolean(self, *args, **kwargs):
         return self._module.boolean(*args, **kwargs)
 
+def _ciphertrust_common_argument_spec():
+    """
+    """
+    return dict(
+        localNode = dict(
+            server_ip=dict(type='str', required=True),
+            server_private_ip=dict(type='str', required=True),
+            server_port=dict(type='int', required=True),
+            user=dict(type='str', required=True),
+            password=dict(type='str', required=True),
+            verify=dict(type='bool', required=True),
+        )
+    )
+
 def ciphertrust_argument_spec():
     """
     Returns a dictionary containing the argument_spec common to all CipherTrust Manager modules.
     """
-    localNode = dict(
-        server_ip=dict(type='str', required=True),
-        server_private_ip=dict(type='str', required=True),
-        server_port=dict(type='int', required=True),
-        user=dict(type='str', required=True),
-        password=dict(type='str', required=True),
-        verify=dict(type='bool', required=True),
-    )
-
-    spec = localNode
+    spec = _ciphertrust_common_argument_spec()
     return spec

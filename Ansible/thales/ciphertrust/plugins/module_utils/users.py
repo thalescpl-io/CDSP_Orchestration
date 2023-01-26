@@ -78,11 +78,9 @@ def new(node,
               cm_api_endpoint="usermgmt/users",
           )
       if response == '4xx':
-          result['success'] = 'User already exists with same username'
+          return 'User already exists'
       else:
-          result['success'] = 'User Created Succesfully'
-
-      return response
+          return 'User Created Succesfully'
     except:
-      result['failed'] = True
+      raise
 

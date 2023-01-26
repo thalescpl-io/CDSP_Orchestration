@@ -185,7 +185,7 @@ def main():
 
     result['response'] = response
 
-    module.exit_json(**result)
+    module.exit_json(msg=result['response'])
 
 if __name__ == '__main__':
     main()

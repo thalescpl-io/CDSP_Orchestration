@@ -153,8 +153,8 @@ argument_spec = dict(
 def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
-        required_if=required_if,
-        mutually_exclusive=mutually_exclusive,
+        required_if=[],
+        mutually_exclusive=[],
         supports_check_mode=True,
 
     )

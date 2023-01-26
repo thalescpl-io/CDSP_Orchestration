@@ -1,0 +1,16 @@
+---
+  - name: "Sample playbook for Group and User Management on CipherTrust Manager"
+    hosts: localhost
+    connection: local
+
+    vars_files:
+      - vars/userMgmt.yml
+
+    tasks:
+    - name: "Create new user"
+      thales.ciphertrust.usermgmt_users_create:
+        localNode: "{{ this_node_connection_string }}"
+        username: "john.doe"
+        password: "cmPassw0rd!"
+        email: "john.doe@example.com"
+        name: "John Doe"

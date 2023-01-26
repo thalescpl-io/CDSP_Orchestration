@@ -1,0 +1,12 @@
+this_node_address: 20.102.80.224
+this_node_private_ip: 10.0.0.4
+this_node_username: admin
+this_node_password: KeySecure01!
+
+this_node_connection_string:
+  server_ip: "{{ this_node_address }}"
+  server_private_ip: "{{ this_node_private_ip }}"
+  server_port: 5432
+  user: "{{ this_node_username }}"
+  password: "{{ this_node_password }}"
+  verify: False

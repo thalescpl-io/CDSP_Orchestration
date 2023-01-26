@@ -136,7 +136,7 @@ RETURN = '''
 
 argument_spec = dict(
     # module function variables
-    localNode=dict(type='dict', options=localNode, required=True),
+    # localNode=dict(type='dict', options=localNode, required=True),
     certificate_subject_dn=dict(type='str', required=False, default=""),
     connection=dict(type='str', required=False, default=""),
     email=dict(type='str', required=False, default=""),
@@ -151,7 +151,7 @@ argument_spec = dict(
 )
 
 def setup_module_object():
-    module = AnsibleAWSModule(
+    module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
         required_if=required_if,
         mutually_exclusive=mutually_exclusive,

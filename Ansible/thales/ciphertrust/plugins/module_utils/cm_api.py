@@ -22,28 +22,6 @@ def is_json(myjson):
     return False
   return True
 
-def singleQuoteToDoubleQuote(singleQuoted):
-    '''
-    convert a single quoted string to a double quoted one
-    Args:
-        singleQuoted(string): a single quoted string e.g. {'cities': [{'name': "Upper Hell's Gate"}]}
-    Returns:
-        string: the double quoted version of the string e.g. 
-    '''
-    cList=list(singleQuoted)
-    inDouble=False;
-    inSingle=False;
-    for i,c in enumerate(cList):
-        #print ("%d:%s %r %r" %(i,c,inSingle,inDouble))
-        if c=="'":
-            if not inDouble:
-                inSingle=not inSingle
-                cList[i]='"'
-        elif c=='"':
-            inDouble=not inDouble
-    doubleQuoted="".join(cList)    
-    return doubleQuoted
-
 def getJwt(host, username, password):
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     auth_url='https://'+host+'/api/v1/auth/tokens'
@@ -60,7 +38,7 @@ def getJwt(host, username, password):
 def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
     # cm_node_json = cm_node.replace("\'", "\"")
-    node = json.loads(singleQuoteToDoubleQuote(cm_node))
+    node = ast.literal_eval(cm_node)
     # node = json.loads(cm_node_json)
     cmSessionObject = CMAPIObject(
             cm_api_user=node["user"],

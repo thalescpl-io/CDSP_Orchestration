@@ -166,7 +166,7 @@ def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
         required_if=(
-            ['op_type', 'patch', ['user_id']],
+            ['op_type', 'patch', ['cm_user_id']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,

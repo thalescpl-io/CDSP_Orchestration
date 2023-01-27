@@ -15,3 +15,12 @@
         password: "cmPassw0rd!"
         email: "john.doe@example.com"
         name: "John Doe"
+
+    - name: "Update user info"
+      thales.ciphertrust.usermgmt_users_save:
+        localNode: "{{ this_node_connection_string }}"
+        op_type: "patch"
+        cm_user_id: "local|6c045e48-7e2e-4b01-ac88-6d2a13d8dc95"
+        username: "john.doe"
+        email: "aj@example.com"
+        name: "Anurag Jain"

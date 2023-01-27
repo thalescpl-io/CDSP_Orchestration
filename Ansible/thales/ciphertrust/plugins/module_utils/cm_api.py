@@ -131,7 +131,7 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
         else:
           return response.json()
       else:
-        return response
+        return 'bad formatted response'
     except requests.exceptions.RequestException as err:
         raise
 

@@ -77,9 +77,6 @@ class ThalesCipherTrustModule:
     def params(self):
         return self._module.params
 
-    def exit_json_orig(self, **kwargs):
-        return self._module.exit_json(**kwargs)
-    
     def exit_json(self, *args, **kwargs):
         return self._module.exit_json(*args, **kwargs)
 

@@ -94,13 +94,12 @@ def changepw(**kwargs):
       response = PATCHData(
               payload=payload,
               cm_node=kwargs['node'],
-              cm_api_endpoint="/v1/auth/changepw",
+              cm_api_endpoint="auth/changepw",
           )
       if response == '4xx':
         return 'Password update failed'
       else:
-        return response
-        #return 'Password updated succesfully'
+        return 'Password updated succesfully'
     except:
       raise
 
@@ -118,7 +117,7 @@ def patch_self(**kwargs):
       response = PATCHData(
               payload=payload,
               cm_node=kwargs['node'],
-              cm_api_endpoint="/v1/auth/self/user",
+              cm_api_endpoint="auth/self/user",
           )
       if response == '4xx':
           return 'User update failed'

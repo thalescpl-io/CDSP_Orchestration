@@ -30,8 +30,8 @@
         localNode: "{{ this_node_connection_string }}"
         op_type: "changepw"
         username: "john.doe"
-        password: "cmPassw0rd!"
-        new_password: "ChangeIt@!@123"
+        password: "cmPassw0rd3!"
+        new_password: "cmPassw0rd4!"
 
     - name: "Update self"
       thales.ciphertrust.usermgmt_users_save:

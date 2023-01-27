@@ -97,9 +97,10 @@ def changepw(**kwargs):
               cm_api_endpoint="/v1/auth/changepw",
           )
       if response == '4xx':
-          return 'Password update failed'
+        return 'Password update failed'
       else:
-          return 'Password updated succesfully'
+        return response
+        #return 'Password updated succesfully'
     except:
       raise
 

@@ -119,14 +119,19 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
         headers=cmSessionObject["headers"], 
         json = json.loads(payload), 
         verify=False)
-      if "codeDesc" in response.json():
+      if is_json(str(response)): 
+        if "codeDesc" in response.json():
           codeDesc=response.json()["codeDesc"]
           if 'NCERRKeyAlreadyExists' in codeDesc:
               return '4xx'
           if 'NCERRConflict' in codeDesc:
               return '4xx'
-      else:
+          if 'NCERRInvalidParamValue' in codeDesc:
+              return '4xx'
+        else:
           return response.json()
+      else:
+        return response
     except requests.exceptions.RequestException as err:
         raise
 

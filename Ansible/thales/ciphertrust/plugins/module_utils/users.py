@@ -62,7 +62,7 @@ def patch(**kwargs):
     request = {}
 
     for key, value in kwargs.items():
-        if key not in ["node", "user_id"] and value != None:
+        if key not in ["node", "cm_user_id"] and value != None:
             request[key] = value
 
     payload = json.dumps(request)
@@ -71,7 +71,7 @@ def patch(**kwargs):
       response = POSTData(
               payload=payload,
               cm_node=kwargs['node'],
-              cm_api_endpoint="usermgmt/users/" + kwargs['user_id'],
+              cm_api_endpoint="usermgmt/users/" + kwargs['cm_user_id'],
           )
       if response == '4xx':
           return 'User update failed'

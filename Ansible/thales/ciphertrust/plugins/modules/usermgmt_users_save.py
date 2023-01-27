@@ -141,7 +141,7 @@ _login_flags = dict(
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    user_id=dict(type='str'),
+    cm_user_id=dict(type='str'),
     allowed_auth_methods=dict(type='list', element='str', required=False),
     app_metadata=dict(type='dict', options=_metadata, required=False),
     certificate_subject_dn=dict(type='str', required=False),
@@ -206,7 +206,7 @@ def main():
     else:
         response = patch(
             node=module.params.get('localNode'),
-            user_id=module.params.get('user_id'),
+            cm_user_id=module.params.get('cm_user_id'),
             allowed_auth_methods=module.params.get('allowed_auth_methods'),
             certificate_subject_dn=module.params.get('certificate_subject_dn'),
             email=module.params.get('email'),

@@ -26,7 +26,7 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.users import create, patch
+from ansible_collections.thales.ciphertrust.plugins.module_utils.users import create, patch, changepw, patch_self
 
 module = None
 

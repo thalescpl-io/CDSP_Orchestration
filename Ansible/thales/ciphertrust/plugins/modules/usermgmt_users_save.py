@@ -155,7 +155,7 @@ argument_spec = dict(
     password_change_required=dict(type='bool', required=False),
     user_id=dict(type='str', required=False),
     user_metadata=dict(type='dict', options=_metadata, required=False),
-    username=dict(type='str', required=True),
+    username=dict(type='str'), # Not needed in self update, else needed
     failed_logins_count=dict(type='int'), # Needed only for patch operation
     new_password=dict(type='str'), # Needed only for change pwd operation
     auth_domain=dict(type='str'), # Needed only for change pwd operation

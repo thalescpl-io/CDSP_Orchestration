@@ -76,6 +76,52 @@ def patch(**kwargs):
       if response == '4xx':
           return 'User update failed'
       else:
-          return 'User updated Succesfully'
+          return 'User updated succesfully'
+    except:
+      raise
+
+def changepw(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+              payload=payload,
+              cm_node=kwargs['node'],
+              cm_api_endpoint="/v1/auth/changepw",
+          )
+      if response == '4xx':
+          return 'Password update failed'
+      else:
+          return 'Password updated succesfully'
+    except:
+      raise
+
+def patch_self(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+              payload=payload,
+              cm_node=kwargs['node'],
+              cm_api_endpoint="/v1/auth/self/user",
+          )
+      if response == '4xx':
+          return 'User update failed'
+      else:
+          return 'User updated succesfully'
     except:
       raise

@@ -140,7 +140,7 @@ _login_flags = dict(
 )
 
 argument_spec = dict(
-    op_type=dict(type='str', options=['create', 'patch'], required=True),
+    op_type=dict(type='str', options=['create', 'patch', 'changepw', 'patch_self'], required=True),
     cm_user_id=dict(type='str'),
     allowed_auth_methods=dict(type='list', element='str', required=False),
     app_metadata=dict(type='dict', options=_metadata, required=False),
@@ -156,7 +156,9 @@ argument_spec = dict(
     user_id=dict(type='str', required=False),
     user_metadata=dict(type='dict', options=_metadata, required=False),
     username=dict(type='str', required=True),
-    failed_logins_count=dict(type='int'),
+    failed_logins_count=dict(type='int'), # Needed only for patch operation
+    new_password=dict(type='str'), # Needed only for change pwd operation
+    auth_domain=dict(type='str'), # Needed only for change pwd operation
 )
 
 def validate_parameters(user_module):
@@ -166,7 +168,9 @@ def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
         required_if=(
-            ['op_type', 'patch', ['cm_user_id']],
+            ['op_type', 'create', ['username']],
+            ['op_type', 'patch', ['cm_user_id', 'username']],
+            ['op_type', 'changepw', ['password', 'new_password', 'username']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -203,7 +207,7 @@ def main():
             user_metadata=module.params.get('user_metadata'),
             username=module.params.get('username'),
         )
-    else:
+    elif module.params.get('op_type') == 'patch':
         response = patch(
             node=module.params.get('localNode'),
             cm_user_id=module.params.get('cm_user_id'),
@@ -218,6 +222,21 @@ def main():
             password_change_required=module.params.get('password_change_required'),
             user_metadata=module.params.get('user_metadata'),
             username=module.params.get('username'),
+        )
+    elif module.params.get('op_type') == 'changepw':
+        response = changepw(
+            node=module.params.get('localNode'),
+            password=module.params.get('password'),
+            username=module.params.get('username'),
+            new_password=module.params.get('new_password'),
+            auth_domain=module.params.get('auth_domain'),
+        )
+    else:
+        response = patch_self(
+            node=module.params.get('localNode'),
+            email=module.params.get('email'),
+            name=module.params.get('name'),
+            user_metadata=module.params.get('user_metadata'),
         )
 
     result['response'] = response

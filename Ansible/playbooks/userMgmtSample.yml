@@ -24,3 +24,17 @@
         username: "john.doe"
         email: "aj@example.com"
         name: "Anurag Jain"
+
+    - name: "Change user password"
+      thales.ciphertrust.usermgmt_users_save:
+        localNode: "{{ this_node_connection_string }}"
+        op_type: "changepw"
+        username: "john.doe"
+        password: "cmPassw0rd!"
+        new_password: "ChangeIt@!@123"
+
+    - name: "Update self"
+      thales.ciphertrust.usermgmt_users_save:
+        localNode: "{{ this_node_connection_string }}"
+        op_type: "patch_self"
+        name: "CM Admin"

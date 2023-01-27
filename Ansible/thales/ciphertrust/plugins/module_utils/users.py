@@ -25,7 +25,7 @@ import requests
 import urllib3
 import json
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData
 
 def is_json(myjson):
   try:
@@ -68,7 +68,7 @@ def patch(**kwargs):
     payload = json.dumps(request)
 
     try:
-      response = POSTData(
+      response = PATCHData(
               payload=payload,
               cm_node=kwargs['node'],
               cm_api_endpoint="usermgmt/users/" + kwargs['cm_user_id'],

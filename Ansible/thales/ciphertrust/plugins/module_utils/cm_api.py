@@ -104,10 +104,11 @@ def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
 
 def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
+    node = ast.literal_eval(cm_node)
     cmSessionObject = CMAPIObject(
-            cm_api_user=cm_node["user"],
-            cm_api_pwd=cm_node["password"],
-            cm_url=cm_node["server_ip"],
+            cm_api_user=node["user"],
+            cm_api_pwd=node["password"],
+            cm_url=node["server_ip"],
             cm_api_endpoint=cm_api_endpoint,
             verify=False,
         )

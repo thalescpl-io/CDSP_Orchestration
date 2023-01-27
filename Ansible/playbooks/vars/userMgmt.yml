@@ -1,7 +1,7 @@
-this_node_address: 20.102.80.224
+this_node_address: 1.1.1.1
 this_node_private_ip: 10.0.0.4
 this_node_username: admin
-this_node_password: KeySecure01!
+this_node_password: cmpwdChangeIt!
 
 this_node_connection_string:
   server_ip: "{{ this_node_address }}"

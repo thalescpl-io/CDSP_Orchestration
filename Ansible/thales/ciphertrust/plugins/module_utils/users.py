@@ -1,10 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-# This is a utility file for creating Thales Ciphertrust Manager REST API session
-# Generating Token
-# Generating Headers
-# Preparing URL for REST operation
+#
+# (c) 2022 Thales Group. All rights reserved.
+# Author: Anurag Jain, Developer Advocate, Thales
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
@@ -23,64 +34,48 @@ def is_json(myjson):
     return False
   return True
 
-def new(node, 
-        cert_sub_dn, 
-        conn, 
-        email, 
-        enable_cert_auth_bool, 
-        is_domain_user_bool, 
-        prevent_ui_login_bool, 
-        name, 
-        pwd, 
-        pwd_change_reqd_bool, 
-        user_id, 
-        username):
+def create(**kwargs):
     result = dict()
-    request = {
-            "enable_cert_auth": enable_cert_auth_bool,
-            "is_domain_user": is_domain_user_bool,
-            "login_flags": {
-                "prevent_ui_login": prevent_ui_login_bool
-            },
-            "password": pwd,
-            "password_change_required": pwd_change_reqd_bool,
-            "username": username,
-        }
-    
-    request['app_metadata'] = dict()
-    
-    request['user_metadata'] = dict()
+    request = {}
 
-    if cert_sub_dn != "":
-        request['certificate_subject_dn']=cert_sub_dn
-
-    if conn != "":
-        request['connection']=conn
-
-    if email != "":
-        request['email']=email
-    else:
-        request['email']=username + "@local"
-
-    if name != "":
-        request['name']=name
-
-    if user_id != "":
-        request['user_id']=user_id
-
+    for key, value in kwargs.items():
+        if key != "node" and value != None:
+            request[key] = value
 
     payload = json.dumps(request)
 
     try:
       response = POSTData(
               payload=payload,
-              cm_node=node,
+              cm_node=kwargs['node'],
               cm_api_endpoint="usermgmt/users",
           )
       if response == '4xx':
           return 'User already exists'
       else:
-          return 'User Created Succesfully'
+          return 'User created succesfully'
     except:
       raise
 
+def patch(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "user_id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=kwargs['node'],
+              cm_api_endpoint="usermgmt/users/" + kwargs['user_id'],
+          )
+      if response == '4xx':
+          return 'User update failed'
+      else:
+          return 'User updated Succesfully'
+    except:
+      raise

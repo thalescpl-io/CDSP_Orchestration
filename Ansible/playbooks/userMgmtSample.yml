@@ -8,8 +8,9 @@
 
     tasks:
     - name: "Create new user"
-      thales.ciphertrust.usermgmt_users_create:
+      thales.ciphertrust.usermgmt_users_save:
         localNode: "{{ this_node_connection_string }}"
+        op_type: "create"
         username: "john.doe"
         password: "cmPassw0rd!"
         email: "john.doe@example.com"

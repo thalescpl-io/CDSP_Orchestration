@@ -136,25 +136,27 @@ RETURN = '''
 
 _metadata = dict()
 _login_flags = dict(
-    prevent_ui_login=dict(type='bool', required=False, default=False),
+    prevent_ui_login=dict(type='bool', required=False),
 )
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    allowed_auth_methods=dict(type='list', element='str', required=False, default=[]),
+    user_id=dict(type='str'),
+    allowed_auth_methods=dict(type='list', element='str', required=False),
     app_metadata=dict(type='dict', options=_metadata, required=False),
-    certificate_subject_dn=dict(type='str', required=False, default=""),
-    connection=dict(type='str', required=False, default=""),
-    email=dict(type='str', required=False, default=""),
-    enable_cert_auth=dict(type='bool', required=False, default=False),
-    is_domain_user=dict(type='bool', required=False, default=False),
+    certificate_subject_dn=dict(type='str', required=False),
+    connection=dict(type='str', required=False),
+    email=dict(type='str', required=False),
+    enable_cert_auth=dict(type='bool', required=False),
+    is_domain_user=dict(type='bool', required=False),
     login_flags=dict(type='dict', options=_login_flags, required=False),
-    name=dict(type='str', required=False, default=""),
-    password=dict(type='str', required=True),
-    password_change_required=dict(type='bool', required=False, default=False),
-    user_id=dict(type='str', required=False, default=""),
+    name=dict(type='str', required=False),
+    password=dict(type='str', required=False),
+    password_change_required=dict(type='bool', required=False),
+    user_id=dict(type='str', required=False),
     user_metadata=dict(type='dict', options=_metadata, required=False),
     username=dict(type='str', required=True),
+    failed_logins_count=dict(type='int'),
 )
 
 def validate_parameters(user_module):
@@ -163,7 +165,9 @@ def validate_parameters(user_module):
 def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
-        required_if=[],
+        required_if=(
+            ['op_type', 'patch', ['user_id']],
+        ),
         mutually_exclusive=[],
         supports_check_mode=True,
 
@@ -202,16 +206,17 @@ def main():
     else:
         response = patch(
             node=module.params.get('localNode'),
-            cert_sub_dn=module.params.get('certificate_subject_dn'),
-            conn=module.params.get('connection'),
+            user_id=module.params.get('user_id'),
+            allowed_auth_methods=module.params.get('allowed_auth_methods'),
+            certificate_subject_dn=module.params.get('certificate_subject_dn'),
             email=module.params.get('email'),
             enable_cert_auth_bool=module.params.get('enable_cert_auth'),
-            is_domain_user_bool=module.params.get('is_domain_user'),
-            prevent_ui_login_bool=module.params.get('prevent_ui_login'),
+            failed_logins_count=module.params.get('failed_logins_count'),
+            login_flags=module.params.get('login_flags'),
             name=module.params.get('name'),
-            pwd=module.params.get('password'),
-            pwd_change_reqd_bool=module.params.get('password_change_required'),
-            user_id=module.params.get('user_id'),
+            password=module.params.get('password'),
+            password_change_required=module.params.get('password_change_required'),
+            user_metadata=module.params.get('user_metadata'),
             username=module.params.get('username'),
         )
 

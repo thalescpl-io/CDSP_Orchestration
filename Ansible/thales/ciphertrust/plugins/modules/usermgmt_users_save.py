@@ -32,36 +32,45 @@ module = None
 
 DOCUMENTATION = '''
 ---
-module: usermgmt_users_create
+module: usermgmt_users_save
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with create User API
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with user management API
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
     localNode:
         description:
-            - This is a dictionary type of object that contains CipherTrust Manager Instance FQDN and credentials
-        required: true
+            - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
+            - holds IP/FQDN of the server, username, password, and port 
+        default: true
         type: dict
-        elements:
-            - str
-            - bool
-    name:
-        description: Full name of the user.
-        required: false
+    op_type:
+        description: Operation to be performed
+        choices: [create, patch, changepw, patch_self]
+        required: true
         type: str
-        default: null
+        default: None
+    cm_user_id:
+        description: CM user ID of the user that needs to be patched. Only required if the op_type is patch
+        type: str
+        default: None
+    allowed_auth_methods:
+        description: 
+          - List of login authentication methods allowed to the user.
+          - Default value - ["password"] i.e. Password Authentication is allowed by default.
+          - Setting it to empty, i.e [], means no authentication method is allowed to the user.
+          - If both enable_cert_auth and allowed_auth_methods are provided in the request, enable_cert_auth is ignored.
+        type: list
     app_metadata:
         description: A schema-less object, which can be used by applications to store information about the resource. app_metadata is typically used by applications to store information which the end-users are not themselves allowed to change, like group membership or security roles.
         required: false
         type: dict
-        default: null
+        default: None
     certificate_subject_dn:
         description: The Distinguished Name of the user in certificate
         required: false
         type: str
-        default: null
     connection:
         description: This attribute is required to create a user, but is not included in user resource responses. Can be the name of a connection or "local_account" for a local user, defaults to "local_account".
         required: false
@@ -71,17 +80,44 @@ options:
         description: E-mail of the user
         required: false
         type: str
-        default: null
     enable_cert_auth:
-        description: Enable certificate based authentication flag. If set to true, the user will be able to login using certificate.
+        description: 
+          - Deprecated
+          - Use allowed_auth_methods instead.
+          - If both enable_cert_auth and allowed_auth_methods are provided in the request, enable_cert_auth is ignored.
+          - Enable certificate based authentication flag. If set to true, the user will be able to login using certificate.
         required: false
         type: bool
-        default: false
     is_domain_user:
         description: This flag can be used to create the user in a non-root domain where user management is allowed.
         required: false
         type: bool
-        default: false
+    login_flags:
+        description: Flags for controlling user's login behavior.
+        required: false
+        type: dict
+        suboptions:
+          prevent_ui_login:
+            description: 
+              - If true, user is not allowed to login from Web UI. 
+              - Default - false
+            required: false
+            type: bool
+
+
+
+
+    name:
+        description: Full name of the user.
+        required: false
+        type: str
+        default: None
+    
+    
+    
+    
+    
+    
     prevent_ui_login:
         description: Part of login_flags for controlling user's login behavior.
         required: false
@@ -136,16 +172,16 @@ RETURN = '''
 
 _metadata = dict()
 _login_flags = dict(
-    prevent_ui_login=dict(type='bool', required=False),
+    prevent_ui_login=dict(type='bool', required=False, default=False),
 )
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch', 'changepw', 'patch_self'], required=True),
     cm_user_id=dict(type='str'),
-    allowed_auth_methods=dict(type='list', element='str', required=False),
+    allowed_auth_methods=dict(type='list', element='str', required=False, default=['password']),
     app_metadata=dict(type='dict', options=_metadata, required=False),
     certificate_subject_dn=dict(type='str', required=False),
-    connection=dict(type='str', required=False),
+    connection=dict(type='str', required=False, default='local_account'),
     email=dict(type='str', required=False),
     enable_cert_auth=dict(type='bool', required=False),
     is_domain_user=dict(type='bool', required=False),

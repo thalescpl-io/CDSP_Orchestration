@@ -46,7 +46,7 @@ def getJwt(host, username, password):
 
 # This will never return the ID
 # There will be a separate call to be made to get the ID
-def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
+def POSTDataOld(payload=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
     node = ast.literal_eval(cm_node)
     cmSessionObject = CMAPIObject(
@@ -73,6 +73,33 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
           return response.json()
     except requests.exceptions.RequestException as err:
         raise
+
+# Returns the whole response object
+def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    node = ast.literal_eval(cm_node)
+    cmSessionObject = CMAPIObject(
+            cm_api_user=node["user"],
+            cm_api_pwd=node["password"],
+            cm_url=node["server_ip"],
+            cm_api_endpoint=cm_api_endpoint,
+            verify=False,
+        )
+    # execute the post API call to create the resource on CM 
+    try:
+      response = requests.post(
+        cmSessionObject["url"], 
+        headers=cmSessionObject["headers"], 
+        json = json.loads(payload), 
+        verify=False)
+      __ret = dict(
+        status_code=response.status_code,
+        data=response.json()
+      )
+      return __ret.json()
+    except requests.exceptions.RequestException as err:
+        raise
+
 
 # This will never return the ID
 # There will be a separate call to be made to get the ID

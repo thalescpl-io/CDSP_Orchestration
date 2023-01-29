@@ -50,10 +50,28 @@ def create(**kwargs):
               cm_node=kwargs['node'],
               cm_api_endpoint="usermgmt/users",
           )
-      if response == '4xx':
-          return 'User already exists'
+      if response["status_code"] == 201:
+        __ret = {
+          "user_id": response["data"]["user_id"],
+          "created_at": response["data"]["created_at"],
+          "message": "User created sucessfully"
+        }
+        return __ret
       else:
-          return 'User created succesfully'
+        if is_json(str(response["data"])):
+          if "codeDesc" in response["data"].json():
+            codeDesc=response["data"].json()["codeDesc"]
+            __ret = {
+              "message": "User creation failed",
+              "err": codeDesc
+            }
+            return __ret
+        else:
+            __ret = {
+              "message": "User creation failed",
+              "err": str(response["data"])
+            }
+            return __ret
     except:
       raise
 

@@ -31,6 +31,7 @@
         password: "cmPassw0rd!"
         email: "john.doe@example.com"
         name: "John Doe"
+      register: output
 
     - name: "Update user info"
       thales.ciphertrust.usermgmt_users_save:
@@ -46,11 +47,14 @@
         localNode: "{{ this_node_connection_string }}"
         op_type: "changepw"
         username: "john.doe"
-        password: "cmPassw0rd4!"
-        new_password: "cmPassw0rd5!"
+        password: "cmPassw0rd!"
+        new_password: "cmPassw0rd1!"
 
     - name: "Update self"
       thales.ciphertrust.usermgmt_users_save:
         localNode: "{{ this_node_connection_string }}"
         op_type: "patch_self"
         name: "CM Admin"
+
+    - name: Debug Output
+      debug: var=output

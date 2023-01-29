@@ -175,12 +175,12 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
             "message": "Resource update succesful",
           }
       else:
-        if str(response).startswith('2'):
+        if "<2" in str(response):
           __ret = {
             "message": "Resource update succesful",
             "status_code": str(response)
           }
-        elif str(response).startswith('4'):
+        elif "<4" in str(response):
           __ret = {
             "message": "Resource update failed",
             "status_code": str(response)

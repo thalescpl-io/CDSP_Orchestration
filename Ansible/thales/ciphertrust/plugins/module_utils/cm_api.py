@@ -25,6 +25,7 @@ import requests
 import urllib3
 import json
 import ast
+import re
 
 def is_json(myjson):
   try:
@@ -149,6 +150,8 @@ def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
 def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
     node = ast.literal_eval(cm_node)
+    pattern_2xx = re.compile(r'20[01]')
+    pattern_4xx = re.compile(r'40[01]')
     cmSessionObject = CMAPIObject(
             cm_api_user=node["user"],
             cm_api_pwd=node["password"],
@@ -175,12 +178,12 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
             "message": "Resource update succesful",
           }
       else:
-        if "<2" in str(response):
+        if pattern_2xx.search(str(response)):
           __ret = {
             "message": "Resource update succesful",
             "status_code": str(response)
           }
-        elif "<4" in str(response):
+        elif pattern_4xx.search(str(response)):
           __ret = {
             "message": "Resource update failed",
             "status_code": str(response)

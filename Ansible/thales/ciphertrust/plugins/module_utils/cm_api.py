@@ -94,11 +94,12 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
         verify=False)
 
       response = _data.json()
-      if response[id] != None:
+
+      if id in response:
         __ret = {
           "id": response[id],
           "created_at": response["created_at"],
-          "message": "User created sucessfully"
+          "message": "Resource created sucessfully"
         }
       else:
         if "codeDesc" in json.dumps(response):
@@ -108,7 +109,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
           }
         else:
           __ret = {
-            "message": "User creation failed",
+            "message": "Resource creation failed",
             "err": str(response)
           }
 
@@ -162,19 +163,24 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
         headers=cmSessionObject["headers"], 
         json = json.loads(payload), 
         verify=False)
+
       if is_json(str(response)): 
-        if "codeDesc" in response.json():
-          codeDesc=response.json()["codeDesc"]
-          if 'NCERRKeyAlreadyExists' in codeDesc:
-              return '4xx'
-          if 'NCERRConflict' in codeDesc:
-              return '4xx'
-          if 'NCERRInvalidParamValue' in codeDesc:
-              return '4xx'
+        if "codeDesc" in response.json:
+          __ret = {
+            "message": "Resource update failed",
+            "err": response["codeDesc"]
+          }
         else:
-          return response.json()
+          __ret = {
+            "message": "Resource update succesful",
+          }
       else:
-        return 'bad formatted response'
+        __ret = {
+            "message": "Resource update failed",
+            "err": str(response)
+          }
+
+      return __ret
     except requests.exceptions.RequestException as err:
         raise
 

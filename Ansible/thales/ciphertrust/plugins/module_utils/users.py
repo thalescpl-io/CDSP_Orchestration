@@ -53,7 +53,7 @@ def create(**kwargs):
               id="user_id",
           )
       
-      return ast.literal_eval(__resp)
+      return ast.literal_eval(str(__resp))
     except:
       raise
 
@@ -73,10 +73,7 @@ def patch(**kwargs):
               cm_node=kwargs['node'],
               cm_api_endpoint="usermgmt/users/" + kwargs['cm_user_id'],
           )
-      if response == '4xx':
-          return 'User update failed'
-      else:
-          return 'User updated succesfully'
+      return ast.literal_eval(str(response))
     except:
       raise
 
@@ -96,10 +93,7 @@ def changepw(**kwargs):
               cm_node=kwargs['node'],
               cm_api_endpoint="auth/changepw",
           )
-      if response == '4xx':
-        return 'Password update failed'
-      else:
-        return 'Password updated succesfully'
+      return ast.literal_eval(str(response))
     except:
       raise
 
@@ -119,9 +113,6 @@ def patch_self(**kwargs):
               cm_node=kwargs['node'],
               cm_api_endpoint="auth/self/user",
           )
-      if response == '4xx':
-          return 'User update failed'
-      else:
-          return 'User updated succesfully'
+      return ast.literal_eval(str(response))
     except:
       raise

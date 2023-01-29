@@ -50,7 +50,9 @@ def create(**kwargs):
               cm_node=kwargs['node'],
               cm_api_endpoint="usermgmt/users",
           )
-      if response["status_code"] == 201:
+      return response
+
+      if response["status_code"] == "201":
         __ret = {
           "user_id": response["data"]["user_id"],
           "created_at": response["data"]["created_at"],

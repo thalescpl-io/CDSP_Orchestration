@@ -94,7 +94,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
         verify=False)
 
       response = _data.json()
-      if response.status_code == "201":
+      if _data.status_code == "201":
         __ret = {
           "id": response[id],
           "created_at": response["created_at"],

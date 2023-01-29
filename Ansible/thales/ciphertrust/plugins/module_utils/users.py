@@ -24,6 +24,7 @@ import os
 import requests
 import urllib3
 import json
+import ast
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData
 
@@ -45,35 +46,35 @@ def create(**kwargs):
     payload = json.dumps(request)
 
     try:
-      response = POSTData(
+      __resp = POSTData(
               payload=payload,
               cm_node=kwargs['node'],
               cm_api_endpoint="usermgmt/users",
           )
-      return response
-
-    #   if response["status_code"] == "201":
-    #     __ret = {
-    #       "user_id": response["data"]["user_id"],
-    #       "created_at": response["data"]["created_at"],
-    #       "message": "User created sucessfully"
-    #     }
-    #     return __ret
-    #   else:
-    #     if is_json(str(response["data"])):
-    #       if "codeDesc" in response["data"].json():
-    #         codeDesc=response["data"].json()["codeDesc"]
-    #         __ret = {
-    #           "message": "User creation failed",
-    #           "err": codeDesc
-    #         }
-    #         return __ret
-    #     else:
-    #         __ret = {
-    #           "message": "User creation failed",
-    #           "err": str(response["data"])
-    #         }
-    #         return __ret
+      
+      response = ast.literal_eval(__resp)
+      if response["status_code"] == "201":
+        __ret = {
+          "user_id": response["data"]["user_id"],
+          "created_at": response["data"]["created_at"],
+          "message": "User created sucessfully"
+        }
+        return __ret
+      else:
+        if is_json(str(response["data"])):
+          if "codeDesc" in response["data"].json():
+            codeDesc=response["data"].json()["codeDesc"]
+            __ret = {
+              "message": "User creation failed",
+              "err": codeDesc
+            }
+            return __ret
+        else:
+            __ret = {
+              "message": "User creation failed",
+              "err": str(response["data"])
+            }
+            return __ret
     except:
       raise
 

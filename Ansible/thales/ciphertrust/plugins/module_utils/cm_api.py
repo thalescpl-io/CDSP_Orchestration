@@ -111,13 +111,8 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
             "message": "User creation failed",
             "err": str(response)
           }
-        
-      __ret_dict = dict(
-          status_code=response.status_code,
-          data=__ret
-        )
 
-      return json.dumps(__ret_dict)
+      return json.loads(__ret)
     except requests.exceptions.RequestException as err:
         raise
 

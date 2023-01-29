@@ -61,7 +61,7 @@ def create(**kwargs):
         }
         return __ret
       else:
-        if "codeDesc" in response["data"].json():
+        if "codeDesc" in json.dumps(response["data"]):
             __ret = {
               "message": response["data"]["message"],
               "err": response["data"]["codeDesc"]

@@ -175,10 +175,21 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
             "message": "Resource update succesful",
           }
       else:
-        __ret = {
-            "message": "Resource update failed",
-            "err": str(response)
+        if str(response).startswith('2'):
+          __ret = {
+            "message": "Resource update succesful",
+            "status_code": str(response)
           }
+        elif str(response).startswith('4'):
+          __ret = {
+            "message": "Resource update failed",
+            "status_code": str(response)
+          }
+        else:
+          __ret = {
+            "message": "Internal Server Error",
+            "status_code": str(response)
+          }            
 
       return __ret
     except requests.exceptions.RequestException as err:

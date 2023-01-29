@@ -63,10 +63,9 @@ def create(**kwargs):
       else:
         if is_json(str(response["data"])):
           if "codeDesc" in response["data"].json():
-            codeDesc=response["data"].json()["codeDesc"]
             __ret = {
-              "message": "User creation failed",
-              "err": codeDesc
+              "message": response["data"]["message"],
+              "err": response["data"]["codeDesc"]
             }
             return __ret
         else:

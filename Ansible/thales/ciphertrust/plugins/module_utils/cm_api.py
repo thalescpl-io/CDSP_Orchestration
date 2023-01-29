@@ -87,12 +87,13 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
         )
     # execute the post API call to create the resource on CM 
     try:
-      response = requests.post(
+      _data = requests.post(
         cmSessionObject["url"], 
         headers=cmSessionObject["headers"], 
         json = json.loads(payload), 
         verify=False)
 
+      response = _data.json()
       if response.status_code == "201":
         __ret = {
           "id": response[id],

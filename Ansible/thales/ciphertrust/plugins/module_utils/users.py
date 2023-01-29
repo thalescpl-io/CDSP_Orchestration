@@ -53,7 +53,7 @@ def create(**kwargs):
               id="user_id",
           )
       
-      return __resp
+      return ast.literal_eval(__resp)
     except:
       raise
 

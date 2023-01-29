@@ -93,28 +93,28 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
         json = json.loads(payload), 
         verify=False)
 
-        if response.status_code == "201":
-          __ret = {
-            "id": response[id],
-            "created_at": response["created_at"],
-            "message": "User created sucessfully"
-          }
+      if response.status_code == "201":
+        __ret = {
+          "id": response[id],
+          "created_at": response["created_at"],
+          "message": "User created sucessfully"
+        }
+      else:
+        if "codeDesc" in json.dumps(response):
+        __ret = {
+          "message": response["message"],
+          "err": response["codeDesc"]
+        }
         else:
-          if "codeDesc" in json.dumps(response):
-            __ret = {
-              "message": response["message"],
-              "err": response["codeDesc"]
-            }
-          else:
-            __ret = {
-              "message": "User creation failed",
-              "err": str(response)
-            }
+        __ret = {
+          "message": "User creation failed",
+          "err": str(response)
+        }
         
       __ret_dict = dict(
-        status_code=response.status_code,
-        data=__ret
-      )
+          status_code=response.status_code,
+          data=__ret
+        )
 
       return json.dumps(__ret_dict)
     except requests.exceptions.RequestException as err:

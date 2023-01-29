@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) 2022 Thales Group. All rights reserved.
+# (c) 2023 Thales Group. All rights reserved.
 # Author: Anurag Jain, Developer Advocate, Thales
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,67 +103,109 @@ options:
               - Default - false
             required: false
             type: bool
-
-
-
-
     name:
         description: Full name of the user.
         required: false
         type: str
-        default: None
-    
-    
-    
-    
-    
-    
-    prevent_ui_login:
-        description: Part of login_flags for controlling user's login behavior.
-        required: false
-        type: bool
-        default: false
     password:
-        description: The password used to secure the users account. Allowed passwords are defined by the password policy. This attribute is required to create a local user, but is not included in user resource responses.
+        description: 
+          - The password used to secure the users account. Allowed passwords are defined by the password policy.
+          - Password is optional when "certificate_subject_dn" is set and "user_certificate" is in allowed_auth_methods.In all other cases, password is required
+          - It is not included in user resource responses.
         required: false
         type: str
-        default: null
     password_change_required:
         description: Password change required flag. If set to true, user will be required to change their password on next successful login.
         required: false
         type: bool
-        default: false
     user_id:
         description: The user_id is the ID of an existing root domain user. This field is used only when adding an existing root domain user to a different domain.
         required: false
         type: str
-        default: null
     user_metadata:
         description: A schema-less object, which can be used by applications to store information about the resource. user_metadata is typically used by applications to store information about the resource which the end-users are allowed to modify, such as user preferences.
         required: false
         type: dict
         default: null
     username:
-        description: The login name of the user. This is the identifier used to login. This attribute is required to create a user, but is omitted when getting or listing user resources. It cannot be updated. This attribute may also be used (instead of the user_id) when adding an existing root domain user to a different domain.
-        required: false
+        description: 
+          - The login name of the user. This is the identifier used to login. 
+          - This attribute is required to create a user, but is omitted when getting or listing user resources. It cannot be updated. 
+          - This attribute may also be used (instead of the user_id) when adding an existing root domain user to a different domain.
+          - Mandatory for create operation
         type: str
-        default: null
+    failed_logins_count:
+        description: Set it to 0 to unlock a locked user account.
+        required: false
+        type: int
+    new_password:
+        description: 
+          - the new password
+          - mandatory for changepw op_type
+        type: str
+    auth_domain:
+        description: 
+          - The domain where user needs to be authenticated. This is the domain where user is created. Defaults to the root domain.
+          - required only for changew op_type, not mandatory though
+        type: str
 '''
 
 EXAMPLES = '''
-- name: "Create DPG Protection Policy"
-  thales.ciphertrust.dpg_protection_policy_create:
-    localNode:
+- name: "Create new user"
+    thales.ciphertrust.usermgmt_users_save:
+      localNode: 
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    username: "john.doe"
-    password: "cmPassw0rd!"
-    email: "john.doe@example.com"
-    name: "John Doe"
+      op_type: "create"
+      username: "john.doe"
+      password: "oldPassword12!"
+      email: "john.doe@example.com"
+      name: "John Doe"
+
+- name: "Update user info"
+    thales.ciphertrust.usermgmt_users_save:
+      localNode: 
+        server_ip: "IP/FQDN of CipherTrust Manager"
+        server_private_ip: "Privare IP in case that is different from above"
+        server_port: 5432
+        user: "CipherTrust Manager Username"
+        password: "CipherTrust Manager Password"
+        verify: false
+      op_type: "patch"
+      cm_user_id: "local|UUID"
+      username: "john.doe"
+      email: "aj@example.com"
+      name: "New Name"
+
+- name: "Change user password"
+    thales.ciphertrust.usermgmt_users_save:
+      localNode: 
+        server_ip: "IP/FQDN of CipherTrust Manager"
+        server_private_ip: "Privare IP in case that is different from above"
+        server_port: 5432
+        user: "CipherTrust Manager Username"
+        password: "CipherTrust Manager Password"
+        verify: false
+      op_type: "changepw"
+      username: "john.doe"
+      password: "oldPassword12!"
+      new_password: "newPassword12!"
+
+- name: "Update self"
+    thales.ciphertrust.usermgmt_users_save:
+      localNode: 
+        server_ip: "IP/FQDN of CipherTrust Manager"
+        server_private_ip: "Privare IP in case that is different from above"
+        server_port: 5432
+        user: "CipherTrust Manager Username"
+        password: "CipherTrust Manager Password"
+        verify: false
+      op_type: "patch_self"
+      name: "CM Admin"
 '''
 
 RETURN = '''

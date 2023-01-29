@@ -50,30 +50,10 @@ def create(**kwargs):
               payload=payload,
               cm_node=kwargs['node'],
               cm_api_endpoint="usermgmt/users",
+              id="user_id",
           )
       
       return __resp
-    #   response = ast.literal_eval(__resp)
-    #   if response["status_code"] == "201":
-    #     __ret = {
-    #       "user_id": response["data"]["user_id"],
-    #       "created_at": response["data"]["created_at"],
-    #       "message": "User created sucessfully"
-    #     }
-    #     return __ret
-    #   else:
-    #     if "codeDesc" in json.dumps(response["data"]):
-    #         __ret = {
-    #           "message": response["data"]["message"],
-    #           "err": response["data"]["codeDesc"]
-    #         }
-    #         return __ret
-    #     else:
-    #         __ret = {
-    #           "message": "User creation failed",
-    #           "err": str(response["data"])
-    #         }
-    #         return __ret
     except:
       raise
 

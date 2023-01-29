@@ -112,7 +112,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
             "err": str(response)
           }
 
-      return json.loads(__ret)
+      return __ret
     except requests.exceptions.RequestException as err:
         raise
 

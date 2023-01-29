@@ -101,15 +101,15 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
         }
       else:
         if "codeDesc" in json.dumps(response):
-        __ret = {
-          "message": response["message"],
-          "err": response["codeDesc"]
-        }
+          __ret = {
+            "message": response["message"],
+            "err": response["codeDesc"]
+          }
         else:
-        __ret = {
-          "message": "User creation failed",
-          "err": str(response)
-        }
+          __ret = {
+            "message": "User creation failed",
+            "err": str(response)
+          }
         
       __ret_dict = dict(
           status_code=response.status_code,

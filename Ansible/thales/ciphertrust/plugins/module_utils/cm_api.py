@@ -96,7 +96,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None):
         status_code=response.status_code,
         data=response.json()
       )
-      return __ret.json()
+      return json.dumps(__ret)
     except requests.exceptions.RequestException as err:
         raise
 

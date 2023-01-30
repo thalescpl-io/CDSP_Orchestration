@@ -45,16 +45,41 @@ options:
             - holds IP/FQDN of the server, username, password, and port 
         default: true
         type: dict
+        suboptions:
+          server_ip:
+            description: CM Server IP or FQDN
+            type: str
+            required: true
+          server_private_ip:
+            description: internal or private IP of the CM Server, if different from the server_ip
+            type: str
+            required: true
+          server_port:
+            description: Port on which CM server is listening
+            type: int
+            required: true
+            default: 5432
+          user:
+            description: admin username of CM
+            type: str
+            required: true
+          password:
+            description: admin password of CM
+            type: str
+            required: true
+          verify:
+            description: if SSL verification is required
+            type: bool
+            required: true
+            default: false
     op_type:
         description: Operation to be performed
         choices: [create, patch, changepw, patch_self]
         required: true
         type: str
-        default: None
     cm_user_id:
         description: CM user ID of the user that needs to be patched. Only required if the op_type is patch
         type: str
-        default: None
     allowed_auth_methods:
         description: 
           - List of login authentication methods allowed to the user.

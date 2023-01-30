@@ -1,10 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-# This is a utility file for creating Thales Ciphertrust Manager REST API session
-# Generating Token
-# Generating Headers
-# Preparing URL for REST operation
+#
+# (c) 2023 Thales Group. All rights reserved.
+# Author: Anurag Jain, Developer Advocate, Thales
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
@@ -13,8 +24,9 @@ import os
 import requests
 import urllib3
 import json
+import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, POSTWithoutData
 
 def is_json(myjson):
   try:
@@ -23,172 +35,13 @@ def is_json(myjson):
     return False
   return True
 
-def new(node,
-        activationDate="",
-        algorithm="",
-        aliases=[],
-        archiveDate="",
-        certType="",
-        compromiseDate="",
-        compromiseOccurrenceDate="",
-        curveid="",
-        deactivationDate="",
-        defaultIV="",
-        destroyDate="",
-        encoding="",
-        keyFormat="",
-        generateKeyId=False,
-        hkdfCreateParameters={},
-        Id="",
-        idSize=None,
-        keyId="",
-        labels={},
-        macSignBytes="",
-        macSignKeyIdentifier="",
-        macSignKeyIdentifierType="",
-        material="",
-        ownerId="",
-        muid="",
-        name="",
-        objectType="",
-        padded=False,
-        processStartDate="",
-        protectStopDate="",
-        revocationMessage="",
-        revocationReason="",
-        rotationFrequencyDays="",
-        secretDataEncoding="",
-        secretDataLink="",
-        signingAlgo="",
-        size=None,
-        state="",
-        undeletable=False,
-        unexportable=False,
-        usageMask=None,
-        uuid="",
-        xts=False
-    ):
+def create(**kwargs):
     result = dict()
     request = {}
 
-    if activationDate != "":
-        request['activationDate']=activationDate
-
-    if algorithm != "":
-        request['algorithm']=algorithm
-  
-    if len(aliases) > 0:
-        request['aliases']=aliases
-
-    if archiveDate != "":
-        request['archiveDate']=archiveDate
-
-    if certType != "":
-        request['certType']=certType
-
-    if compromiseOccurrenceDate != "":
-        request['compromiseOccurrenceDate']=compromiseOccurrenceDate
-
-    if curveid != "":
-        request['curveid']=curveid
-
-    if deactivationDate != "":
-        request['deactivationDate']=deactivationDate
-
-    if defaultIV != "":
-        request['defaultIV']=defaultIV
-
-    if destroyDate != "":
-        request['destroyDate']=destroyDate
-
-    if encoding != "":
-        request['encoding']=encoding
-
-    if keyFormat != "":
-        request['format']=keyFormat
-
-    request['generateKeyId']=generateKeyId
-
-    request['hkdfCreateParameters']=hkdfCreateParameters
-
-    if Id != "":
-        request['id']=Id
-
-    if idSize is not None:
-        request['idSize']=idSize
-
-    if keyId != "":
-        request['keyId']=keyId
-
-    request['labels']=labels
-
-    if macSignBytes != "":
-        request['macSignBytes']=macSignBytes
-
-    if macSignKeyIdentifier != "":
-        request['macSignKeyIdentifier']=macSignKeyIdentifier
-
-    if macSignKeyIdentifierType != "":
-        request['macSignKeyIdentifierType']=macSignKeyIdentifierType
-
-    if material != "":
-        request['material']=material
-
-    if ownerId != "":
-        request['ownerId']={"ownerId": ownerId}
-
-    if muid != "":
-        request['muid']=muid
-
-    if name != "":
-        request['name']=name
-
-    if objectType != "":
-        request['objectType']=objectType
-
-    request['padded']=padded
-
-    if processStartDate != "":
-        request['processStartDate']=processStartDate
-
-    if protectStopDate != "":
-        request['protectStopDate']=protectStopDate
-
-    if revocationMessage != "":
-        request['revocationMessage']=revocationMessage
-
-    if revocationReason != "":
-        request['revocationReason']=revocationReason
-
-    if rotationFrequencyDays != "":
-        request['rotationFrequencyDays']=rotationFrequencyDays
-
-    if secretDataEncoding != "":
-        request['secretDataEncoding']=secretDataEncoding
-
-    if secretDataLink != "":
-        request['secretDataLink']=secretDataLink
-
-    if signingAlgo != "":
-        request['signingAlgo']=signingAlgo
-
-    if size is not None:
-        request['size']=size
-
-    if state != "":
-        request['state']=state
-
-    request['undeletable']=undeletable
-
-    request['unexportable']=unexportable
-
-    if usageMask is not None:
-        request['usageMask']=usageMask
-
-    if uuid != "":
-        request['uuid']=uuid
-
-    request['xts']=xts
+    for key, value in kwargs.items():
+        if key != "node" and value != None:
+            request[key] = value
 
     payload = json.dumps(request)
 
@@ -197,13 +50,284 @@ def new(node,
               payload=payload,
               cm_node=node,
               cm_api_endpoint="vault/keys2",
+              id="id",
           )
-      if response == '4xx':
-          result['success'] = 'User already exists with same username'
-      else:
-          result['success'] = response
-
-      return response
+          
+      return ast.literal_eval(str(__resp))
     except:
-      result['failed'] = True
+      raise
 
+def patch(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "cm_key_id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+              payload=payload,
+              cm_node=kwargs['node'],
+              cm_api_endpoint="vault/keys2/" + kwargs['cm_key_id'],
+          )
+      return ast.literal_eval(str(response))
+    except:
+      raise
+
+def version_create(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "cm_key_id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=kwargs['node'],
+              cm_api_endpoint="vault/keys2/" + kwargs['cm_key_id'] + "/versions",
+              id="id",
+          )
+      return ast.literal_eval(str(response))
+    except:
+      raise
+
+# destroy, archive, recover, revoke, reactivate, export, clone
+def destroy(**kwargs):
+    result = dict()
+    request = {}
+    queryString = "?"
+
+    if kwargs['key_version'] != None:
+        queryString = queryString + "version=" + kwargs['key_version']
+
+    if kwargs['id_type'] != None:
+        if queryString == "?":
+            queryString = queryString + "type=" + kwargs['id_type']
+        else:
+            queryString = queryString + "&type=" + kwargs['id_type']
+
+    if queryString == "?":
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/destroy"
+    else:
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/destroy" + queryString
+
+    try:
+      response = POSTWithoutData(
+              cm_node=kwargs['node'],
+              cm_api_endpoint=url,
+          )
+      return ast.literal_eval(str(response))
+    except:
+      raise
+
+def archive(**kwargs):
+    result = dict()
+    request = {}
+    queryString = "?"
+
+    if kwargs['key_version'] != None:
+        queryString = queryString + "version=" + kwargs['key_version']
+
+    if kwargs['id_type'] != None:
+        if queryString == "?":
+            queryString = queryString + "type=" + kwargs['id_type']
+        else:
+            queryString = queryString + "&type=" + kwargs['id_type']
+
+    if queryString == "?":
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/archive"
+    else:
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/archive" + queryString
+
+    try:
+      response = POSTWithoutData(
+              cm_node=kwargs['node'],
+              cm_api_endpoint=url,
+          )
+      return ast.literal_eval(str(response))
+    except:
+      raise
+
+def recover(**kwargs):
+    result = dict()
+    request = {}
+    queryString = "?"
+
+    if kwargs['key_version'] != None:
+        queryString = queryString + "version=" + kwargs['key_version']
+
+    if kwargs['id_type'] != None:
+        if queryString == "?":
+            queryString = queryString + "type=" + kwargs['id_type']
+        else:
+            queryString = queryString + "&type=" + kwargs['id_type']
+
+    if queryString == "?":
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/recover"
+    else:
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/recover" + queryString
+
+    try:
+      response = POSTWithoutData(
+              cm_node=kwargs['node'],
+              cm_api_endpoint=url,
+          )
+      return ast.literal_eval(str(response))
+    except:
+      raise
+
+def revoke(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "cm_key_id", "key_version", "id_type"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    if kwargs['key_version'] != None:
+        queryString = queryString + "version=" + kwargs['key_version']
+
+    if kwargs['id_type'] != None:
+        if queryString == "?":
+            queryString = queryString + "type=" + kwargs['id_type']
+        else:
+            queryString = queryString + "&type=" + kwargs['id_type']
+
+    if queryString == "?":
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/revoke"
+    else:
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/revoke" + queryString
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint=url,
+              id="id",
+          )
+          
+      return ast.literal_eval(str(__resp))
+    except:
+      raise
+
+def reactivate(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "cm_key_id", "key_version", "id_type"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    if kwargs['key_version'] != None:
+        queryString = queryString + "version=" + kwargs['key_version']
+
+    if kwargs['id_type'] != None:
+        if queryString == "?":
+            queryString = queryString + "type=" + kwargs['id_type']
+        else:
+            queryString = queryString + "&type=" + kwargs['id_type']
+
+    if queryString == "?":
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/reactivate"
+    else:
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/reactivate" + queryString
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint=url,
+              id="id",
+          )
+          
+      return ast.literal_eval(str(__resp))
+    except:
+      raise
+
+
+def export(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "cm_key_id", "key_version", "id_type"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    if kwargs['key_version'] != None:
+        queryString = queryString + "version=" + kwargs['key_version']
+
+    if kwargs['id_type'] != None:
+        if queryString == "?":
+            queryString = queryString + "type=" + kwargs['id_type']
+        else:
+            queryString = queryString + "&type=" + kwargs['id_type']
+
+    if queryString == "?":
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/export"
+    else:
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/export" + queryString
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint=url,
+          )
+          
+      return ast.literal_eval(str(__resp))
+    except:
+      raise
+
+def clone(**kwargs):
+    result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "cm_key_id", "key_version", "id_type", "includeMaterial"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    if kwargs['key_version'] != None:
+        queryString = queryString + "version=" + kwargs['key_version']
+
+    if kwargs['id_type'] != None:
+        if queryString == "?":
+            queryString = queryString + "type=" + kwargs['id_type']
+        else:
+            queryString = queryString + "&type=" + kwargs['id_type']
+    
+    if kwargs['includeMaterial'] != None:
+        if queryString == "?":
+            queryString = queryString + "includeMaterial=" + kwargs['includeMaterial']
+        else:
+            queryString = queryString + "&includeMaterial=" + kwargs['includeMaterial']
+
+    if queryString == "?":
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/clone"
+    else:
+        url = "vault/keys2/" + kwargs['cm_key_id'] + "/clone" + queryString
+
+    try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint=url,
+          )
+          
+      return ast.literal_eval(str(__resp))
+    except:
+      raise

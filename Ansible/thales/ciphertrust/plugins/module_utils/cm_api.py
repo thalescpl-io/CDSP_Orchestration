@@ -79,6 +79,8 @@ def POSTDataOld(payload=None, cm_node=None, cm_api_endpoint=None):
 def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
     # Create the session object
     node = ast.literal_eval(cm_node)
+    pattern_2xx = re.compile(r'20[0-9]')
+    pattern_4xx = re.compile(r'40[0-9]')
     cmSessionObject = CMAPIObject(
             cm_api_user=node["user"],
             cm_api_pwd=node["password"],
@@ -96,7 +98,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
 
       response = _data.json()
 
-      if id in response:
+      if id is not None and id in response:
         __ret = {
           "id": response[id],
           "created_at": response["created_at"],
@@ -109,24 +111,42 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
             "err": response["codeDesc"]
           }
         else:
-          __ret = {
-            "message": "Resource creation failed",
-            "err": str(response)
-          }
+            if id is None:
+                if pattern_2xx.search(str(response)):
+                  __ret = {
+                    "message": "Resource created sucessfully",
+                    "description": str(response)
+                  }
+                elif pattern_4xx.search(str(response)):
+                  __ret = {
+                    "message": "Resource operation failed",
+                    "status_code": str(response)
+                  }
+                else:
+                  __ret = {
+                    "message": "Internal Server Error",
+                    "status_code": str(response)
+                  }
+            else:
+              __ret = {
+                "message": "Resource creation failed",
+                "err": str(response)
+              }
 
       return __ret
     except requests.exceptions.RequestException as err:
         raise
 
 
-# This will never return the ID
-# There will be a separate call to be made to get the ID
 def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
     # Create the session object
+    node = ast.literal_eval(cm_node)
+    pattern_2xx = re.compile(r'20[0-9]')
+    pattern_4xx = re.compile(r'40[0-9]')
     cmSessionObject = CMAPIObject(
-            cm_api_user=cm_node["user"],
-            cm_api_pwd=cm_node["password"],
-            cm_url=cm_node["server_ip"],
+            cm_api_user=node["user"],
+            cm_api_pwd=node["password"],
+            cm_url=node["server_ip"],
             cm_api_endpoint=cm_api_endpoint,
             verify=False,
         )
@@ -136,14 +156,35 @@ def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
         cmSessionObject["url"], 
         headers=cmSessionObject["headers"], 
         verify=False)
-      if "codeDesc" in response.json():
-          codeDesc=response.json()["codeDesc"]
-          if 'NCERRKeyAlreadyExists' in codeDesc:
-              return '4xx'
-          if 'NCERRConflict' in codeDesc:
-              return '4xx'
+
+      if is_json(str(response)): 
+        if "codeDesc" in response.json:
+          __ret = {
+            "message": "Resource operation failed",
+            "err": response["codeDesc"]
+          }
+        else:
+          __ret = {
+            "message": "Resource operation succesful",
+          }
       else:
-          return response.json()
+        if pattern_2xx.search(str(response)):
+          __ret = {
+            "message": "Resource operation succesful",
+            "status_code": str(response)
+          }
+        elif pattern_4xx.search(str(response)):
+          __ret = {
+            "message": "Resource operation failed",
+            "status_code": str(response)
+          }
+        else:
+          __ret = {
+            "message": "Internal Server Error",
+            "status_code": str(response)
+          }
+
+      return __ret
     except requests.exceptions.RequestException as err:
         raise
 

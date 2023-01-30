@@ -678,7 +678,7 @@ argument_spec = dict(
     muid=dict(type='str', required=False),
     name=dict(type='str', required=False),
     objectType=dict(type='str', choices=['Symmetric Key', 'Public Key', 'Private Key', 'Secret Data', 'Opaque Object', 'Certificate'], required=False),
-    padded=dict(type='dict', options=label, required=False),
+    padded=dict(type='bool', default=False, required=False),
     password=dict(type='str', required=False),
     processStartDate=dict(type='str', required=False),
     protectStopDate=dict(type='str', required=False),
@@ -797,7 +797,7 @@ def main():
         xts=module.params.get('xts'),
       )
     elif module.params.get('op_type') == 'patch':
-      response = create(
+      response = patch(
         node=module.params.get('localNode'),
         cm_key_id=module.params.get('cm_key_id'),
         activationDate=module.params.get('activationDate'),

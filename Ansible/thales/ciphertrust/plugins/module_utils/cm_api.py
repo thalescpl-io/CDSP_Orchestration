@@ -101,13 +101,12 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
       if id is not None and id in response:
         __ret = {
           "id": response[id],
-          "created_at": response["created_at"],
           "message": "Resource created sucessfully"
         }
       else:
         if "codeDesc" in json.dumps(response):
           __ret = {
-            "message": response["message"],
+            "message": "Resource created sucessfully",
             "err": response["codeDesc"]
           }
         else:

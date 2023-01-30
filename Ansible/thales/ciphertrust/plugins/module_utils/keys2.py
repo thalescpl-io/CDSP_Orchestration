@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, POSTWithoutData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, POSTWithoutData, PATCHData
 
 def is_json(myjson):
   try:
@@ -48,12 +48,12 @@ def create(**kwargs):
     try:
       response = POSTData(
               payload=payload,
-              cm_node=node,
+              cm_node=kwargs["node"],
               cm_api_endpoint="vault/keys2",
               id="id",
           )
           
-      return ast.literal_eval(str(__resp))
+      return ast.literal_eval(str(response))
     except:
       raise
 
@@ -210,12 +210,12 @@ def revoke(**kwargs):
     try:
       response = POSTData(
               payload=payload,
-              cm_node=node,
+              cm_node=kwargs["node"],
               cm_api_endpoint=url,
               id="id",
           )
           
-      return ast.literal_eval(str(__resp))
+      return ast.literal_eval(str(response))
     except:
       raise
 
@@ -246,12 +246,12 @@ def reactivate(**kwargs):
     try:
       response = POSTData(
               payload=payload,
-              cm_node=node,
+              cm_node=kwargs["node"],
               cm_api_endpoint=url,
               id="id",
           )
           
-      return ast.literal_eval(str(__resp))
+      return ast.literal_eval(str(response))
     except:
       raise
 
@@ -283,11 +283,11 @@ def export(**kwargs):
     try:
       response = POSTData(
               payload=payload,
-              cm_node=node,
+              cm_node=kwargs["node"],
               cm_api_endpoint=url,
           )
           
-      return ast.literal_eval(str(__resp))
+      return ast.literal_eval(str(response))
     except:
       raise
 
@@ -324,10 +324,10 @@ def clone(**kwargs):
     try:
       response = POSTData(
               payload=payload,
-              cm_node=node,
+              cm_node=kwargs["node"],
               cm_api_endpoint=url,
           )
           
-      return ast.literal_eval(str(__resp))
+      return ast.literal_eval(str(response))
     except:
       raise

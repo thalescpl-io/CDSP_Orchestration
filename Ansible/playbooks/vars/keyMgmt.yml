@@ -1,0 +1,14 @@
+this_node_address: 1.1.1.1
+this_node_private_ip: 10.0.0.4
+this_node_username: admin
+this_node_password: cmpwdChangeIt!
+
+this_node_connection_string:
+  server_ip: "{{ this_node_address }}"
+  server_private_ip: "{{ this_node_private_ip }}"
+  server_port: 5432
+  user: "{{ this_node_username }}"
+  password: "{{ this_node_password }}"
+  verify: False
+
+key_name: AnsibleKey

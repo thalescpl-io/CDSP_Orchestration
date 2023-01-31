@@ -17,17 +17,6 @@
 # limitations under the License.
 #
 
-from __future__ import absolute_import, division, print_function
-__metaclass__ = type
-
-import os
-import requests
-import urllib3
-import json
-
-from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.keys2 import destroy, archive, recover, revoke, reactivate, export, clone
-
 DOCUMENTATION = '''
 ---
 module: vault_keys2_op
@@ -443,6 +432,19 @@ EXAMPLES = '''
 RETURN = '''
 
 '''
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+import os
+import requests
+import urllib3
+import json
+
+from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
+from ansible_collections.thales.ciphertrust.plugins.module_utils.keys2 import destroy, archive, recover, revoke, reactivate, export, clone
+
+module = None
 
 _wrap_HKDF=dict(
     hashAlgorithm=dict(type='str', choices=['hmac-sha1', 'hmac-sha224', 'hmac-sha256', 'hmac-sha384', 'hmac-sha512'], required=False),

@@ -240,32 +240,49 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
 
 def DELETEByNameOrId(name=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
+    node = ast.literal_eval(cm_node)
+    pattern_2xx = re.compile(r'20[0-9]')
+    pattern_4xx = re.compile(r'40[0-9]')
     cmSessionObject = CMAPIObject(
-            cm_api_user=cm_node["user"],
-            cm_api_pwd=cm_node["password"],
-            cm_url=cm_node["server_ip"],
+            cm_api_user=node["user"],
+            cm_api_pwd=node["password"],
+            cm_url=node["server_ip"],
             cm_api_endpoint=cm_api_endpoint,
             verify=False,
         )
     # execute the delete API call to delete the resource on CM
     try:
       response = requests.delete(cmSessionObject["url"] + "/" + name, headers=cmSessionObject["headers"], verify=False)
-      if is_json(str(response)):
-          if "codeDesc" in response.json():
-              codeDesc=response.json()["codeDesc"]
-              if 'NCERRResourceNotFound' in codeDesc:
-                  return 'no matching resource found'
-          else:
-              return 'resource deletion succesful'
+      if is_json(str(response)): 
+        if "codeDesc" in response.json:
+          __ret = {
+            "message": "Resource deletion failed",
+            "err": response["codeDesc"]
+          }
+        else:
+          __ret = {
+            "message": "Resource deletion succesful",
+          }
       else:
-          if '204' in str(response):
-              return 'resource deletion succesful'
-          if '405' in str(response):
-              return 'resource ID/Name is a required parameter'
+        if pattern_2xx.search(str(response)):
+          __ret = {
+            "message": "Resource deletion succesful",
+            "status_code": str(response)
+          }
+        elif pattern_4xx.search(str(response)):
+          __ret = {
+            "message": "Resource deletion failed",
+            "status_code": str(response)
+          }
+        else:
+          __ret = {
+            "message": "Internal Server Error",
+            "status_code": str(response)
+          }
+
+      return __ret
     except requests.exceptions.RequestException as err:
         raise
-    except json.decoder.JSONDecodeError as jsonErr:
-        return jsonErr
 
 def DeleteWithoutData(cm_node=None, cm_api_endpoint=None):
     # Create the session object

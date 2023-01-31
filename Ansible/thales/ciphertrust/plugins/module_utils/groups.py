@@ -23,106 +23,92 @@ def is_json(myjson):
     return False
   return True
 
-def create(node,
-           name):
+def create(**kwargs):
     result = dict()
-    request = {
-        "name": name,
-      }
+    request = {}
 
-    request['app_metadata'] = dict()
-    request['client_metadata'] = dict()
-    request['user_metadata'] = dict()
+    for key, value in kwargs.items():
+        if key != "node" and value != None:
+            request[key] = value
 
     payload = json.dumps(request)
 
     try:
       response = POSTData(
               payload=payload,
-              cm_node=node,
+              cm_node=kwargs["node"],
               cm_api_endpoint="usermgmt/groups",
+              id="name",
           )
-      if response == '4xx':
-          result['success'] = 'Group already exists with same name'
-      else:
-          result['success'] = 'Group Created Succesfully'
-
-      return result
+          
+      return ast.literal_eval(str(response))
     except:
-      result['failed'] = True
+      raise
 
-def addUserToGroup(node,
-           groupName,
-           userId):
+def patch(**kwargs):
     result = dict()
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "old_name"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
 
     try:
-      response = POSTWithoutData(
-              cm_node=node,
-              cm_api_endpoint="usermgmt/groups/" + groupName + "/users/" + userId,
+      response = PATCHData(
+              payload=payload,
+              cm_node=kwargs['node'],
+              cm_api_endpoint="usermgmt/groups/" + kwargs['old_name'],
           )
-      if response == '4xx':
-          result['success'] = 'User Addition Failed'
-      else:
-          result['success'] = 'User Added Succesfully'
-
-      return result
+      return ast.literal_eval(str(response))
     except:
-      result['failed'] = True
+      raise
 
-def addClientToGroup(node,
-           groupName,
-           clientId):
-    result = dict()
+def addUserToGroup(**kwargs):
+  url = "usermgmt/groups/" + kwargs['name'] + "/users/" + kwargs['object_id']
+
+  try:
+    response = POSTWithoutData(
+      cm_node=node,
+      cm_api_endpoint=url,
+    )
+    return ast.literal_eval(str(response))
+  except:
+    raise
+
+def addClientToGroup(**kwargs):
+  url = "usermgmt/groups/" + kwargs['name'] + "/clients/" + kwargs['object_id']
+
+  try:
+    response = POSTWithoutData(
+      cm_node=node,
+      cm_api_endpoint=url,
+    )
+    return ast.literal_eval(str(response))
+  except:
+    raise
+
+def deleteUserFromGroup(**kwargs):
+  url = "usermgmt/groups/" + kwargs['name'] + "/users/" + kwargs['object_id']
+
+  try:
+    response = DeleteWithoutData(
+      cm_node=node,
+      cm_api_endpoint=url,
+    )
+    return ast.literal_eval(str(response))
+  except:
+    raise
+
+def deleteClientFromGroup(**kwargs):
+    url = "usermgmt/groups/" + kwargs['name'] + "/clients/" + kwargs['object_id']
 
     try:
-      response = POSTWithoutData(
-              cm_node=node,
-              cm_api_endpoint="usermgmt/groups/" + groupName + "/clients/" + clientId,
-          )
-      if response == '4xx':
-          result['success'] = 'Client Addition Failed'
-      else:
-          result['success'] = 'Client Added Succesfully'
-
-      return result
-    except:
-      result['failed'] = True
-
-def deleteUserFromGroup(node,
-           groupName,
-           userId):
-    result = dict()
-
-    try:
-      response = DeleteWithoutData(
-              cm_node=node,
-              cm_api_endpoint="usermgmt/groups/" + groupName + "/users/" + userId,
-          )
-      if response == '4xx':
-          result['success'] = 'User Deletion Failed'
-      else:
-          result['success'] = 'User Deleted Succesfully'
-
-      return result
-    except:
-      result['failed'] = True
-
-def deleteClientFromGroup(node,
-           groupName,
-           clientId):
-    result = dict()
-
-    try:
-      response = DeleteWithoutData(
-              cm_node=node,
-              cm_api_endpoint="usermgmt/groups/" + groupName + "/clients/" + clientId,
-          )
-      if response == '4xx':
-          result['success'] = 'Client Deletion Failed'
-      else:
-          result['success'] = 'Client Deleted Succesfully'
-
-      return result
-    except:
-      result['failed'] = True
+    response = DeleteWithoutData(
+      cm_node=node,
+      cm_api_endpoint=url,
+    )
+    return ast.literal_eval(str(response))
+  except:
+    raise

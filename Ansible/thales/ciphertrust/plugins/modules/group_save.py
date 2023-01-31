@@ -26,14 +26,14 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.groups import addUserToGroup, addClientToGroup, deleteUserFromGroup, deleteClientFromGroup
+from ansible_collections.thales.ciphertrust.plugins.module_utils.groups import create, patch
 
 DOCUMENTATION = '''
 ---
-module: group_add_remove_object
+module: group_save
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with groups operation API
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with groups management API
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -71,34 +71,48 @@ options:
             required: true
             default: false     
     op_type:
-        description: 
-          - Operation to be performed
-          - add: user or client to a group
-          - remove: remove user or client from a group
-        choices: [add, remove]
+        description: Operation to be performed
+        choices: [create, patch]
         required: true
         type: str
-    object_type:
+    old_name:
         description: 
-          - Type of object to be added to or removed from a group
-        choices: [user, client]
-        required: true
+          - Group's original name that needs to be patched. 
+          - Only required if the op_type is patch
         type: str
+        default: null
     name:
-        description: name of the group to be updated
+        description: name of the group
         type: str
         required: true
         default: null
-    object_id:
-        description: CM ID of the object (user or client) to be added to the group
-        type: str
+    app_metadata:
+        description: 
+          - A schema-less object, which can be used by applications to store information about the resource. 
+          - app_metadata is typically used by applications to store information which the end-users are not themselves allowed to change, like group membership or security roles.
+        type: dict
+        required: false
+        default: null
+    client_metadata:
+        description: 
+          - A schema-less object, which can be used by applications to store information about the resource. 
+          - client_metadata is typically used by applications to store information about the resource, such as client preferences.
+        type: dict
+        required: false
+        default: null
+    user_metadata:
+        description: 
+          - A schema-less object, which can be used by applications to store information about the resource. 
+          - user_metadata is typically used by applications to store information about the resource which the end-users are allowed to modify, such as user preferences.
+        type: dict
         required: true
         default: null
+
 '''
 
 EXAMPLES = '''
-- name: "Add User to a Group"
-  thales.ciphertrust.group_add_remove_object:
+- name: "Create Group"
+  thales.ciphertrust.group_save:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
@@ -106,13 +120,11 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    op_type: add
-    object_type: user
-    object_id: user_id_on_CM
+    op_type: create
     name: "group_name"
 
-- name: "Add Client to a Group"
-  thales.ciphertrust.group_add_remove_object:
+- name: "Patch Group"
+  thales.ciphertrust.group_save:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
@@ -120,50 +132,24 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    op_type: add
-    object_type: client
-    object_id: client_id_on_CM
-    name: "group_name"
-
-- name: "Remove User from a Group"
-  thales.ciphertrust.group_add_remove_object:
-    localNode:
-        server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Privare IP in case that is different from above"
-        server_port: 5432
-        user: "CipherTrust Manager Username"
-        password: "CipherTrust Manager Password"
-        verify: false
-    op_type: remove
-    object_type: user
-    object_id: user_id_on_CM
-    name: "group_name"
-
-- name: "Remove Client from a Group"
-  thales.ciphertrust.group_add_remove_object:
-    localNode:
-        server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Privare IP in case that is different from above"
-        server_port: 5432
-        user: "CipherTrust Manager Username"
-        password: "CipherTrust Manager Password"
-        verify: false
-    op_type: remove
-    object_type: client
-    object_id: client_id_on_CM
-    name: "group_name"
+    op_type: patch
+    old_name: "group_name"
+    name: "new_name"
 '''
 
 RETURN = '''
 
 '''
 
+_schema_less = dict()
+
 argument_spec = dict(
-    op_type=dict(type='str', options=['add', 'remove'], required=True),
-    object_type=dict(type='str', options=['user', 'client'], required=True),
-    object_id=dict(type='str', required=True),
+    op_type=dict(type='str', options=['create', 'patch'], required=True),
+    old_name=dict(type='str'),
     name=dict(type='str', required=True),
-    
+    app_metadata=dict(type='dict', options=_schema_less, required=False),
+    client_metadata=dict(type='dict', options=_schema_less, required=False),
+    user_metadata=dict(type='dict', options=_schema_less, required=False),
 )
 
 def validate_parameters(user_module):
@@ -172,7 +158,9 @@ def validate_parameters(user_module):
 def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
-        required_if=[],
+        required_if=(
+            ['op_type', 'patch', ['old_name']],
+        ),
         mutually_exclusive=[],
         supports_check_mode=True,
     )
@@ -191,33 +179,25 @@ def main():
         changed=False,
     )
 
-#Change below this
-    if module.params.get('op_type') == 'add':
-        if module.params.get('object_type') == 'user':
-          response = addUserToGroup(
-            node=module.params.get('localNode'),
-            name=module.params.get('name'),
-            object_id=module.params.get('object_id'),
-        )
-        else:
-          response = addClientToGroup(
-            node=module.params.get('localNode'),
-            name=module.params.get('name'),
-            object_id=module.params.get('object_id'),
-        )
+    if module.params.get('op_type') == 'create':
+      response = create(
+        node=module.params.get('localNode'),
+        name=module.params.get('name'),
+        app_metadata=module.params.get('app_metadata'),
+        client_metadata=module.params.get('client_metadata'),
+        user_metadata=module.params.get('user_metadata'),
+      )
+    elif module.params.get('op_type') == 'patch':
+      response = patch(
+        node=module.params.get('localNode'),
+        old_name=module.params.get('old_name'),
+        name=module.params.get('name'),
+        app_metadata=module.params.get('app_metadata'),
+        client_metadata=module.params.get('client_metadata'),
+        user_metadata=module.params.get('user_metadata'),
+      )
     else:
-        if module.params.get('object_type') == 'user':
-          response = deleteUserFromGroup(
-            node=module.params.get('localNode'),
-            name=module.params.get('name'),
-            object_id=module.params.get('object_id'),
-        )
-        else:
-          response = deleteClientFromGroup(
-            node=module.params.get('localNode'),
-            name=module.params.get('name'),
-            object_id=module.params.get('object_id'),
-        )
+        module.fail_json(msg="invalid op_type")
 
     result['response'] = response
 

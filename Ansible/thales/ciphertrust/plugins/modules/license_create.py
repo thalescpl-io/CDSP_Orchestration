@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) 2022 Thales Group. All rights reserved.
+# (c) 2023 Thales Group. All rights reserved.
+# Author: Anurag Jain, Developer Advocate, Thales
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +25,7 @@ import requests
 import urllib3
 import json
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.licensing import addLicense
 
 DOCUMENTATION = '''
@@ -32,30 +33,56 @@ DOCUMENTATION = '''
 module: license_create
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Licensing API
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with trials management API
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
     localNode:
         description:
-            - This is a dictionary type of object that contains CipherTrust Manager Instance FQDN and credentials
-        required: true
+            - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
+            - holds IP/FQDN of the server, username, password, and port 
+        default: true
         type: dict
-        elements:
-            - str
-            - bool
+        suboptions:
+          server_ip:
+            description: CM Server IP or FQDN
+            type: str
+            required: true
+          server_private_ip:
+            description: internal or private IP of the CM Server, if different from the server_ip
+            type: str
+            required: true
+          server_port:
+            description: Port on which CM server is listening
+            type: int
+            required: true
+            default: 5432
+          user:
+            description: admin username of CM
+            type: str
+            required: true
+          password:
+            description: admin password of CM
+            type: str
+            required: true
+          verify:
+            description: if SSL verification is required
+            type: bool
+            required: true
+            default: false     
     license:
-        description: License string.
+        description: License string
         required: true
         type: str
     bind_type:
         description: Binding type for this license. Can be either 'instance' or 'cluster'. If omitted, then CM attempts to bind the license to the cluster. If this step fails with a lock code error, it will attempt to bind to the instance.
-        required: true
+        required: false
         type: str
+
 '''
 
 EXAMPLES = '''
-- name: "Create License"
+- name: "Add License"
   thales.ciphertrust.license_create:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
@@ -64,42 +91,49 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
+    license: license_string
 '''
 
 RETURN = '''
 
 '''
 
-def main():    
-    localNode = dict(
-            server_ip=dict(type='str', required=True),
-            server_private_ip=dict(type='str', required=True),
-            server_port=dict(type='int', required=True),
-            user=dict(type='str', required=True),
-            password=dict(type='str', required=True),
-            verify=dict(type='bool', required=True),
-        )
-    module = AnsibleModule(
-            argument_spec=dict(
-                localNode=dict(type='dict', options=localNode, required=True),
-                license=dict(type='str', required=True),
-                bind_type=dict(type='str', required=False),
-            ),
-        )
+argument_spec = dict(
+    license=dict(type='str', options=['create', 'patch'], required=True),
+    bind_type=dict(type='str'),
+)
 
-    localNode = module.params.get('localNode');
-    license =  module.params.get('license');
-    bind_type =  module.params.get('bind_type');
+def validate_parameters(user_module):
+    return True
+
+def setup_module_object():
+    module = ThalesCipherTrustModule(
+        argument_spec=argument_spec,
+        required_if=[],
+        mutually_exclusive=[],
+        supports_check_mode=True,
+    )
+    return module
+
+def main():
+
+    global module
+    
+    module = setup_module_object()
+    validate_parameters(
+        user_module=module,
+    )
 
     result = dict(
         changed=False,
     )
 
     response = addLicense(
-            node=localNode,
-            license=license,
-            bind_type=bind_type
-        )
+      node=module.params.get('localNode'),
+      license=module.params.get('license'),
+      bind_type=module.params.get('bind_type'),
+    )
+
     result['response'] = response
 
     module.exit_json(**result)

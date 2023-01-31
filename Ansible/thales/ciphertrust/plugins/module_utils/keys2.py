@@ -186,6 +186,7 @@ def recover(**kwargs):
 def revoke(**kwargs):
     result = dict()
     request = {}
+    queryString = "?"
 
     for key, value in kwargs.items():
         if key not in ["node", "cm_key_id", "key_version", "id_type"] and value != None:
@@ -222,6 +223,7 @@ def revoke(**kwargs):
 def reactivate(**kwargs):
     result = dict()
     request = {}
+    queryString = "?"
 
     for key, value in kwargs.items():
         if key not in ["node", "cm_key_id", "key_version", "id_type"] and value != None:
@@ -259,10 +261,13 @@ def reactivate(**kwargs):
 def export(**kwargs):
     result = dict()
     request = {}
+    queryString = "?"
 
     for key, value in kwargs.items():
         if key not in ["node", "cm_key_id", "key_version", "id_type"] and value != None:
             request[key] = value
+        if key == "keyFormat":
+            request["format"] = value
 
     payload = json.dumps(request)
 
@@ -294,6 +299,7 @@ def export(**kwargs):
 def clone(**kwargs):
     result = dict()
     request = {}
+    queryString = "?"
 
     for key, value in kwargs.items():
         if key not in ["node", "cm_key_id", "key_version", "id_type", "includeMaterial"] and value != None:

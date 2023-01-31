@@ -40,33 +40,26 @@ def getLockdata(node):
     except:
       result['failed'] = True
 
-def addLicense(node,
-        license,
-        bind_type
-    ):
+def addLicense(**kwargs):
     result = dict()
+    request = {}
 
-    request = {
-        "license": license,
-        "bind_type": bind_type
-      }
+    for key, value in kwargs.items():
+        if key != "node" and value != None:
+            request[key] = value
 
     payload = json.dumps(request)
-    
+
     try:
       response = POSTData(
               payload=payload,
-              cm_node=node,
-              cm_api_endpoint="licensing/licenses",
+              cm_node=kwargs["node"],
+              cm_api_endpoint="vault/keys2",
           )
-      if response == '4xx':
-          result['success'] = 'Unable to add license'
-      else:
-          result['success'] = 'License Added Succesfully'
-
-      return result
+          
+      return ast.literal_eval(str(response))
     except:
-      result['failed'] = True
+      raise
 
 def activateTrial(node,
         trialId

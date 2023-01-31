@@ -581,8 +581,8 @@ options:
 '''
 
 EXAMPLES = '''
-- name: "Create DPG Protection Policy"
-  thales.ciphertrust.dpg_protection_policy_create:
+- name: "Create Key"
+  thales.ciphertrust.vault_keys2_create:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
@@ -590,10 +590,24 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    username: "john.doe"
-    password: "cmPassw0rd!"
-    email: "john.doe@example.com"
-    name: "John Doe"
+    op_type: create
+    name: "key_name"
+    algorithm: aes
+    size: 256
+    usageMask: 3145740
+
+- name: "Patch Key"
+  thales.ciphertrust.vault_keys2_create:
+    localNode:
+        server_ip: "IP/FQDN of CipherTrust Manager"
+        server_private_ip: "Privare IP in case that is different from above"
+        server_port: 5432
+        user: "CipherTrust Manager Username"
+        password: "CipherTrust Manager Password"
+        verify: false
+    op_type: patch
+    cm_key_id: "4ae2649a705e479589ef65759d3287f6ff452a788531445fbc7f0240516d028d"
+    unexportable: false
 '''
 
 RETURN = '''

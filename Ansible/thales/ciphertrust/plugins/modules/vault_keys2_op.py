@@ -32,10 +32,10 @@ module = None
 
 DOCUMENTATION = '''
 ---
-module: usermgmt_users_save
+module: vault_keys2_op
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with user management API
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with key operations API
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -427,7 +427,7 @@ options:
 
 EXAMPLES = '''
 - name: "Create new user"
-    thales.ciphertrust.usermgmt_users_save:
+    thales.ciphertrust.vault_keys2_op:
       localNode: 
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"

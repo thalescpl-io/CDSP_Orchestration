@@ -542,6 +542,7 @@ def main():
     result = dict(
         changed=False,
     )
+    response = dict()
 
     if module.params.get('op_type') == 'destroy':
         response = destroy(

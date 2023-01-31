@@ -736,7 +736,6 @@ def setup_module_object():
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
-
     )
     return module
 

@@ -528,7 +528,6 @@ def setup_module_object():
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
-
     )
     return module
 
@@ -543,6 +542,8 @@ def main():
         changed=False,
     )
     response = dict()
+
+    module.debug(msg="op_type is: " + module.params.get('op_type'))
 
     if module.params.get('op_type') == 'destroy':
         response = destroy(
@@ -614,7 +615,7 @@ def main():
             wrappingHashAlgo=module.params.get('wrappingHashAlgo'),
             wrappingMethod=module.params.get('wrappingMethod'),
         )
-    else:
+    elif module.params.get('op_type') == 'clone':
         response = clone(
             node=module.params.get('localNode'),
             cm_key_id=module.params.get('cm_key_id'),
@@ -625,6 +626,8 @@ def main():
             meta=module.params.get('meta'),
             newKeyName=module.params.get('newKeyName'),
         )
+    else:
+        module.fail_json(msg="invalid op_type")
 
 result['response'] = response
 

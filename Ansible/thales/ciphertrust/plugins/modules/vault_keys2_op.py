@@ -17,6 +17,17 @@
 # limitations under the License.
 #
 
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+import os
+import requests
+import urllib3
+import json
+
+from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
+from ansible_collections.thales.ciphertrust.plugins.module_utils.keys2 import destroy, archive, recover, revoke, reactivate, export, clone
+
 DOCUMENTATION = '''
 ---
 module: vault_keys2_op
@@ -130,7 +141,7 @@ options:
         type: str
         required: false
         default: null
-    format:
+    keyFormat:
         description: 
           - The format of the returned key material. If the algorithm is 'rsa' or 'ec'. The value can be one of these: 'pkcs1', 'pkcs8' , 'pkcs12', or 'jwe'. The default value is 'pkcs8'. If algorithm is ‘rsa’ and format is 'pkcs12', the key material will contain the base64-encoded value of the PFX file. The value 'base64' is used for symmetric keys, for which the format of the returned key material is base64-encoded if wrapping is applied (i.e., either 'wrapKeyName' or 'wrapPublicKey' is specified),otherwise, the format is hex-encoded, unless 'base64' is given. If the "format" is 'jwe' then the "material" for the symmetric key, asymmetric key or certificate will be wrapped in JWE format. "wrapKeyName"(should be a public key) or "wrapPublicKey" and "wrapJWE" parameters are required for 'jwe' format. The value 'opaque' is supported for symmetric keys with 'opaque' format only.
           - Only applicable for op_type "export"
@@ -413,38 +424,25 @@ options:
 '''
 
 EXAMPLES = '''
-- name: "Create new user"
-    thales.ciphertrust.vault_keys2_op:
-      localNode: 
+- name: "Create Key"
+  thales.ciphertrust.vault_keys2_create:
+    localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-      op_type: "create"
-      username: "john.doe"
-      password: "oldPassword12!"
-      email: "john.doe@example.com"
-      name: "John Doe"
+    op_type: create
+    name: "key_name"
+    algorithm: aes
+    size: 256
+    usageMask: 3145740
 '''
 
 RETURN = '''
 
 '''
-
-from __future__ import absolute_import, division, print_function
-__metaclass__ = type
-
-import os
-import requests
-import urllib3
-import json
-
-from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.keys2 import destroy, archive, recover, revoke, reactivate, export, clone
-
-module = None
 
 _wrap_HKDF=dict(
     hashAlgorithm=dict(type='str', choices=['hmac-sha1', 'hmac-sha224', 'hmac-sha256', 'hmac-sha384', 'hmac-sha512'], required=False),
@@ -475,20 +473,17 @@ _wrap_RSAAES=dict(
 _schema_less = dict()
 
 argument_spec = dict(
-    # Query params
     key_version=dict(type='int', required=False),
     id_type=dict(type='str', options=['name', 'id', 'uri', 'alias'], required=False),
     includeMaterial=dict(type='bool', default=False, required=False),
-    # End of --Query params--
     op_type=dict(type='str', options=['destroy', 'archive', 'recover', 'revoke', 'reactivate', 'export', 'clone'], required=True),
     cm_key_id=dict(type='str', required=True),
     reason=dict(type='str', choices=['Unspecified', 'KeyCompromise', 'CACompromise', 'AffiliationChanged', 'Superseded', 'CessationOfOperation', 'PrivilegeWithdrawn', 'DeactivatedToActive', 'ActiveProtectStopToActive', 'DeactivatedToActiveProtectStop']),
     compromiseOccurrenceDate=dict(type='str', required=False),
     message=dict(type='str', required=False),
-    # Below params applicable to op_type "export"
     combineXts=dict(type='bool', required=False, default=False),
     encoding=dict(type='str', required=False),
-    format=dict(type='str', choices=['pkcs1', 'pkcs8', 'pkcs12', 'jwe'], required=False),
+    keyFormat=dict(type='str', choices=['pkcs1', 'pkcs8', 'pkcs12', 'jwe'], required=False),
     macSignKeyIdentifier=dict(type='str', required=False),
     macSignKeyIdentifierType=dict(type='str', choices=['name', 'id', 'alias'], required=False),
     padded=dict(type='bool', required=False, default=False),
@@ -508,12 +503,9 @@ argument_spec = dict(
     wrappingEncryptionAlgo=dict(type='str', choices=['AES/AESKEYWRAP', 'AES/AESKEYWRAPPADDING', 'RSA/RSAAESKEYWRAPPADDING'], required=False),
     wrappingHashAlgo=dict(type='str', required=False),
     wrappingMethod=dict(type='str', choices=['encrypt', 'mac/sign', 'pbe'], required=False),
-    # End of --Below params applicable to op_type "export"--
-    # Below params applicable to op_type "clone"
     newKeyName=dict(type='str', required=False),
     meta=dict(type='dict', options=_schema_less, required=False),
     idSize=dict(type='int', required=False),
-    # End of --Below params applicable to op_type "clone"--
 )
 
 def validate_parameters(user_module):
@@ -543,9 +535,6 @@ def main():
     result = dict(
         changed=False,
     )
-    response = dict()
-
-    module.debug(msg="op_type is: " + module.params.get('op_type'))
 
     if module.params.get('op_type') == 'destroy':
         response = destroy(
@@ -595,7 +584,7 @@ def main():
             id_type=module.params.get('id_type'),
             combineXts=module.params.get('combineXts'),
             encoding=module.params.get('encoding'),
-            format=module.params.get('format'),
+            keyFormat=module.params.get('keyFormat'),
             macSignKeyIdentifier=module.params.get('macSignKeyIdentifier'),
             macSignKeyIdentifierType=module.params.get('macSignKeyIdentifierType'),
             padded=module.params.get('padded'),
@@ -631,9 +620,9 @@ def main():
     else:
         module.fail_json(msg="invalid op_type")
 
-result['response'] = response
+    result['response'] = response
 
-module.exit_json(**result)
+    module.exit_json(**result)
 
 if __name__ == '__main__':
     main()

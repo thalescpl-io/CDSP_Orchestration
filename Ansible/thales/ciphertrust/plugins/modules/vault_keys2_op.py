@@ -28,8 +28,6 @@ import json
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.keys2 import destroy, archive, recover, revoke, reactivate, export, clone
 
-module = None
-
 DOCUMENTATION = '''
 ---
 module: vault_keys2_op

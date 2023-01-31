@@ -741,6 +741,8 @@ def setup_module_object():
 
 def main():
 
+    global module
+    
     module = setup_module_object()
     validate_parameters(
         user_module=module,

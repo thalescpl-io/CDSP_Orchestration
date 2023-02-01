@@ -107,7 +107,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
         }
       else:
         if "codeDesc" in json.dumps(response):
-            raise CMApiException(message="Error creating resource" + response["codeDesc"], api_error_code=_data.status_code)
+            raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=_data.status_code)
             # __ret = {
             #   "message": "Resource created sucessfully",
             #   "err": response["codeDesc"]
@@ -120,19 +120,19 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
                     "description": str(response)
                   }
                 elif pattern_4xx.search(str(response)):
-                    raise CMApiException(message="Error creating resource" + str(response), api_error_code=_data.status_code)
+                    raise CMApiException(message="Error creating resource " + str(response), api_error_code=_data.status_code)
                 #   __ret = {
                 #     "message": "Resource operation failed",
                 #     "status_code": str(response)
                 #   }
                 else:
-                    raise CMApiException(message="Error creating resource" + str(response), api_error_code=_data.status_code)
+                    raise CMApiException(message="Error creating resource " + str(response), api_error_code=_data.status_code)
                 #   __ret = {
                 #     "message": "Internal Server Error",
                 #     "status_code": str(response)
                 #   }
             else:
-                raise CMApiException(message="Error creating resource" + str(response), api_error_code=_data.status_code)
+                raise CMApiException(message="Error creating resource " + str(response), api_error_code=_data.status_code)
             #   __ret = {
             #     "message": "Resource creation failed",
             #     "err": str(response)
@@ -170,7 +170,7 @@ def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
 
       if is_json(str(response)): 
         if "codeDesc" in response.json:
-          raise CMApiException(message="Error creating resource" + response["codeDesc"], api_error_code=response.status_code)
+          raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
         else:
           __ret = {
             "message": "Resource created sucessfully",
@@ -182,9 +182,9 @@ def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
             "description": str(response)
           }
         elif pattern_4xx.search(str(response)):
-          raise CMApiException(message="Error creating resource" + str(response), api_error_code=response.status_code)
+          raise CMApiException(message="Error creating resource " + str(response), api_error_code=response.status_code)
         else:
-          raise CMApiException(message="Error creating resource" + str(response), api_error_code=response.status_code)
+          raise CMApiException(message="Error creating resource " + str(response), api_error_code=response.status_code)
 
       return __ret
     except requests.exceptions.HTTPError as errh:
@@ -218,7 +218,7 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
 
       if is_json(str(response)): 
         if "codeDesc" in response.json:
-          raise CMApiException(message="Error creating resource" + response["codeDesc"], api_error_code=response.status_code)
+          raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
         else:
           __ret = {
             "message": "Resource updated succesfully",
@@ -230,9 +230,9 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
             "status_code": str(response)
           }
         elif pattern_4xx.search(str(response)):
-          raise CMApiException(message="Error creating resource" + str(response), api_error_code=response.status_code)
+          raise CMApiException(message="Error creating resource " + str(response), api_error_code=response.status_code)
         else:
-          raise CMApiException(message="Error creating resource" + str(response), api_error_code=response.status_code)           
+          raise CMApiException(message="Error creating resource " + str(response), api_error_code=response.status_code)           
 
       return __ret
     except requests.exceptions.HTTPError as errh:
@@ -308,16 +308,16 @@ def DeleteWithoutData(cm_node=None, cm_api_endpoint=None):
 
       if is_json(str(response)):
           if "codeDesc" in response.json():
-            raise CMApiException(message="Error deleting resource" + response.json()["codeDesc"], api_error_code=response.status_code)
+            raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
           else:
               return 'Resource deleted succesfully'
       else:
           if pattern_2xx.search(str(response)):
               return 'Resource deleted succesfully'
           elif pattern_4xx.search(str(response)):
-            raise CMApiException(message="Error deleting resource" + str(response), api_error_code=response.status_code)
+            raise CMApiException(message="Error deleting resource " + str(response), api_error_code=response.status_code)
           else:
-            raise CMApiException(message="Error deleting resource" + str(response), api_error_code=response.status_code)
+            raise CMApiException(message="Error deleting resource " + str(response), api_error_code=response.status_code)
 
     except requests.exceptions.HTTPError as errh:
       raise AnsibleCMException(message="HTTPError: cm_api >> " + errh)

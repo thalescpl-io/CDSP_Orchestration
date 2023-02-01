@@ -99,8 +99,8 @@ RETURN = '''
 '''
 
 argument_spec = dict(
-    license=dict(type='str', options=['create', 'patch'], required=True),
-    bind_type=dict(type='str'),
+    action_type=dict(type='str', options=['activate', 'deactivate'], required=True),
+    trialId=dict(type='str', required=True),
 )
 
 def validate_parameters(user_module):
@@ -128,11 +128,16 @@ def main():
         changed=False,
     )
 
-    response = addLicense(
-      node=module.params.get('localNode'),
-      license=module.params.get('license'),
-      bind_type=module.params.get('bind_type'),
-    )
+    if module.params.get('action_type') == 'activate':
+        respone = activateTrial(
+            node=module.params.get('localNode'),
+            trialId=module.params.get('trialId')
+        )
+    else:
+        respone = deactivateTrial(
+            node=module.params.get('localNode'),
+            trialId=module.params.get('trialId')
+        )
 
     result['response'] = response
 

@@ -314,11 +314,12 @@ def DeleteWithoutData(cm_node=None, cm_api_endpoint=None):
         return jsonErr
 
 def GETData(cm_node=None, cm_api_endpoint=None):
+    node = ast.literal_eval(cm_node)
     # Create the session object
     cmSessionObject = CMAPIObject(
-            cm_api_user=cm_node["user"],
-            cm_api_pwd=cm_node["password"],
-            cm_url=cm_node["server_ip"],
+            cm_api_user=node["user"],
+            cm_api_pwd=node["password"],
+            cm_url=node ["server_ip"],
             cm_api_endpoint=cm_api_endpoint,
             verify=False,
         )

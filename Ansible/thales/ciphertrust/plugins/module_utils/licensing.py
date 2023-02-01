@@ -61,40 +61,30 @@ def addLicense(**kwargs):
     except:
       raise
 
-def activateTrial(node,
-        trialId
-    ):
+def activateTrial(**kwargs):
     result = dict()
     
+    url = "licensing/trials/" + kwargs['trialId'] + "/activate"
+
     try:
       response = POSTWithoutData(
-            cm_node=node,
-            cm_api_endpoint="licensing/trials/" + trialId + "/activate",
-        )
-      if response == '4xx':
-          result['success'] = 'Unable to activate trial'
-      else:
-          result['success'] = 'Trial Activated Succesfully'
-
-      return result
+              cm_node=kwargs['node'],
+              cm_api_endpoint=url,
+          )
+      return ast.literal_eval(str(response))
     except:
-      result['failed'] = True
+      raise
 
-def deactivateTrial(node,
-        trialId
-    ):
+def deactivateTrial(**kwargs):
     result = dict()
     
+    url = "licensing/trials/" + kwargs['trialId'] + "/deactivate"
+
     try:
       response = POSTWithoutData(
-            cm_node=node,
-            cm_api_endpoint="licensing/trials/" + trialId + "/deactivate",
-        )
-      if response == '4xx':
-          result['success'] = 'Unable to deactivate trial'
-      else:
-          result['success'] = 'Trial DeActivated Succesfully'
-
-      return result
+              cm_node=kwargs['node'],
+              cm_api_endpoint=url,
+          )
+      return ast.literal_eval(str(response))
     except:
-      result['failed'] = True
+      raise

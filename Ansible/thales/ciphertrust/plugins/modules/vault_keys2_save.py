@@ -816,7 +816,7 @@ def main():
         result['response'] = response
       except CMApiException as api_e:
         if api_e.api_error_code:
-          module.fail_json(api_e.api_error_code, msg=api_e.message)
+          module.fail_json(msg=api_e.api_error_code + ": " + api_e.message)
       except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
 
@@ -847,7 +847,7 @@ def main():
         result['response'] = response
       except CMApiException as api_e:
         if api_e.api_error_code:
-          module.fail_json(api_e.api_error_code, msg=api_e.message)
+          module.fail_json(msg=api_e.api_error_code + ": " + api_e.message)
       except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
 
@@ -877,7 +877,7 @@ def main():
         result['response'] = response
       except CMApiException as api_e:
         if api_e.api_error_code:
-          module.fail_json(api_e.api_error_code, msg=api_e.message)
+          module.fail_json(msg=api_e.api_error_code + ": " + api_e.message)
       except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
 

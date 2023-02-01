@@ -27,10 +27,11 @@ import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.licensing import activateTrial, deactivateTrial
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
-module: license_create
+module: license_trial_action
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
     - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with trials activation and deactivation API
@@ -70,20 +71,21 @@ options:
             type: bool
             required: true
             default: false     
-    license:
-        description: License string
+    action_type:
+        description: Operation to be performed on the trial license
+        choices: [activate, deactivate]
         required: true
         type: str
-    bind_type:
-        description: Binding type for this license. Can be either 'instance' or 'cluster'. If omitted, then CM attempts to bind the license to the cluster. If this step fails with a lock code error, it will attempt to bind to the instance.
-        required: false
+    trialId:
+        description: CM ID of the trial license
+        required: true
         type: str
 
 '''
 
 EXAMPLES = '''
-- name: "Add License"
-  thales.ciphertrust.license_create:
+- name: "Activate Trial License"
+  thales.ciphertrust.license_trial_action:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
@@ -91,7 +93,20 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    license: license_string
+    action_type: activate
+    trialId: trial_id
+
+- name: "De-activate Trial License"
+  thales.ciphertrust.license_trial_action:
+    localNode:
+        server_ip: "IP/FQDN of CipherTrust Manager"
+        server_private_ip: "Privare IP in case that is different from above"
+        server_port: 5432
+        user: "CipherTrust Manager Username"
+        password: "CipherTrust Manager Password"
+        verify: false
+    action_type: deactivate
+    trialId: trial_id
 '''
 
 RETURN = '''
@@ -129,17 +144,31 @@ def main():
     )
 
     if module.params.get('action_type') == 'activate':
+      try:
         respone = activateTrial(
             node=module.params.get('localNode'),
             trialId=module.params.get('trialId')
         )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
     else:
+      try:
         respone = deactivateTrial(
             node=module.params.get('localNode'),
             trialId=module.params.get('trialId')
         )
-
-    result['response'] = response
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+    #result['response'] = response
 
     module.exit_json(**result)
 

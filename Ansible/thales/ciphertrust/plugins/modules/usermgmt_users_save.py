@@ -27,6 +27,7 @@ import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.users import create, patch, changepw, patch_self
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 module = None
 
@@ -293,7 +294,8 @@ def main():
     )
 
     if module.params.get('op_type') == 'create':
-        response = create(
+        try:
+          response = create(
             node=module.params.get('localNode'),
             allowed_auth_methods=module.params.get('allowed_auth_methods'),
             app_metadata=module.params.get('app_metadata'),
@@ -309,9 +311,16 @@ def main():
             user_id=module.params.get('user_id'),
             user_metadata=module.params.get('user_metadata'),
             username=module.params.get('username'),
-        )
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(api_e.api_error_code, msg=api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
     elif module.params.get('op_type') == 'patch':
-        response = patch(
+        try:
+          response = patch(
             node=module.params.get('localNode'),
             cm_user_id=module.params.get('cm_user_id'),
             allowed_auth_methods=module.params.get('allowed_auth_methods'),
@@ -325,25 +334,44 @@ def main():
             password_change_required=module.params.get('password_change_required'),
             user_metadata=module.params.get('user_metadata'),
             username=module.params.get('username'),
-        )
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(api_e.api_error_code, msg=api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
     elif module.params.get('op_type') == 'changepw':
-        response = changepw(
+        try:
+          response = changepw(
             node=module.params.get('localNode'),
             password=module.params.get('password'),
             username=module.params.get('username'),
             new_password=module.params.get('new_password'),
             auth_domain=module.params.get('auth_domain'),
-        )
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(api_e.api_error_code, msg=api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
     else:
-        response = patch_self(
+        try:
+          response = patch_self(
             node=module.params.get('localNode'),
             email=module.params.get('email'),
             name=module.params.get('name'),
             user_metadata=module.params.get('user_metadata'),
-        )
-
-    result['response'] = response
-
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(api_e.api_error_code, msg=api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
+          
+    # result['response'] = response
     module.exit_json(**result)
 
 if __name__ == '__main__':

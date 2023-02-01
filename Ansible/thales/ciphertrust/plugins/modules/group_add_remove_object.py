@@ -27,6 +27,7 @@ import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.groups import addUserToGroup, addClientToGroup, deleteUserFromGroup, deleteClientFromGroup
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
@@ -193,33 +194,63 @@ def main():
 
 #Change below this
     if module.params.get('op_type') == 'add':
-        if module.params.get('object_type') == 'user':
+      if module.params.get('object_type') == 'user':
+        try:
           response = addUserToGroup(
             node=module.params.get('localNode'),
             name=module.params.get('name'),
             object_id=module.params.get('object_id'),
-        )
-        else:
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(api_e.api_error_code, msg=api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
+
+      else:
+        try:
           response = addClientToGroup(
             node=module.params.get('localNode'),
             name=module.params.get('name'),
             object_id=module.params.get('object_id'),
-        )
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(api_e.api_error_code, msg=api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
+
     else:
-        if module.params.get('object_type') == 'user':
+      if module.params.get('object_type') == 'user':
+        try:
           response = deleteUserFromGroup(
             node=module.params.get('localNode'),
             name=module.params.get('name'),
             object_id=module.params.get('object_id'),
-        )
-        else:
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(api_e.api_error_code, msg=api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
+
+      else:
+        try:
           response = deleteClientFromGroup(
             node=module.params.get('localNode'),
             name=module.params.get('name'),
             object_id=module.params.get('object_id'),
-        )
-
-    result['response'] = response
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(api_e.api_error_code, msg=api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
+    #result['response'] = response
 
     module.exit_json(**result)
 

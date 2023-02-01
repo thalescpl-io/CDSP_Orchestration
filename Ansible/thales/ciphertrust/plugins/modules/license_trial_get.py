@@ -26,15 +26,15 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.licensing import addLicense
+from ansible_collections.thales.ciphertrust.plugins.module_utils.licensing import getTrialLicenseId
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
-module: license_create
+module: license_trial_get
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with trials management API
+    - This is a Thales CipherTrust Manager module for retrieving the ID of a trial license if available for a particular CM instance
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -70,21 +70,13 @@ options:
             description: if SSL verification is required
             type: bool
             required: true
-            default: false     
-    license:
-        description: License string
-        required: true
-        type: str
-    bind_type:
-        description: Binding type for this license. Can be either 'instance' or 'cluster'. If omitted, then CM attempts to bind the license to the cluster. If this step fails with a lock code error, it will attempt to bind to the instance.
-        required: false
-        type: str
+            default: false
 
 '''
 
 EXAMPLES = '''
-- name: "Add License"
-  thales.ciphertrust.license_create:
+- name: "Get Trial License ID"
+  thales.ciphertrust.license_trial_get:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
@@ -92,17 +84,13 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    license: license_string
 '''
 
 RETURN = '''
 
 '''
 
-argument_spec = dict(
-    license=dict(type='str', options=['create', 'patch'], required=True),
-    bind_type=dict(type='str'),
-)
+argument_spec = dict()
 
 def validate_parameters(user_module):
     return True
@@ -118,31 +106,30 @@ def setup_module_object():
 
 def main():
 
-    global module
-    
-    module = setup_module_object()
-    validate_parameters(
-        user_module=module,
-    )
+  global module
+  
+  module = setup_module_object()
+  validate_parameters(
+    user_module=module,
+  )
 
-    result = dict(
-        changed=False,
-    )
+  result = dict(
+    changed=False,
+  )
 
-    try:
-      response = addLicense(
-        node=module.params.get('localNode'),
-        license=module.params.get('license'),
-        bind_type=module.params.get('bind_type'),
-      )
-      result['response'] = response
-    except CMApiException as api_e:
-      if api_e.api_error_code:
-        module.fail_json(api_e.api_error_code, msg=api_e.message)
-    except AnsibleCMException as custom_e:
-      module.fail_json(msg=custom_e.message)
-      
-    module.exit_json(**result)
+  try:
+    respone = getTrialLicenseId(
+      node=module.params.get('localNode'),
+    )
+    result['response'] = response
+  except CMApiException as api_e:
+    if api_e.api_error_code:
+      module.fail_json(api_e.api_error_code, msg=api_e.message)
+  except AnsibleCMException as custom_e:
+    module.fail_json(msg=custom_e.message)
+  #result['response'] = response
+
+  module.exit_json(**result)
 
 if __name__ == '__main__':
     main()

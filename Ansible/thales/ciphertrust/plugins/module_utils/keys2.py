@@ -27,6 +27,7 @@ import json
 import ast
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, POSTWithoutData, PATCHData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
   try:
@@ -54,7 +55,9 @@ def create(**kwargs):
           )
           
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def patch(**kwargs):
@@ -74,7 +77,9 @@ def patch(**kwargs):
               cm_api_endpoint="vault/keys2/" + kwargs['cm_key_id'],
           )
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def version_create(**kwargs):
@@ -95,7 +100,9 @@ def version_create(**kwargs):
               id="id",
           )
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 # destroy, archive, recover, revoke, reactivate, export, clone
@@ -124,7 +131,9 @@ def destroy(**kwargs):
               cm_api_endpoint=url,
           )
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def archive(**kwargs):
@@ -152,7 +161,9 @@ def archive(**kwargs):
               cm_api_endpoint=url,
           )
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def recover(**kwargs):
@@ -180,7 +191,9 @@ def recover(**kwargs):
               cm_api_endpoint=url,
           )
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def revoke(**kwargs):
@@ -217,7 +230,9 @@ def revoke(**kwargs):
           )
           
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def reactivate(**kwargs):
@@ -254,7 +269,9 @@ def reactivate(**kwargs):
           )
           
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 
@@ -293,7 +310,9 @@ def export(**kwargs):
           )
           
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def clone(**kwargs):
@@ -335,5 +354,7 @@ def clone(**kwargs):
           )
           
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise

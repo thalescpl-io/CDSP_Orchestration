@@ -27,6 +27,7 @@ import json
 import ast
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
   try:
@@ -47,14 +48,16 @@ def create(**kwargs):
 
     try:
       __resp = POSTData(
-              payload=payload,
-              cm_node=kwargs['node'],
-              cm_api_endpoint="usermgmt/users",
-              id="user_id",
-          )
+          payload=payload,
+          cm_node=kwargs['node'],
+          cm_api_endpoint="usermgmt/users",
+          id="user_id",
+        )
       
       return ast.literal_eval(str(__resp))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def patch(**kwargs):
@@ -74,7 +77,9 @@ def patch(**kwargs):
               cm_api_endpoint="usermgmt/users/" + kwargs['cm_user_id'],
           )
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def changepw(**kwargs):
@@ -94,7 +99,9 @@ def changepw(**kwargs):
               cm_api_endpoint="auth/changepw",
           )
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise
 
 def patch_self(**kwargs):
@@ -114,5 +121,7 @@ def patch_self(**kwargs):
               cm_api_endpoint="auth/self/user",
           )
       return ast.literal_eval(str(response))
-    except:
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
       raise

@@ -27,6 +27,7 @@ import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.groups import create, patch
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
@@ -180,26 +181,41 @@ def main():
     )
 
     if module.params.get('op_type') == 'create':
-      response = create(
-        node=module.params.get('localNode'),
-        name=module.params.get('name'),
-        app_metadata=module.params.get('app_metadata'),
-        client_metadata=module.params.get('client_metadata'),
-        user_metadata=module.params.get('user_metadata'),
-      )
+      try:
+        response = create(
+          node=module.params.get('localNode'),
+          name=module.params.get('name'),
+          app_metadata=module.params.get('app_metadata'),
+          client_metadata=module.params.get('client_metadata'),
+          user_metadata=module.params.get('user_metadata'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
     elif module.params.get('op_type') == 'patch':
-      response = patch(
-        node=module.params.get('localNode'),
-        old_name=module.params.get('old_name'),
-        name=module.params.get('name'),
-        app_metadata=module.params.get('app_metadata'),
-        client_metadata=module.params.get('client_metadata'),
-        user_metadata=module.params.get('user_metadata'),
-      )
+      try:
+        response = patch(
+          node=module.params.get('localNode'),
+          old_name=module.params.get('old_name'),
+          name=module.params.get('name'),
+          app_metadata=module.params.get('app_metadata'),
+          client_metadata=module.params.get('client_metadata'),
+          user_metadata=module.params.get('user_metadata'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+        
     else:
         module.fail_json(msg="invalid op_type")
-
-    result['response'] = response
+    #result['response'] = response
 
     module.exit_json(**result)
 

@@ -27,6 +27,7 @@ import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.keys2 import destroy, archive, recover, revoke, reactivate, export, clone
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
@@ -513,13 +514,13 @@ def validate_parameters(user_module):
 
 def setup_module_object():
     module = ThalesCipherTrustModule(
-        argument_spec=argument_spec,
-        required_if=(
-            ['op_type', 'revoke', ['reason']],
-            ['op_type', 'reactivate', ['reason']],
-        ),
-        mutually_exclusive=[],
-        supports_check_mode=True,
+      argument_spec=argument_spec,
+      required_if=(
+        ['op_type', 'revoke', ['reason']],
+        ['op_type', 'reactivate', ['reason']],
+      ),
+      mutually_exclusive=[],
+      supports_check_mode=True,
     )
     return module
 
@@ -529,35 +530,60 @@ def main():
     
     module = setup_module_object()
     validate_parameters(
-        user_module=module,
+      user_module=module,
     )
 
     result = dict(
-        changed=False,
+      changed=False,
     )
 
     if module.params.get('op_type') == 'destroy':
+      try:
         response = destroy(
             node=module.params.get('localNode'),
             cm_key_id=module.params.get('cm_key_id'),
             key_version=module.params.get('key_version'),
             id_type=module.params.get('id_type'),
         )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
     elif module.params.get('op_type') == 'archive':
+      try:
         response = archive(
             node=module.params.get('localNode'),
             cm_key_id=module.params.get('cm_key_id'),
             key_version=module.params.get('key_version'),
             id_type=module.params.get('id_type'),
         )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+        
     elif module.params.get('op_type') == 'recover':
+      try:
         response = recover(
             node=module.params.get('localNode'),
             cm_key_id=module.params.get('cm_key_id'),
             key_version=module.params.get('key_version'),
             id_type=module.params.get('id_type'),
         )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+        
     elif module.params.get('op_type') == 'revoke':
+      try:
         response = revoke(
             node=module.params.get('localNode'),
             cm_key_id=module.params.get('cm_key_id'),
@@ -567,7 +593,15 @@ def main():
             compromiseOccurrenceDate=module.params.get('compromiseOccurrenceDate'),
             message=module.params.get('message'),
         )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+        
     elif module.params.get('op_type') == 'reactivate':
+      try:
         response = reactivate(
             node=module.params.get('localNode'),
             cm_key_id=module.params.get('cm_key_id'),
@@ -576,7 +610,15 @@ def main():
             reason=module.params.get('reason'),
             message=module.params.get('message'),
         )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+        
     elif module.params.get('op_type') == 'export':
+      try:
         response = export(
             node=module.params.get('localNode'),
             cm_key_id=module.params.get('cm_key_id'),
@@ -606,7 +648,15 @@ def main():
             wrappingHashAlgo=module.params.get('wrappingHashAlgo'),
             wrappingMethod=module.params.get('wrappingMethod'),
         )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+        
     elif module.params.get('op_type') == 'clone':
+      try:
         response = clone(
             node=module.params.get('localNode'),
             cm_key_id=module.params.get('cm_key_id'),
@@ -617,10 +667,16 @@ def main():
             meta=module.params.get('meta'),
             newKeyName=module.params.get('newKeyName'),
         )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(api_e.api_error_code, msg=api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+        
     else:
         module.fail_json(msg="invalid op_type")
-
-    result['response'] = response
+    #result['response'] = response
 
     module.exit_json(**result)
 

@@ -315,7 +315,7 @@ def main():
           result['response'] = response
         except CMApiException as api_e:
           if api_e.api_error_code:
-            module.fail_json(msg=api_e.api_error_code + ": " + api_e.message)
+            module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
         except AnsibleCMException as custom_e:
           module.fail_json(msg=custom_e.message)
     elif module.params.get('op_type') == 'patch':
@@ -338,7 +338,7 @@ def main():
           result['response'] = response
         except CMApiException as api_e:
           if api_e.api_error_code:
-            module.fail_json(msg=api_e.api_error_code + ": " + api_e.message)
+            module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
         except AnsibleCMException as custom_e:
           module.fail_json(msg=custom_e.message)
     elif module.params.get('op_type') == 'changepw':
@@ -353,7 +353,7 @@ def main():
           result['response'] = response
         except CMApiException as api_e:
           if api_e.api_error_code:
-            module.fail_json(msg=api_e.api_error_code + ": " + api_e.message)
+            module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
         except AnsibleCMException as custom_e:
           module.fail_json(msg=custom_e.message)
     else:
@@ -367,7 +367,7 @@ def main():
           result['response'] = response
         except CMApiException as api_e:
           if api_e.api_error_code:
-            module.fail_json(msg=api_e.api_error_code + ": " + api_e.message)
+            module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
         except AnsibleCMException as custom_e:
           module.fail_json(msg=custom_e.message)
           

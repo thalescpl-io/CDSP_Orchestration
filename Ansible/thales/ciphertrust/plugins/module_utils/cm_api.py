@@ -132,6 +132,55 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
     except requests.exceptions.RequestException as err:
       raise AnsibleCMException(message="ErrorPath: cm_api >> " + err)
 
+# Added to support PUT operation
+def PUTData(payload=None, cm_node=None, cm_api_endpoint=None):
+    # Create the session object
+    node = ast.literal_eval(cm_node)
+    pattern_2xx = re.compile(r'20[0-9]')
+    pattern_4xx = re.compile(r'40[0-9]')
+    cmSessionObject = CMAPIObject(
+      cm_api_user=node["user"],
+      cm_api_pwd=node["password"],
+      cm_url=node["server_ip"],
+      cm_api_endpoint=cm_api_endpoint,
+      verify=False,
+    )
+    # execute the put API call to update resource on CM 
+    try:
+      response = requests.put(
+        cmSessionObject["url"], 
+        headers=cmSessionObject["headers"], 
+        json = json.loads(payload), 
+        verify=False)
+
+      if is_json(str(response)): 
+        if "codeDesc" in response.json:
+          raise CMApiException(message="Error updating resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
+        else:
+          __ret = {
+            "message": "Resource updated sucessfully",
+          }
+      else:
+        if pattern_2xx.search(str(response)):
+          __ret = {
+            "message": "Resource updated sucessfully",
+            "description": str(response)
+          }
+        elif pattern_4xx.search(str(response)):
+          raise CMApiException(message="Error updating resource " + str(response), api_error_code=response.status_code)
+        else:
+          raise CMApiException(message="Error updating resource " + str(response), api_error_code=response.status_code)
+
+      return __ret
+    except requests.exceptions.HTTPError as errh:
+      raise AnsibleCMException(message="HTTPError: cm_api >> " + errh)
+    except requests.exceptions.ConnectionError as errc:
+      raise AnsibleCMException(message="ConnectionError: cm_api >> " + errc)
+    except requests.exceptions.Timeout as errt:
+      raise AnsibleCMException(message="TimeoutError: cm_api >> " + errt)
+    except requests.exceptions.RequestException as err:
+      raise AnsibleCMException(message="ErrorPath: cm_api >> " + err)
+
 
 def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
     # Create the session object

@@ -23,21 +23,17 @@
       - vars/keyMgmt.yml
 
     tasks:
-    - name: "Fetch Key"
+    - name: "Get Key ID from its name"
       thales.ciphertrust.cm_resource_get_id_from_name:
-        localNode: "{{ this_node_connection_string }}"
         query_param: "name"
         query_param_value: "{{ key_name }}"
         resource_type: "keys"
       register: key
 
-    - name: Pause until you can verify updates to an application were successful
-      ansible.builtin.pause:
-
     - name: "Archive Key"
       thales.ciphertrust.vault_keys2_op:
         op_type: archive
-        cm_key_id: "{{ key['response']['id'] }}"
+        cm_key_id: "{{ key['id'] }}"
         localNode: "{{ this_node_connection_string }}"
       register: output
 
@@ -47,7 +43,7 @@
     - name: "Recover Key"
       thales.ciphertrust.vault_keys2_op:
         op_type: recover
-        cm_key_id: "{{ key['response']['id'] }}"
+        cm_key_id: "{{ key['id'] }}"
         localNode: "{{ this_node_connection_string }}"
       register: output
 
@@ -57,9 +53,9 @@
     - name: "Revoke Key"
       thales.ciphertrust.vault_keys2_op:
         op_type: revoke
-        cm_key_id: "{{ key['response']['id'] }}"
-        reason: "KeyCompromise"
-        message: "By Ansible"
+        cm_key_id: "{{ key['id'] }}"
+        reason: "{{ key_revocation_reason }}"
+        message: "{{ key_revocation_message }}"
         localNode: "{{ this_node_connection_string }}"
       register: output
 
@@ -69,9 +65,9 @@
     - name: "Reactivate Key"
       thales.ciphertrust.vault_keys2_op:
         op_type: revoke
-        cm_key_id: "{{ key['response']['id'] }}"
-        reason: "DeactivatedToActive"
-        message: "By Ansible"
+        cm_key_id: "{{ key['id'] }}"
+        reason: "{{ key_reactivation_reason }}"
+        message: "{{ key_reactivation_message }}"
         localNode: "{{ this_node_connection_string }}"
       register: output
 
@@ -81,7 +77,7 @@
     - name: "Destroy Key"
       thales.ciphertrust.vault_keys2_op:
         op_type: destroy
-        cm_key_id: "{{ key['response']['id'] }}"
+        cm_key_id: "{{ key['id'] }}"
         localNode: "{{ this_node_connection_string }}"
       register: output
 
@@ -91,7 +87,7 @@
     - name: "Delete Key"
       thales.ciphertrust.cm_resource_delete:
         localNode: "{{ this_node_connection_string }}"
-        key: "{{ key['response']['id'] }}"
+        key: "{{ key['id'] }}"
         resource_type: "keys"
 
     - name: Debug Output

@@ -15,44 +15,41 @@
 # limitations under the License.
 #
 ---
-  - name: "Sample playbook for Key Management and Key Operations on CipherTrust Manager"
+  - name: "Sample playbook for License Management on CipherTrust Manager"
     hosts: localhost
     connection: local
 
     vars_files:
-      - vars/keyMgmt.yml
+      - vars/licenseMgmt.yml
 
     tasks:
-    - name: "Create Key"
-      thales.ciphertrust.vault_keys2_save:
-        op_type: create
-        name: "{{ key_name }}"
-        algorithm: aes
-        size: 256
-        usageMask: 3145740
+    - name: "Get trial license ID from CM"
+      thales.ciphertrust.license_trial_get:
+        localNode: "{{ this_node_connection_string }}"
+      register: license
+
+    - name: "Activate Trial License"
+      thales.ciphertrust.license_trial_action:
+        action_type: activate
+        trialId: "{{ license['id'] }}"
         localNode: "{{ this_node_connection_string }}"
       register: output
 
-    - name: "Get Key ID from its name"
-      thales.ciphertrust.cm_resource_get_id_from_name:
-        query_param: "name"
-        query_param_value: "{{ key_name }}"
-        resource_type: "keys"
-      register: key
+    - name: Paused for verifying trial license activation, press enter to continue
+      ansible.builtin.pause:
 
-    - name: "Patch Key"
-      thales.ciphertrust.vault_keys2_save:
-        op_type: patch
-        cm_key_id: "{{ key['id'] }}"
-        unexportable: false
+    - name: "De-activate Trial License"
+      thales.ciphertrust.license_trial_action:
+        action_type: deactivate
+        trialId: "{{ license['id'] }}"
         localNode: "{{ this_node_connection_string }}"
 
-    - name: "Create Version"
-      thales.ciphertrust.vault_keys2_save:
-        op_type: create_version
-        cm_key_id: "{{ key['id'] }}"
-        encoding: "base64"
+    # The next one requires a valid license file/information
+    - name: "Add License"
+      thales.ciphertrust.license_create:
         localNode: "{{ this_node_connection_string }}"
+        license: "{{ license_string }}"
+      ignore_errors: true # Set to true if it is ok to ignore error and continue to next step 
 
     - name: Debug Output
       debug: var=output

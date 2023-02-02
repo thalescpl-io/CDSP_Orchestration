@@ -11,8 +11,4 @@ this_node_connection_string:
   password: "{{ this_node_password }}"
   verify: False
 
-key_name: AnsibleKey
-key_revocation_reason: KeyCompromise
-key_revocation_message: "By Ansible"
-key_reactivation_reason: DeactivatedToActive
-key_reactivation_message: "By Ansible"
+license_string: "dummy_license_string"

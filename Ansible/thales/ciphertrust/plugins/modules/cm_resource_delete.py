@@ -23,8 +23,9 @@ import requests
 import urllib3
 import json
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, DELETEByNameOrId
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
@@ -37,12 +38,37 @@ author: Anurag Jain, Developer Advocate Thales Group
 options:
     localNode:
         description:
-            - This is a dictionary type of object that contains CipherTrust Manager Instance FQDN and credentials
-        required: true
+            - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
+            - holds IP/FQDN of the server, username, password, and port 
+        default: true
         type: dict
-        elements:
-            - str
-            - bool
+        suboptions:
+          server_ip:
+            description: CM Server IP or FQDN
+            type: str
+            required: true
+          server_private_ip:
+            description: internal or private IP of the CM Server, if different from the server_ip
+            type: str
+            required: true
+          server_port:
+            description: Port on which CM server is listening
+            type: int
+            required: true
+            default: 5432
+          user:
+            description: admin username of CM
+            type: str
+            required: true
+          password:
+            description: admin password of CM
+            type: str
+            required: true
+          verify:
+            description: if SSL verification is required
+            type: bool
+            required: true
+            default: false
     key:
         description:
             - This is a string type of option that can have either the name of the ID of the resource to be deleted
@@ -77,7 +103,7 @@ EXAMPLES = '''
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    key: "AnsibleKey"
+    key: "resource_id"
     resource_type: "keys"
 '''
 
@@ -89,66 +115,71 @@ message:
     sample: succesfully deleted
 '''
 
-def main():
-    localNode = dict(
-            server_ip=dict(type='str', required=True),
-            server_private_ip=dict(type='str', required=True),
-            server_port=dict(type='int', required=True),
-            user=dict(type='str', required=True),
-            password=dict(type='str', required=True),
-            verify=dict(type='bool', required=True),
-        )
-    module = AnsibleModule(
-            argument_spec=dict(
-                key=dict(type='str', required=True),
-                resource_type=dict(type='str', choices=['keys', 'protection-policies', 'access-policies', 'user-sets', 'interfaces', 'character-sets', 'users', 'dpg-policies', 'client-profiles', 'masking-formats'], required=True),
-                localNode=dict(type='dict', options=localNode, required=True),
-            ),
-        )
+_arr_resource_type_choices = [
+    'keys', 
+    'protection-policies', 
+    'access-policies', 
+    'user-sets', 
+    'interfaces', 
+    'character-sets', 
+    'users', 
+    'dpg-policies', 
+    'client-profiles', 
+    'masking-formats'
+]
 
-    localNode = module.params.get('localNode');
-    key =  module.params.get('key');
-    resource_type = module.params.get('resource_type');
+argument_spec = dict(
+    key=dict(type='str', required=True),
+    resource_type=dict(type='str', choices=_arr_resource_type_choices, required=True),
+)
+
+def validate_parameters(user_module):
+    return True
+
+def setup_module_object():
+    module = ThalesCipherTrustModule(
+        argument_spec=argument_spec,
+        required_if=[],
+        mutually_exclusive=[],
+        supports_check_mode=True,
+    )
+    return module
+
+def main():
+    global module
+    
+    module = setup_module_object()
+    validate_parameters(
+        user_module=module,
+    )
 
     result = dict(
         changed=False,
     )
 
-    endpoint = '';
+    endpoint = ''
     #Create the API end point based on the resource_type
     if resource_type == "keys":
-        endpoint = 'vault/keys2';
-    elif resource_type == "protection-policies":
-        endpoint = 'data-protection/protection-policies';
-    elif resource_type == "access-policies":
-        endpoint = 'data-protection/access-policies';
-    elif resource_type == "user-sets":
-        endpoint = 'data-protection/user-sets';
+        endpoint = 'vault/keys2'
     elif resource_type == "interfaces":
-        endpoint = 'configs/interfaces';
-    elif resource_type == "character-sets":
-        endpoint = 'data-protection/character-sets';
+        endpoint = 'configs/interfaces'
     elif resource_type == "users":
-        endpoint = 'usermgmt/users';
-    elif resource_type == "dpg-policies":
-        endpoint = 'data-protection/dpg-policies';
-    elif resource_type == "client-profiles":
-        endpoint = 'data-protection/client-profiles';
-    elif resource_type == "masking-formats":
-        endpoint = 'data-protection/masking-formats';
+        endpoint = 'usermgmt/users'
     else:
         module.fail_json(msg='resource_type not supported yet')
 
     try:
         response = DELETEByNameOrId(
-                name=key,
-                cm_node=localNode,
-                cm_api_endpoint=endpoint
-            )
-        result['message'] = response
-    except requests.exceptions.RequestException as err:
-        result['failed'] = True
-        result['error'] = err
+            key=key,
+            cm_node=localNode,
+            cm_api_endpoint=endpoint
+        )
+        result['response'] = response
+    except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+    except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
 
     module.exit_json(**result)
 

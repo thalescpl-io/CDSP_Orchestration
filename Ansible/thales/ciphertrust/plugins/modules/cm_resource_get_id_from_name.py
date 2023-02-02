@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) 2022 Thales Group. All rights reserved.
+# (c) 2023 Thales Group. All rights reserved.
+# Author: Anurag Jain, Developer Advocate, Thales
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
@@ -23,26 +25,52 @@ import requests
 import urllib3
 import json
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
 from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, GETIdByQueryParam
+from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
 module: cm_resource_get_id_from_name
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically List API with name filter.
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically List API with some filter.
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
     localNode:
         description:
-            - This is a dictionary type of object that contains CipherTrust Manager Instance FQDN and credentials
-        required: true
+            - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
+            - holds IP/FQDN of the server, username, password, and port 
+        default: true
         type: dict
-        elements:
-            - str
-            - bool
+        suboptions:
+          server_ip:
+            description: CM Server IP or FQDN
+            type: str
+            required: true
+          server_private_ip:
+            description: internal or private IP of the CM Server, if different from the server_ip
+            type: str
+            required: true
+          server_port:
+            description: Port on which CM server is listening
+            type: int
+            required: true
+            default: 5432
+          user:
+            description: admin username of CM
+            type: str
+            required: true
+          password:
+            description: admin password of CM
+            type: str
+            required: true
+          verify:
+            description: if SSL verification is required
+            type: bool
+            required: true
+            default: false
     query_param:
         description:
             - This is a string type of option that holds the query parameter type to be used to filter the list resources API response
@@ -77,7 +105,6 @@ options:
 '''
 
 EXAMPLES = '''
-# Delete Resource at CipherTrust Manager
 - name: "Get Key ID"
   thales.ciphertrust.cm_resource_get_id_from_name:
     localNode:
@@ -100,71 +127,82 @@ id:
     sample: 123456789
 '''
 
-def main():
-    localNode = dict(
-            server_ip=dict(type='str', required=True),
-            server_private_ip=dict(type='str', required=True),
-            server_port=dict(type='int', required=True),
-            user=dict(type='str', required=True),
-            password=dict(type='str', required=True),
-            verify=dict(type='bool', required=True),
-        )
-    module = AnsibleModule(
-            argument_spec=dict(
-                #name=dict(type='str', required=True),
-                resource_type=dict(type='str', choices=['keys', 'protection-policies', 'access-policies', 'user-sets', 'interfaces', 'character-sets', 'users', 'dpg-policies', 'client-profiles', 'masking-formats'], required=True),
-                query_param=dict(type='str', choices=['name', 'username', 'email', 'status'], required=True),
-                query_param_value=dict(type='str', required=True),
-                localNode=dict(type='dict', options=localNode, required=True),
-            ),
-        )
+_arr_resource_type_choices = [
+    'keys', 
+    'protection-policies', 
+    'access-policies', 
+    'user-sets', 
+    'interfaces', 
+    'character-sets', 
+    'users', 
+    'dpg-policies', 
+    'client-profiles', 
+    'masking-formats'
+]
+_arr_query_param_choices = [
+    'name',
+    'username', 
+    'email', 
+    'status'
+]
+argument_spec = dict(
+    resource_type=dict(type='str', choices=_arr_resource_type_choices, required=True),
+    query_param=dict(type='str', choices=_arr_query_param_choices, required=True),
+    query_param_value=dict(type='str', required=True),
+)
 
-    localNode = module.params.get('localNode');
-    #name =  module.params.get('name');
-    resource_type = module.params.get('resource_type');
-    query_param = module.params.get('query_param');
-    query_param_value = module.params.get('query_param_value');
+def validate_parameters(user_module):
+    return True
+
+def setup_module_object():
+    module = ThalesCipherTrustModule(
+        argument_spec=argument_spec,
+        required_if=[],
+        mutually_exclusive=[],
+        supports_check_mode=True,
+    )
+    return module
+
+def main():
+    global module
+    
+    module = setup_module_object()
+    validate_parameters(
+        user_module=module,
+    )
 
     result = dict(
         changed=False,
     )
 
-    endpoint = '';
+    endpoint = ''
     #Create the API end point based on the resource_type
     if resource_type == "keys":
-        endpoint = 'vault/keys2';
-    elif resource_type == "protection-policies":
-        endpoint = 'data-protection/protection-policies';
-    elif resource_type == "access-policies":
-        endpoint = 'data-protection/access-policies';
-    elif resource_type == "user-sets":
-        endpoint = 'data-protection/user-sets';
+        endpoint = 'vault/keys2'
+        query_id = 'id'
     elif resource_type == "interfaces":
-        endpoint = 'configs/interfaces';
-    elif resource_type == "character-sets":
-        endpoint = 'data-protection/character-sets';
+        endpoint = 'configs/interfaces'
+        query_id = 'id'
     elif resource_type == "users":
-        endpoint = 'usermgmt/users';
-    elif resource_type == "dpg-policies":
-        endpoint = 'data-protection/dpg-policies';
-    elif resource_type == "client-profiles":
-        endpoint = 'data-protection/client-profiles';
-    elif resource_type == "masking-formats":
-        endpoint = 'data-protection/masking-formats';
+        endpoint = 'usermgmt/users'
+        query_id = 'user_id'
     else:
         module.fail_json(msg='resource_type not supported yet')
 
     try:
         response = GETIdByQueryParam(
-                param=query_param,
-                value=query_param_value,
-                cm_node=localNode,
-                cm_api_endpoint=endpoint
-            )
+            cm_node=module.params.get('localNode'),
+            param=module.params.get('query_param'),
+            value=module.params.get('query_param_value'),
+            cm_api_endpoint=endpoint,
+            id=query_id,
+        )
         result['response'] = response
-    except requests.exceptions.RequestException as err:
-        result['failed'] = True
-        result['error'] = err
+    except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+    except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
 
     module.exit_json(**result)
 

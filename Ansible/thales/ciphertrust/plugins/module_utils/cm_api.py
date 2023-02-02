@@ -108,10 +108,6 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
       else:
         if "codeDesc" in json.dumps(response):
             raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=_data.status_code)
-            # __ret = {
-            #   "message": "Resource created sucessfully",
-            #   "err": response["codeDesc"]
-            # }
         else:
             if id is None:
                 if pattern_2xx.search(str(response)):
@@ -121,22 +117,10 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
                   }
                 elif pattern_4xx.search(str(response)):
                     raise CMApiException(message="Error creating resource " + str(response), api_error_code=_data.status_code)
-                #   __ret = {
-                #     "message": "Resource operation failed",
-                #     "status_code": str(response)
-                #   }
                 else:
                     raise CMApiException(message="Error creating resource " + str(response), api_error_code=_data.status_code)
-                #   __ret = {
-                #     "message": "Internal Server Error",
-                #     "status_code": str(response)
-                #   }
             else:
                 raise CMApiException(message="Error creating resource " + str(response), api_error_code=_data.status_code)
-            #   __ret = {
-            #     "message": "Resource creation failed",
-            #     "err": str(response)
-            #   }
 
       return __ret
     except requests.exceptions.HTTPError as errh:
@@ -244,27 +228,24 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
     except requests.exceptions.RequestException as err:
       raise AnsibleCMException(message="ErrorPath: cm_api >> " + err)
 
-def DELETEByNameOrId(name=None, cm_node=None, cm_api_endpoint=None):
+def DELETEByNameOrId(key=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
     node = ast.literal_eval(cm_node)
     pattern_2xx = re.compile(r'20[0-9]')
     pattern_4xx = re.compile(r'40[0-9]')
     cmSessionObject = CMAPIObject(
-            cm_api_user=node["user"],
-            cm_api_pwd=node["password"],
-            cm_url=node["server_ip"],
-            cm_api_endpoint=cm_api_endpoint,
-            verify=False,
-        )
+      cm_api_user=node["user"],
+      cm_api_pwd=node["password"],
+      cm_url=node["server_ip"],
+      cm_api_endpoint=cm_api_endpoint,
+      verify=False,
+    )
     # execute the delete API call to delete the resource on CM
     try:
-      response = requests.delete(cmSessionObject["url"] + "/" + name, headers=cmSessionObject["headers"], verify=False)
+      response = requests.delete(cmSessionObject["url"] + "/" + key, headers=cmSessionObject["headers"], verify=False)
       if is_json(str(response)): 
         if "codeDesc" in response.json:
-          __ret = {
-            "message": "Resource deletion failed",
-            "err": response["codeDesc"]
-          }
+          raise CMApiException(message="Error deleting resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
         else:
           __ret = {
             "message": "Resource deletion succesful",
@@ -276,19 +257,19 @@ def DELETEByNameOrId(name=None, cm_node=None, cm_api_endpoint=None):
             "status_code": str(response)
           }
         elif pattern_4xx.search(str(response)):
-          __ret = {
-            "message": "Resource deletion failed",
-            "status_code": str(response)
-          }
+          raise CMApiException(message="Error deleting resource " + str(response), api_error_code=response.status_code)
         else:
-          __ret = {
-            "message": "Internal Server Error",
-            "status_code": str(response)
-          }
+          raise CMApiException(message="Error deleting resource " + str(response), api_error_code=response.status_code)
 
       return __ret
+    except requests.exceptions.HTTPError as errh:
+      raise AnsibleCMException(message="HTTPError: cm_api >> " + errh)
+    except requests.exceptions.ConnectionError as errc:
+      raise AnsibleCMException(message="ConnectionError: cm_api >> " + errc)
+    except requests.exceptions.Timeout as errt:
+      raise AnsibleCMException(message="TimeoutError: cm_api >> " + errt)
     except requests.exceptions.RequestException as err:
-        raise
+      raise AnsibleCMException(message="ErrorPath: cm_api >> " + err)
 
 def DeleteWithoutData(cm_node=None, cm_api_endpoint=None):
     # Create the session object
@@ -384,38 +365,49 @@ def GETIdByName(name=None, cm_node=None, cm_api_endpoint=None):
     except requests.exceptions.RequestException as err:
         raise
 
-def GETIdByQueryParam(param=None, value=None, cm_node=None, cm_api_endpoint=None):
+def GETIdByQueryParam(param=None, value=None, cm_node=None, cm_api_endpoint=None, id=None):
     # Create the session object
+    node = ast.literal_eval(cm_node)
+    pattern_2xx = re.compile(r'20[0-9]')
+    pattern_4xx = re.compile(r'40[0-9]')
     cmSessionObject = CMAPIObject(
-            cm_api_user=cm_node["user"],
-            cm_api_pwd=cm_node["password"],
-            cm_url=cm_node["server_ip"],
-            cm_api_endpoint=cm_api_endpoint,
-            verify=False,
-        )
-    ret=dict()
+      cm_api_user=cm_node["user"],
+      cm_api_pwd=cm_node["password"],
+      cm_url=cm_node["server_ip"],
+      cm_api_endpoint=cm_api_endpoint,
+      verify=False,
+    )
+
     try:
-        response = requests.get(
-                cmSessionObject["url"] + "/?skip=0&limit=1&" + param + "=" + value, 
-                headers=cmSessionObject["headers"], 
-                verify=False)
-        if response.json()["resources"] == None:
-            ret["status"]='4xx'
-            ret["id"]=''
-            return ret
-        if len(response.json()["resources"]) > 0:
-            if cm_api_endpoint == "usermgmt/users":
-                ret["id"]=response.json()["resources"][0]["user_id"]
-            else:
-                ret["id"]=response.json()["resources"][0]["id"]
-            ret["status"]='2xx'
-            return ret
+      _data = requests.get(
+        cmSessionObject["url"] + "/?skip=0&limit=1&" + param + "=" + value, 
+        headers=cmSessionObject["headers"], 
+        verify=False)
+
+      response = _data.json()
+      
+      if response.["resources"] == None:
+        raise CMApiException(message="Error fetching data " + str(response), api_error_code=_data.status_code)
+
+      if len(response["resources"]) > 0:
+        if id is not None and id in response:
+          __ret = {
+            "id": response["resources"][0][id]
+          }
         else:
-            ret["status"]='4xx'
-            ret["id"]=''
-            return ret
+          raise CMApiException(message="Error fetching data " + str(response), api_error_code=_data.status_code)
+      else:
+        raise CMApiException(message="No matching recors found", api_error_code=_data.status_code)
+
+      return __ret
+    except requests.exceptions.HTTPError as errh:
+      raise AnsibleCMException(message="HTTPError: cm_api >> " + errh)
+    except requests.exceptions.ConnectionError as errc:
+      raise AnsibleCMException(message="ConnectionError: cm_api >> " + errc)
+    except requests.exceptions.Timeout as errt:
+      raise AnsibleCMException(message="TimeoutError: cm_api >> " + errt)
     except requests.exceptions.RequestException as err:
-        raise
+      raise AnsibleCMException(message="ErrorPath: cm_api >> " + err)
 
 def CMAPIObject(cm_api_user=None, cm_api_pwd=None, cm_url=None, cm_api_endpoint=None, verify=None):
     """Create a Ciphertrust Manager (CM) client"""

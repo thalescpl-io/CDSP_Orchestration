@@ -11,8 +11,7 @@ this_node_connection_string:
   password: "{{ this_node_password }}"
   verify: False
 
-key_name: AnsibleKey
-key_revocation_reason: KeyCompromise
-key_revocation_message: "By Ansible"
-key_reactivation_reason: DeactivatedToActive
-key_reactivation_message: "By Ansible"
+group_name: AnsibleGroup
+new_group_name: NewGroupName
+user_id: "local|36b4b901-9890-4a46-9a6f-94c8b76c9373"
+client_id: "06c04d31-905e-4fdd-ac0e-ffbaa85edec9"

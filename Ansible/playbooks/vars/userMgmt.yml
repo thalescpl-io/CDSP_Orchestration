@@ -10,3 +10,12 @@ this_node_connection_string:
   user: "{{ this_node_username }}"
   password: "{{ this_node_password }}"
   verify: False
+
+var_username: "john.doe"
+var_password: "cmPassw0rd!"
+var_email: "john.doe@example.com"
+var_name: "John Doe"
+var_new_password: "newPassw0rd!"
+var_new_name: "Doe John"
+var_new_email: "doe.john@example.com"
+var_new_self_name: "CM Admin"

@@ -27,34 +27,41 @@
       thales.ciphertrust.usermgmt_users_save:
         localNode: "{{ this_node_connection_string }}"
         op_type: "create"
-        username: "john.doe"
-        password: "cmPassw0rd!"
-        email: "john.doe@example.com"
-        name: "John Doe"
+        username: "{{ var_username }}"
+        password: "{{ var_password }}"
+        email: "{{ var_email }}"
+        name: "{{ var_name }}"
       register: output
+
+    - name: "Get user ID from its name"
+      thales.ciphertrust.cm_resource_get_id_from_name:
+        query_param: "username"
+        query_param_value: "{{ var_username }}"
+        resource_type: "users"
+      register: user
 
     - name: "Update user info"
       thales.ciphertrust.usermgmt_users_save:
         localNode: "{{ this_node_connection_string }}"
         op_type: "patch"
-        cm_user_id: "local|6c045e48-7e2e-4b01-ac88-6d2a13d8dc95"
-        username: "john.doe"
-        email: "aj@example.com"
-        name: "Anurag Jain"
+        cm_user_id: "{{ user['id] }}"
+        username: "{{ var_username }}"
+        email: "{{ var_new_email }}"
+        name: "{{ var_new_name }}"
 
     - name: "Change user password"
       thales.ciphertrust.usermgmt_users_save:
         localNode: "{{ this_node_connection_string }}"
         op_type: "changepw"
-        username: "john.doe"
-        password: "cmPassw0rd!"
-        new_password: "cmPassw0rd1!"
+        username: "{{ user['id] }}"
+        password: "{{ var_password }}"
+        new_password: "{{ var_new_password }}"
 
     - name: "Update self"
       thales.ciphertrust.usermgmt_users_save:
         localNode: "{{ this_node_connection_string }}"
         op_type: "patch_self"
-        name: "CM Admin"
+        name: "{{ var_new_self_name }}"
 
     - name: Debug Output
       debug: var=output

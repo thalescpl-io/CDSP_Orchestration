@@ -24,7 +24,7 @@
 
     tasks:
     - name: "Create Group"
-      thales.ciphertrust.vault_keys2_save:
+      thales.ciphertrust.group_save:
         op_type: create
         name: "{{ group_name }}"
         localNode: "{{ this_node_connection_string }}"
@@ -35,7 +35,7 @@
       ansible.builtin.pause:
 
     - name: "Patch Group"
-      thales.ciphertrust.vault_keys2_save:
+      thales.ciphertrust.group_save:
         op_type: patch
         old_name: "{{ group_name }}"
         name: "{{ new_group_name }}"

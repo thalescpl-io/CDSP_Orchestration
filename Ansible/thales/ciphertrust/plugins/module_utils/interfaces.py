@@ -88,7 +88,7 @@ def addCertificateToInterface(**kwargs):
     if key not in ["node", "interface_id"] and value != None:
       request[key] = value
 
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/certificate
+  url = "configs/interfaces/" + kwargs['interface_id'] + "/certificate"
 
   try:
     response = PUTData(
@@ -103,7 +103,7 @@ def addCertificateToInterface(**kwargs):
     raise
 
 def enableInterface(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/enable
+  url = "configs/interfaces/" + kwargs['interface_id'] + "/enable"
 
   try:
     response = POSTWithoutData(
@@ -117,7 +117,7 @@ def enableInterface(**kwargs):
     raise
 
 def disableInterface(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/disable
+  url = "configs/interfaces/" + kwargs['interface_id'] + "/disable"
 
   try:
     response = POSTWithoutData(
@@ -131,7 +131,7 @@ def disableInterface(**kwargs):
     raise
 
 def restoreDefaultTlsCiphers(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/restore-default-tls-ciphers
+  url = "configs/interfaces/" + kwargs['interface_id'] + "/restore-default-tls-ciphers"
 
   try:
     response = POSTWithoutData(
@@ -145,7 +145,7 @@ def restoreDefaultTlsCiphers(**kwargs):
     raise
 
 def createCsr(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/csr
+  url = "configs/interfaces/" + kwargs['interface_id'] + "/csr"
 
   result = dict()
   request = {}
@@ -169,7 +169,7 @@ def createCsr(**kwargs):
     raise
 
 def autogenServerCert(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/auto-gen-server-cert
+  url = "configs/interfaces/" + kwargs['interface_id'] + "/auto-gen-server-cert"
 
   try:
     response = POSTWithoutData(
@@ -183,7 +183,7 @@ def autogenServerCert(**kwargs):
     raise
 
 def useCertificate(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/use-certificate
+  url = "configs/interfaces/" + kwargs['interface_id'] + "/use-certificate"
 
   result = dict()
   request = {}

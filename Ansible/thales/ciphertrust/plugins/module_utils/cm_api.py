@@ -435,7 +435,7 @@ def GETIdByQueryParam(param=None, value=None, cm_node=None, cm_api_endpoint=None
 
       response = _data.json()
       
-      if response.["resources"] == None:
+      if response["resources"] == None:
         raise CMApiException(message="Error fetching data " + str(response), api_error_code=_data.status_code)
 
       if len(response["resources"]) > 0:

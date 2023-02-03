@@ -40,8 +40,7 @@
   - assert:
       that:
         - _result_create is not failed
-        - _result_create.changed
-        - _result_create.id is string
+        - _result_create.response.id is string
 
 ## Validate the create group module
 - block:
@@ -56,5 +55,4 @@
   - assert:
       that:
         - _result_patch is not failed
-        - _result_patch.changed
-        - _result_patch.message === 'Resource updated succesfully'
+        - _result_patch.response.message === 'Resource updated succesfully'

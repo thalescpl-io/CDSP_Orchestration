@@ -47,8 +47,8 @@
   - name: "Patch Group"
     thales.ciphertrust.group_save:
       op_type: patch
-      old_name: "{{ new_group_name }}"
-      name: "{{ group_name }}"
+      old_name: "{{ group_name }}"
+      name: "{{ new_group_name }}"
       localNode: "{{ this_node_connection_string }}"
     register: _result_patch
 

@@ -86,7 +86,7 @@ def addUserToGroup(**kwargs):
 
   try:
     response = POSTWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))
@@ -100,7 +100,7 @@ def addClientToGroup(**kwargs):
 
   try:
     response = POSTWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))
@@ -114,7 +114,7 @@ def deleteUserFromGroup(**kwargs):
 
   try:
     response = DeleteWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))
@@ -128,7 +128,7 @@ def deleteClientFromGroup(**kwargs):
 
   try:
     response = DeleteWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))

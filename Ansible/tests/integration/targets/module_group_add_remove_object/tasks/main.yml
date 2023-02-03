@@ -31,7 +31,7 @@
 
 ## Validate the operation add user to a group
 - block:
-  -name: "Add User to Group"
+  - name: "Add User to Group"
     thales.ciphertrust.group_add_remove_object:
       op_type: add
       object_type: user
@@ -43,11 +43,11 @@
   - assert:
       that:
         - _result_add_user is not failed
-        - _result_add_user.response.name is match("{{ new_group_name }}")
+        - _result_add_user.response.name is match({{ new_group_name }})
 
 ## Validate the operation add client to a group
 - block:
-  -name: "Add Client to Group"
+  - name: "Add Client to Group"
     thales.ciphertrust.group_add_remove_object:
       op_type: add
       object_type: client
@@ -59,4 +59,4 @@
   - assert:
       that:
         - _result_add_client is not failed
-        - _result_add_client.response.name is match("{{ new_group_name }}")
+        - _result_add_client.response.name is match({{ new_group_name }})

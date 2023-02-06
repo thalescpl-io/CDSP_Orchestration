@@ -11,7 +11,7 @@ Tested with Python version 3.6
 Install Ansible on your host machine using instructions specific to the OS of the host machine.
 
 Download thales-ciphertrust-1.0.0.tar.gz from this repository
-* [Ansible](Ansible/)
+* [Ansible](/)
 
 Install the collection using command -
 ```
@@ -37,7 +37,7 @@ You can call modules by their Fully Qualified Collection Name (FQCN), such as th
 
 ## Run Playbooks
 Sample playbooks provided as part of the repo
-* [Ansible](Ansible/playbooks/)
+* [Ansible](playbooks/)
 ```
 ansible-playbook cluster.yml -vv
 ```

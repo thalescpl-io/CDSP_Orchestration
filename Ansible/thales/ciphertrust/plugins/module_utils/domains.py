@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, POSTWithoutData, DeleteWithoutData, PUTData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, POSTWithoutData
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -86,7 +86,7 @@ def enableSyslogRedirection(**kwargs):
 
   try:
     response = POSTWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))
@@ -100,7 +100,7 @@ def disableInterface(**kwargs):
 
   try:
     response = POSTWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))

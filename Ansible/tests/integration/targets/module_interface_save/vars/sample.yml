@@ -1,0 +1,13 @@
+this_node_connection_string:
+  server_ip: 1.1.1.1
+  server_private_ip: 10.0.0.1
+  server_port: 5432
+  user: admin
+  password: ChangeIt!
+  verify: False
+
+port: 9006
+type: nae
+mode: no-tls-pw-opt
+interface_id: nae_all_9006
+new_port: 9007

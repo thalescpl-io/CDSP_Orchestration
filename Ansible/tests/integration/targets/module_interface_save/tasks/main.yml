@@ -25,30 +25,42 @@
   - assert:
       that:
         - this_node_connection_string is defined
-        - nodes is defined
+        - port is defined
+        - type is defined
+        - mode is defined
+        - interface_id is defined
+        - new_port is defined
 
-## Validate the create new cluster
+## Validate the create interface module
 - block:
-  - name: "Create New Cluster"
-    thales.ciphertrust.cm_cluster:
-      op_type: new      
+  - name: "Create Interface"
+    thales.ciphertrust.interface_save:
       localNode: "{{ this_node_connection_string }}"
+      op_type: create
+      port: "{{ port }}"
+      auto_registration: false
+      interface_type: "{{ type }}"
+      mode: "{{ mode }}"
+      network_interface: all
     register: _result_create
 
   - assert:
       that:
         - _result_create is not failed
-        - _result_create.response is match("Cluster creation success!")
+        - _result_create.response.id is string
 
-## Validate the cluster node join operation
+## Validate the patch interface module
 - block:
-  - name: "Join Nodes to above Cluster"
-    thales.ciphertrust.cm_cluster:
-      op_type: join
-      nodes: "{{ nodes }}"
-    register: _result_join
+  - name: "Patch User"
+    thales.ciphertrust.usermgmt_users_save:
+      op_type: "patch"
+      op_type: patch
+      interface_id: "{{ interface_id }}"
+      port: "{{ new_port }}"
+      localNode: "{{ this_node_connection_string }}"
+    register: _result_patch
 
   - assert:
       that:
-        - _result_join is not failed
-        - _result_join.response.message is match("Resource created sucessfully")
+        - _result_patch is not failed
+        - _result_patch.response.message is match("Resource updated succesfully")

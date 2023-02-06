@@ -1,0 +1,13 @@
+this_node_connection_string:
+  server_ip: 1.1.1.1
+  server_private_ip: 10.0.0.1
+  server_port: 5432
+  user: admin
+  password: ChangeIt!
+  verify: False
+
+domain_name: AnsibleDomain
+admins:
+  - local|4d1c26ab-8730-4d44-af5c-9a8641d0266d
+  - local|c7cf4efc-df81-4446-a30e-2dd5badf44b4
+ca_id: a5e0fa8a-a7f7-434c-ade8-f84de040269a

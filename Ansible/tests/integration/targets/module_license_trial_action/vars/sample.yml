@@ -1,0 +1,7 @@
+this_node_connection_string:
+  server_ip: 1.1.1.1
+  server_private_ip: 10.0.0.1
+  server_port: 5432
+  user: admin
+  password: ChangeIt!
+  verify: False

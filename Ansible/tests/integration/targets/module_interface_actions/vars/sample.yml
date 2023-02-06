@@ -1,0 +1,13 @@
+this_node_connection_string:
+  server_ip: 1.1.1.1
+  server_private_ip: 10.0.0.1
+  server_port: 5432
+  user: admin
+  password: ChangeIt!
+  verify: False
+
+csr_cn: test
+interface_id: nae_all_9006
+cert_bundle_pem: ""
+cert_format: PEM
+source_interface: nae_all_9008

@@ -25,30 +25,44 @@
   - assert:
       that:
         - this_node_connection_string is defined
-        - nodes is defined
 
-## Validate the create new cluster
+## Validate the trial license actions
 - block:
-  - name: "Create New Cluster"
-    thales.ciphertrust.cm_cluster:
-      op_type: new      
+
+  - name: "Get trial license ID from CM"
+    thales.ciphertrust.license_trial_get:
       localNode: "{{ this_node_connection_string }}"
-    register: _result_create
+    register: license
 
   - assert:
       that:
-        - _result_create is not failed
-        - _result_create.response is match("Cluster creation success!")
+        - license is not failed
+        - license.id is string
 
-## Validate the cluster node join operation
-- block:
-  - name: "Join Nodes to above Cluster"
-    thales.ciphertrust.cm_cluster:
-      op_type: join
-      nodes: "{{ nodes }}"
-    register: _result_join
+  - name: "Save trial license ID"
+    set_fact:
+      trial_license_id_reg: "{{ license.id }}"
+
+  - name: "Activate Trial License"
+    thales.ciphertrust.license_trial_action:
+      action_type: activate
+      trialId: "{{ trial_license_id_reg }}"
+      localNode: "{{ this_node_connection_string }}"
+    register: _result_activate
 
   - assert:
       that:
-        - _result_join is not failed
-        - _result_join.response.message is match("Resource created sucessfully")
+        - _result_activate is not failed
+        - _result_activate.response.message is match("Resource created sucessfully")
+
+  - name: "Deactivate Trial License"
+    thales.ciphertrust.license_trial_action:
+      action_type: deactivate
+      trialId: "{{ trial_license_id_reg }}"
+      localNode: "{{ this_node_connection_string }}"
+    register: _result_deactivate
+
+  - assert:
+      that:
+        - _result_deactivate is not failed
+        - _result_deactivate.response.message is match("Resource created sucessfully")

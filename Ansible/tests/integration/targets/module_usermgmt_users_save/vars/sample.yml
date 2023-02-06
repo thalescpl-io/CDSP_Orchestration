@@ -1,0 +1,17 @@
+this_node_connection_string:
+  server_ip: 1.1.1.1
+  server_private_ip: 10.0.0.1
+  server_port: 5432
+  user: admin
+  password: ChangeIt!
+  verify: False
+
+username: "john.doe"
+password: "ChangeIt!"
+email: "john.doe@example.com"
+name: "John Doe"
+new_email: "jane.doe@example.com"
+new_name: "Jane Doe"
+new_password: "ChangeIt!"
+new_self_name: "Super User"
+user_id: "local|932f7750-930b-4a09-8931-870564a8897a"

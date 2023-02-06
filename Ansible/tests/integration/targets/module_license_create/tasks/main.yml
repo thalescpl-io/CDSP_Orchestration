@@ -25,30 +25,17 @@
   - assert:
       that:
         - this_node_connection_string is defined
-        - nodes is defined
+        - license_string is defined
 
-## Validate the create new cluster
+## Validate the add license module
 - block:
-  - name: "Create New Cluster"
-    thales.ciphertrust.cm_cluster:
-      op_type: new      
+  - name: "Add License"
+    thales.ciphertrust.license_create:
       localNode: "{{ this_node_connection_string }}"
-    register: _result_create
+      license: "{{ license_string }}"
+    register: _result_add
 
   - assert:
       that:
-        - _result_create is not failed
-        - _result_create.response is match("Cluster creation success!")
-
-## Validate the cluster node join operation
-- block:
-  - name: "Join Nodes to above Cluster"
-    thales.ciphertrust.cm_cluster:
-      op_type: join
-      nodes: "{{ nodes }}"
-    register: _result_join
-
-  - assert:
-      that:
-        - _result_join is not failed
-        - _result_join.response.message is match("Resource created sucessfully")
+        - _result_add is not failed
+        - _result_add.response.message is match("Resource created sucessfully")

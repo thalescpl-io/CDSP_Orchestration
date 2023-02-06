@@ -176,6 +176,7 @@ def main():
     )
 
     endpoint = ''
+    resource_type=module.params.get('resource_type'),
     #Create the API end point based on the resource_type
     if resource_type == "keys":
         endpoint = 'vault/keys2'

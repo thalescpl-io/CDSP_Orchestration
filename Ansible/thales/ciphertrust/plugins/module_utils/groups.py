@@ -117,7 +117,7 @@ def deleteUserFromGroup(**kwargs):
       cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
-    return ast.literal_eval(str(response))
+    return str(response)
   except CMApiException as api_e:
     raise
   except AnsibleCMException as custom_e:
@@ -131,7 +131,7 @@ def deleteClientFromGroup(**kwargs):
       cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
-    return ast.literal_eval(str(response))
+    return str(response)
   except CMApiException as api_e:
     raise
   except AnsibleCMException as custom_e:

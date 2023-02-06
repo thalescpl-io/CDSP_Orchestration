@@ -300,10 +300,10 @@ def main():
         response = addCertificateToInterface(
           node=module.params.get('localNode'),
           interface_id=module.params.get('interface_id'),
-          certificate=module.params.get('interface_id'),
+          certificate=module.params.get('certificate'),
           cert_format=module.params.get('format'),
-          generate=module.params.get('interface_id'),
-          password=module.params.get('interface_id'),
+          generate=module.params.get('generate'),
+          password=module.params.get('password'),
         )
         result['response'] = response
       except CMApiException as api_e:

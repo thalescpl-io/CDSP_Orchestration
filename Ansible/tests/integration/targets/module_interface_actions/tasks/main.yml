@@ -77,13 +77,14 @@
       op_type: put_certificate
       interface_id: "{{ interface_id }}"
       certificate: "{{ cert_bundle_pem }}"
+      generate: true
       format: "{{ cert_format }}"
     register: _result_add_cert
 
   - assert:
       that:
         - _result_add_cert is not failed
-        - _result_add_cert.response.id is match("Resource updated sucessfully")
+        - _result_add_cert.response.message is match("Resource updated sucessfully")
 
   - name: "Enable Interface"
     thales.ciphertrust.interface_actions:

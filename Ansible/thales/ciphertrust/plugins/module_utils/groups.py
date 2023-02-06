@@ -96,7 +96,7 @@ def addUserToGroup(**kwargs):
     raise
 
 def addClientToGroup(**kwargs):
-  url = "usermgmt/groups/" + kwargs['name'] + "/clients/" + kwargs['object_id']
+  url = "client-management/groups/" + kwargs['name'] + "/clients/" + kwargs['object_id']
 
   try:
     response = POSTWithoutData(
@@ -124,7 +124,7 @@ def deleteUserFromGroup(**kwargs):
     raise
 
 def deleteClientFromGroup(**kwargs):
-  url = "usermgmt/groups/" + kwargs['name'] + "/clients/" + kwargs['object_id']
+  url = "client-management/groups/" + kwargs['name'] + "/clients/" + kwargs['object_id']
 
   try:
     response = DeleteWithoutData(

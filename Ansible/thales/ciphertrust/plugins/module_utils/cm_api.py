@@ -110,12 +110,12 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
             raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=_data.status_code)
         else:
             if id is None:
-                if pattern_2xx.search(str(response)) or pattern_2xx.search(_data.status_code):
+                if pattern_2xx.search(str(response)) or pattern_2xx.search(str(_data.status_code)):
                   __ret = {
                     "message": "Resource created sucessfully",
                     "description": str(response)
                   }
-                elif pattern_4xx.search(str(response)) or pattern_4xx.search(_data.status_code):
+                elif pattern_4xx.search(str(response)) or pattern_4xx.search(str(_data.status_code)):
                     raise CMApiException(message="Error creating resource " + str(response), api_error_code=_data.status_code)
                 else:
                     raise CMApiException(message="Error creating resource " + str(response), api_error_code=_data.status_code)

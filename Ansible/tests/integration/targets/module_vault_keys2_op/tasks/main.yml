@@ -25,6 +25,14 @@
   - assert:
       that:
         - this_node_connection_string is defined
+        - key_name is defined
+        - key_algo is defined
+        - key_len is defined
+        - usage_mask is defined
+        - key_revocation_reason is defined
+        - key_revocation_message is defined
+        - key_reactivation_reason is defined
+        - key_reactivation_message is defined
 
 ## Validate the create user module
 - block:

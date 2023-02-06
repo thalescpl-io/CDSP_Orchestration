@@ -6,12 +6,11 @@ this_node_connection_string:
   password: ChangeIt!
   verify: False
 
-username: "john.doe"
-password: "ChangeIt!"
-email: "john.doe@example.com"
-name: "John Doe"
-new_email: "jane.doe@example.com"
-new_name: "Jane Doe"
-new_password: "ChangeIt!"
-new_self_name: "Super User"
-#user_id: "local|932f7750-930b-4a09-8931-870564a8897a"
+key_name: AnsibleKey
+key_algo: aes
+key_len: 256
+usage_mask: 3145740
+key_revocation_reason: KeyCompromise
+key_revocation_message: "By Ansible"
+key_reactivation_reason: DeactivatedToActive
+key_reactivation_message: "By Ansible"

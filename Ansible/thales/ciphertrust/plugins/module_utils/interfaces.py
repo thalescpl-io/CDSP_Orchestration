@@ -96,7 +96,7 @@ def addCertificateToInterface(**kwargs):
   try:
     response = PUTData(
       payload=payload,
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))
@@ -110,7 +110,7 @@ def enableInterface(**kwargs):
 
   try:
     response = POSTWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))
@@ -124,7 +124,7 @@ def disableInterface(**kwargs):
 
   try:
     response = POSTWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))
@@ -138,7 +138,7 @@ def restoreDefaultTlsCiphers(**kwargs):
 
   try:
     response = POSTWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))
@@ -176,7 +176,7 @@ def autogenServerCert(**kwargs):
 
   try:
     response = POSTWithoutData(
-      cm_node=node,
+      cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
     return ast.literal_eval(str(response))

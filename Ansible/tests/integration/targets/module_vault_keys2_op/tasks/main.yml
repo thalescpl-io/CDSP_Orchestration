@@ -43,7 +43,7 @@
       algorithm: "{{ key_algo }}"
       size: "{{ key_len }}"
       usageMask: "{{ usage_mask }}"
-    localNode: "{{ this_node_connection_string }}"
+      localNode: "{{ this_node_connection_string }}"
     register: _result_create
 
   - assert:
@@ -79,7 +79,7 @@
   - assert:
       that:
         - _result_create_version is not failed
-        - _result_create_version.response.message is match("Resource created succesfully")
+        - _result_create_version.response.message is match("Resource created sucessfully")
 
   - name: "Archive Key"
     thales.ciphertrust.vault_keys2_op:

@@ -118,7 +118,7 @@ def main():
   )
 
   try:
-    respone = getTrialLicenseId(
+    response = getTrialLicenseId(
       node=module.params.get('localNode'),
     )
     result['response'] = response

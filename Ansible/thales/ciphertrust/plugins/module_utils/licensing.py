@@ -63,9 +63,9 @@ def getTrialLicenseId(**kwargs):
       cm_api_endpoint="licensing/trials",
     )
 
-    _json_response = json.loads(ast.literal_eval(str(response)))
+    #_json_response = json.loads(ast.literal_eval(str(response)))
 
-    resources = _json_response["resources"]
+    resources = response["resources"]
     __id = resources[0]["id"]
     __status = resources[0]["status"]
     result["id"] = __id

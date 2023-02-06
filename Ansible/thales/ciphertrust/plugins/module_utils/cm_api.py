@@ -460,9 +460,9 @@ def GETIdByQueryParam(param=None, value=None, cm_node=None, cm_api_endpoint=None
         if id == None:
           return response
         else:
-        __ret = {
-          "id": response["resources"][0][id]
-        }
+          __ret = {
+            "id": response["resources"][0][id]
+          }
       else:
         raise CMApiException(message="No matching recors found", api_error_code=_data.status_code)
 

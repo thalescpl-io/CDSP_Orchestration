@@ -73,7 +73,7 @@
   - name: "Change Password"
     thales.ciphertrust.usermgmt_users_save:
       op_type: "changepw"
-      username: "{{ user_id }}"
+      username: "{{ username }}"
       password: "{{ password }}"
       new_password: "{{ new_password }}"
       localNode: "{{ this_node_connection_string }}"

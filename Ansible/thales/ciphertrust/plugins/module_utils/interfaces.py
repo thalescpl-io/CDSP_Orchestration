@@ -51,7 +51,7 @@ def create(**kwargs):
       payload=payload,
       cm_node=kwargs["node"],
       cm_api_endpoint="configs/interfaces",
-      id="id",
+      id="name",
     )          
     return ast.literal_eval(str(response))
   except CMApiException as api_e:

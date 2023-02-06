@@ -48,7 +48,7 @@
   - name: "Patch Domain"
     thales.ciphertrust.domain_save:
       op_type: patch
-      domain_id: "{{ _result_create['response']['id] }}"
+      domain_id: "{{ _result_create.response.id }}"
     register: _result_patch
 
   - assert:

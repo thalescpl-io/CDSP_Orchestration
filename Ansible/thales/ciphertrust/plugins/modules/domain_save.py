@@ -168,8 +168,8 @@ _schema_less = dict()
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
     domain_id=dict(type='str'),
-    admins=dict(type='list', element='str', required=True),
-    name=dict(type='str', required=True),
+    admins=dict(type='list', element='str'),
+    name=dict(type='str'),
     allow_user_management=dict(type='bool', required=False, default=False),
     hsm_connection_id=dict(type='str', required=False),
     hsm_kek_label=dict(type='str', required=False),
@@ -187,6 +187,8 @@ def setup_module_object():
         argument_spec=argument_spec,
         required_if=(
             ['op_type', 'patch', ['domain_id']],
+            ['op_type', 'create', ['admins']],
+            ['op_type', 'create', ['name']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,

@@ -71,7 +71,7 @@ def getTrialLicenseId(**kwargs):
     result["id"] = __id
     result["status"] = __status
 
-    return json.dumps(result)
+    return result
     
   except CMApiException as api_e:
     raise

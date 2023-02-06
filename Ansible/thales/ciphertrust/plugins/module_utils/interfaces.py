@@ -91,6 +91,8 @@ def addCertificateToInterface(**kwargs):
 
   url = "configs/interfaces/" + kwargs['interface_id'] + "/certificate"
 
+  payload = json.dumps(request)
+
   try:
     response = PUTData(
       payload=payload,

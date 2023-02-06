@@ -255,7 +255,7 @@ argument_spec = dict(
   interface_id=dict(type='str', required=True),
   certificate=dict(type='str'),
   format=dict(type='str', options=['PEM', 'PKCS12']),
-  generate=dict(type='str', required=False),
+  generate=dict(type='bool', required=False),
   password=dict(type='str', required=False),
   cn=dict(type='str'),
   dns_names=dict(type='list', element='str', required=False),

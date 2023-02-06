@@ -73,7 +73,7 @@ def patch(**kwargs):
     response = PATCHData(
       payload=payload,
       cm_node=kwargs['node'],
-      cm_api_endpoint="domains/" + kwargs['interface_id'],
+      cm_api_endpoint="domains/" + kwargs['domain_id'],
     )
     return ast.literal_eval(str(response))
   except CMApiException as api_e:

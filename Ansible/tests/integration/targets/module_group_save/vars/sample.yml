@@ -8,3 +8,5 @@ this_node_connection_string:
 
 group_name: AnsibleGroup
 new_group_name: NewGroupName
+user_id: "<user_id>"
+client_id: "<client_id>"

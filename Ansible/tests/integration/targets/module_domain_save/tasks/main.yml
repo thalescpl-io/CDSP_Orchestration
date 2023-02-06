@@ -45,9 +45,7 @@
         - _result_create is not failed
         - _result_create.response.id is string
 
-## Validate the patch domain module
-- block:
-  - name: "Patch Group"
+  - name: "Patch Domain"
     thales.ciphertrust.domain_save:
       op_type: patch
       domain_id: "{{ _result_create['response']['id] }}"

@@ -54,7 +54,7 @@ def getLockdata(node):
       result['failed'] = True
 
 def getTrialLicenseId(**kwargs):
-  result = dict{}
+  result = dict()
   request = {}
 
   try:

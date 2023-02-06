@@ -11,7 +11,7 @@ Tested with Python version 3.6
 Install Ansible on your host machine using instructions specific to the OS of the host machine.
 
 Download thales-ciphertrust-1.0.0.tar.gz from this repository
-* [Ansible](Ansible/thales/ciphertrust/)
+* [Ansible](Ansible/)
 
 Install the collection using command -
 ```

@@ -176,17 +176,17 @@ def main():
     )
 
     endpoint = ''
-    resource_type=module.params.get('resource_type'),
+    resource_type=module.params.get('resource_type')
     #Create the API end point based on the resource_type
     if resource_type == "keys":
-        endpoint = 'vault/keys2'
-        query_id = 'id'
+        endpoint='vault/keys2'
+        query_id='id'
     elif resource_type == "interfaces":
-        endpoint = 'configs/interfaces'
-        query_id = 'id'
+        endpoint='configs/interfaces'
+        query_id='id'
     elif resource_type == "users":
-        endpoint = 'usermgmt/users'
-        query_id = 'user_id'
+        endpoint='usermgmt/users'
+        query_id='user_id'
     else:
         module.fail_json(msg='resource_type not supported yet')
 

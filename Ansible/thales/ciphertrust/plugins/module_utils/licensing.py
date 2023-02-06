@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, GETData, POSTWithoutData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, GETData, POSTWithoutData, GETIdByQueryParam
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -58,7 +58,7 @@ def getTrialLicenseId(**kwargs):
   request = {}
 
   try:
-    response = GETData(
+    response = GETIdByQueryParam(
       cm_node=kwargs["node"],
       cm_api_endpoint="licensing/trials",
     )

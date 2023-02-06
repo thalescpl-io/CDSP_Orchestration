@@ -361,7 +361,6 @@ def DeleteWithoutData(cm_node=None, cm_api_endpoint=None):
         return jsonErr
 
 def GETData(cm_node=None, cm_api_endpoint=None):
-
   # Create the session object
   node = ast.literal_eval(cm_node)
   pattern_2xx = re.compile(r'20[0-9]')
@@ -401,7 +400,7 @@ def GETData(cm_node=None, cm_api_endpoint=None):
     raise AnsibleCMException(message="TimeoutError: cm_api >> " + errt)
   except requests.exceptions.RequestException as err:
     raise AnsibleCMException(message="ErrorPath: cm_api >> " + err)
-    
+
 # Below method is outdated...need to be cleaned up later
 def GETIdByName(name=None, cm_node=None, cm_api_endpoint=None):
     # Create the session object
@@ -433,16 +432,22 @@ def GETIdByQueryParam(param=None, value=None, cm_node=None, cm_api_endpoint=None
     pattern_2xx = re.compile(r'20[0-9]')
     pattern_4xx = re.compile(r'40[0-9]')
     cmSessionObject = CMAPIObject(
-      cm_api_user=cm_node["user"],
-      cm_api_pwd=cm_node["password"],
-      cm_url=cm_node["server_ip"],
+      cm_api_user=node["user"],
+      cm_api_pwd=node["password"],
+      cm_url=node["server_ip"],
       cm_api_endpoint=cm_api_endpoint,
       verify=False,
     )
 
+    url = ''
+    if param == None:
+      url = cmSessionObject["url"]
+    else:
+      url = cmSessionObject["url"] + "/?skip=0&limit=1&" + param + "=" + value
+
     try:
       _data = requests.get(
-        cmSessionObject["url"] + "/?skip=0&limit=1&" + param + "=" + value, 
+        url,
         headers=cmSessionObject["headers"], 
         verify=False)
 
@@ -452,12 +457,12 @@ def GETIdByQueryParam(param=None, value=None, cm_node=None, cm_api_endpoint=None
         raise CMApiException(message="Error fetching data " + str(response), api_error_code=_data.status_code)
 
       if len(response["resources"]) > 0:
-        if id is not None and id in response:
-          __ret = {
-            "id": response["resources"][0][id]
-          }
+        if id == None:
+          return response
         else:
-          raise CMApiException(message="Error fetching data " + str(response), api_error_code=_data.status_code)
+        __ret = {
+          "id": response["resources"][0][id]
+        }
       else:
         raise CMApiException(message="No matching recors found", api_error_code=_data.status_code)
 

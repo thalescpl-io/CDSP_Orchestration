@@ -24,9 +24,10 @@ import os
 import requests
 import urllib3
 import json
+import ast
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.groups import addCertificateToInterface, enableInterface, disableInterface, restoreDefaultTlsCiphers, createCsr, autogenServerCert, useCertificate
+from ansible_collections.thales.ciphertrust.plugins.module_utils.interfaces import addCertificateToInterface, enableInterface, disableInterface, restoreDefaultTlsCiphers, createCsr, autogenServerCert, useCertificate
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''

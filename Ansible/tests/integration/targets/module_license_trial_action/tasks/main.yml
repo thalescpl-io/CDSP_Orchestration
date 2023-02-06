@@ -37,11 +37,11 @@
   - assert:
       that:
         - license is not failed
-        - license.id is string
+        - license.response.id is string
 
   - name: "Save trial license ID"
     set_fact:
-      trial_license_id_reg: "{{ license.id }}"
+      trial_license_id_reg: "{{ license.response.id }}"
 
   - name: "Activate Trial License"
     thales.ciphertrust.license_trial_action:

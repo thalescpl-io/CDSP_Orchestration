@@ -7,7 +7,10 @@ this_node_connection_string:
   verify: False
 
 csr_cn: test
-interface_id: nae_all_9006
 cert_bundle_pem: ""
 cert_format: PEM
-source_interface: nae_all_9008
+source_interface: nae_all_9005
+port: 9008
+type: nae
+mode: no-tls-pw-opt
+new_port: 9009

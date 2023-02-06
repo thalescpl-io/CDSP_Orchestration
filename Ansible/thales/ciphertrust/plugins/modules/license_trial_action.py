@@ -145,7 +145,7 @@ def main():
 
     if module.params.get('action_type') == 'activate':
       try:
-        respone = activateTrial(
+        response = activateTrial(
             node=module.params.get('localNode'),
             trialId=module.params.get('trialId')
         )
@@ -158,7 +158,7 @@ def main():
 
     else:
       try:
-        respone = deactivateTrial(
+        response = deactivateTrial(
             node=module.params.get('localNode'),
             trialId=module.params.get('trialId')
         )

@@ -1,16 +1,16 @@
 this_node_connection_string:
-  server_ip: 1.1.1.1
-  server_private_ip: 10.0.0.1
+  server_ip: <CM_IP_OR_FQDN>
+  server_private_ip: <CM_PRIVATE_IP>
   server_port: 5432
-  user: admin
-  password: ChangeIt!
+  user: <CM_ADMIN_USERNAME>
+  password: <CM_ADMIN_PASSWORD>
   verify: False
 
-csr_cn: test
-cert_bundle_pem: ""
-cert_format: PEM
-source_interface: nae_all_9005
-port: 9008
-type: nae
-mode: no-tls-pw-opt
-new_port: 9009
+csr_cn: <CSR_CN>
+cert_bundle_pem: <CERT_KEY_PAIR>
+cert_format: <CERT_FORMAT>
+source_interface: <SOURCE_NAE_INTERFACE>
+port: <INTERFACE_PORT>
+type: <INTERFACE_TYPE>
+mode: <INTERFACE_MODE>
+new_port: <NEW_INTERFACE_PORT>

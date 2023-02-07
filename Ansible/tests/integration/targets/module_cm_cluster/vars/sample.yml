@@ -1,15 +1,15 @@
 this_node_connection_string:
-  server_ip: 1.1.1.1
-  server_private_ip: 10.0.0.1
+  server_ip: <CM_IP_OR_FQDN>
+  server_private_ip: <CM_PRIVATE_IP>
   server_port: 5432
-  user: admin
-  password: ChangeIt!
+  user: <CM_ADMIN_USERNAME>
+  password: <CM_ADMIN_PASSWORD>
   verify: False
 
 nodes:
-  - server_ip: 2.2.2.2
-    server_private_ip: 10.0.0.5
+  - server_ip: <CM_IP_OR_FQDN>
+    server_private_ip: <CM_PRIVATE_IP>
     server_port: 5432
-    user: admin
-    password: ChangeIt!
+    user: <CM_ADMIN_USERNAME>
+    password: <CM_ADMIN_PASSWORD>
     verify: false

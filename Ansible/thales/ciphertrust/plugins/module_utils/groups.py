@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, POSTWithoutData, DeleteWithoutData, PUTData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, POSTWithoutData, DeleteWithoutData
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -50,7 +50,7 @@ def create(**kwargs):
     response = POSTData(
       payload=payload,
       cm_node=kwargs["node"],
-      cm_api_endpoint="configs/interfaces",
+      cm_api_endpoint="usermgmt/groups",
       id="name",
     )          
     return ast.literal_eval(str(response))
@@ -64,7 +64,7 @@ def patch(**kwargs):
   request = {}
 
   for key, value in kwargs.items():
-    if key not in ["node", "interface_id"] and value != None:
+    if key not in ["node", "old_name"] and value != None:
       request[key] = value
 
   payload = json.dumps(request)
@@ -73,7 +73,7 @@ def patch(**kwargs):
     response = PATCHData(
       payload=payload,
       cm_node=kwargs['node'],
-      cm_api_endpoint="configs/interfaces/" + kwargs['interface_id'],
+      cm_api_endpoint="usermgmt/groups/" + kwargs['old_name'],
     )
     return ast.literal_eval(str(response))
   except CMApiException as api_e:
@@ -81,32 +81,8 @@ def patch(**kwargs):
   except AnsibleCMException as custom_e:
     raise
 
-def addCertificateToInterface(**kwargs):
-  result = dict()
-  request = {}
-
-  for key, value in kwargs.items():
-    if key not in ["node", "interface_id"] and value != None:
-      request[key] = value
-
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/certificate"
-
-  payload = json.dumps(request)
-
-  try:
-    response = PUTData(
-      payload=payload,
-      cm_node=kwargs['node'],
-      cm_api_endpoint=url,
-    )
-    return ast.literal_eval(str(response))
-  except CMApiException as api_e:
-    raise
-  except AnsibleCMException as custom_e:
-    raise
-
-def enableInterface(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/enable"
+def addUserToGroup(**kwargs):
+  url = "usermgmt/groups/" + kwargs['name'] + "/users/" + kwargs['object_id']
 
   try:
     response = POSTWithoutData(
@@ -119,8 +95,8 @@ def enableInterface(**kwargs):
   except AnsibleCMException as custom_e:
     raise
 
-def disableInterface(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/disable"
+def addClientToGroup(**kwargs):
+  url = "client-management/groups/" + kwargs['name'] + "/clients/" + kwargs['object_id']
 
   try:
     response = POSTWithoutData(
@@ -133,77 +109,29 @@ def disableInterface(**kwargs):
   except AnsibleCMException as custom_e:
     raise
 
-def restoreDefaultTlsCiphers(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/restore-default-tls-ciphers"
+def deleteUserFromGroup(**kwargs):
+  url = "usermgmt/groups/" + kwargs['name'] + "/users/" + kwargs['object_id']
 
   try:
-    response = POSTWithoutData(
+    response = DeleteWithoutData(
       cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
-    return ast.literal_eval(str(response))
+    return str(response)
   except CMApiException as api_e:
     raise
   except AnsibleCMException as custom_e:
     raise
 
-def createCsr(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/csr"
-
-  result = dict()
-  request = {}
-
-  for key, value in kwargs.items():
-    if key not in ["node", "interface_id"] and value != None:
-      request[key] = value
-
-  payload = json.dumps(request)
+def deleteClientFromGroup(**kwargs):
+  url = "client-management/groups/" + kwargs['name'] + "/clients/" + kwargs['object_id']
 
   try:
-    response = POSTData(
-      payload=payload,
-      cm_node=kwargs["node"],
-      cm_api_endpoint=url,
-    )          
-    return ast.literal_eval(str(response))
-  except CMApiException as api_e:
-    raise
-  except AnsibleCMException as custom_e:
-    raise
-
-def autogenServerCert(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/auto-gen-server-cert"
-
-  try:
-    response = POSTWithoutData(
+    response = DeleteWithoutData(
       cm_node=kwargs['node'],
       cm_api_endpoint=url,
     )
-    return ast.literal_eval(str(response))
-  except CMApiException as api_e:
-    raise
-  except AnsibleCMException as custom_e:
-    raise
-
-def useCertificate(**kwargs):
-  url = "configs/interfaces/" + kwargs['interface_id'] + "/use-certificate"
-
-  result = dict()
-  request = {}
-
-  for key, value in kwargs.items():
-    if key not in ["node", "interface_id"] and value != None:
-      request[key] = value
-
-  payload = json.dumps(request)
-
-  try:
-    response = POSTData(
-      payload=payload,
-      cm_node=kwargs["node"],
-      cm_api_endpoint=url,
-    )          
-    return ast.literal_eval(str(response))
+    return str(response)
   except CMApiException as api_e:
     raise
   except AnsibleCMException as custom_e:

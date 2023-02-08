@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) 2022 Thales Group. All rights reserved.
+# (c) 2023 Thales Group. All rights reserved.
+# Author: Anurag Jain, Developer Advocate, Thales
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
@@ -24,15 +26,15 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, DELETEByNameOrId
+from ansible_collections.thales.ciphertrust.plugins.module_utils.licensing import activateTrial, deactivateTrial
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
-module: cm_resource_delete
+module: license_trial_action
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically delete resource APIs.
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with trials activation and deactivation API
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -68,69 +70,52 @@ options:
             description: if SSL verification is required
             type: bool
             required: true
-            default: false
-    key:
-        description:
-            - This is a string type of option that can have either the name of the ID of the resource to be deleted
+            default: false     
+    action_type:
+        description: Operation to be performed on the trial license
+        choices: [activate, deactivate]
         required: true
         type: str
-    resource_type:
-        description:
-            - This is a string type of option that can hold the resource type.
+    trialId:
+        description: CM ID of the trial license
         required: true
-        choices:
-            - keys
-            - protection-policies
-            - access-policies
-            - user-sets
-            - interfaces
-            - character-sets
-            - users
-            - dpg-policies
-            - client-profiles
-            - masking-formats
         type: str
+
 '''
 
 EXAMPLES = '''
-# Delete Resource at CipherTrust Manager
-- name: "Delete key on Ciphertrust Manager"
-  thales.ciphertrust.cm_resource_delete:
-    localNode: 
+- name: "Activate Trial License"
+  thales.ciphertrust.license_trial_action:
+    localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    key: "resource_id"
-    resource_type: "keys"
+    action_type: activate
+    trialId: trial_id
+
+- name: "De-activate Trial License"
+  thales.ciphertrust.license_trial_action:
+    localNode:
+        server_ip: "IP/FQDN of CipherTrust Manager"
+        server_private_ip: "Privare IP in case that is different from above"
+        server_port: 5432
+        user: "CipherTrust Manager Username"
+        password: "CipherTrust Manager Password"
+        verify: false
+    action_type: deactivate
+    trialId: trial_id
 '''
 
 RETURN = '''
-message:
-    description: String with response
-    returned: changed or success
-    type: string
-    sample: succesfully deleted
+
 '''
 
-_arr_resource_type_choices = [
-    'keys', 
-    'protection-policies', 
-    'access-policies', 
-    'user-sets', 
-    'interfaces', 
-    'character-sets', 
-    'users', 
-    'dpg-policies', 
-    'client-profiles', 
-    'masking-formats'
-]
-
 argument_spec = dict(
-    key=dict(type='str', required=True),
-    resource_type=dict(type='str', choices=_arr_resource_type_choices, required=True),
+    action_type=dict(type='str', options=['activate', 'deactivate'], required=True),
+    trialId=dict(type='str', required=True),
 )
 
 def validate_parameters(user_module):
@@ -146,6 +131,7 @@ def setup_module_object():
     return module
 
 def main():
+
     global module
     
     module = setup_module_object()
@@ -157,29 +143,32 @@ def main():
         changed=False,
     )
 
-    endpoint = ''
-    #Create the API end point based on the resource_type
-    if resource_type == "keys":
-        endpoint = 'vault/keys2'
-    elif resource_type == "interfaces":
-        endpoint = 'configs/interfaces'
-    elif resource_type == "users":
-        endpoint = 'usermgmt/users'
-    else:
-        module.fail_json(msg='resource_type not supported yet')
-
-    try:
-        response = DELETEByNameOrId(
-            key=key,
-            cm_node=localNode,
-            cm_api_endpoint=endpoint
+    if module.params.get('action_type') == 'activate':
+      try:
+        response = activateTrial(
+            node=module.params.get('localNode'),
+            trialId=module.params.get('trialId')
         )
         result['response'] = response
-    except CMApiException as api_e:
+      except CMApiException as api_e:
         if api_e.api_error_code:
           module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
-    except AnsibleCMException as custom_e:
+      except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
+
+    else:
+      try:
+        response = deactivateTrial(
+            node=module.params.get('localNode'),
+            trialId=module.params.get('trialId')
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+    #result['response'] = response
 
     module.exit_json(**result)
 

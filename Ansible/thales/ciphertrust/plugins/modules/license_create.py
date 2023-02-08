@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) 2022 Thales Group. All rights reserved.
+# (c) 2023 Thales Group. All rights reserved.
+# Author: Anurag Jain, Developer Advocate, Thales
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
@@ -24,15 +26,15 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, DELETEByNameOrId
+from ansible_collections.thales.ciphertrust.plugins.module_utils.licensing import addLicense
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
-module: cm_resource_delete
+module: license_create
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically delete resource APIs.
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with trials management API
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -68,69 +70,38 @@ options:
             description: if SSL verification is required
             type: bool
             required: true
-            default: false
-    key:
-        description:
-            - This is a string type of option that can have either the name of the ID of the resource to be deleted
+            default: false     
+    license:
+        description: License string
         required: true
         type: str
-    resource_type:
-        description:
-            - This is a string type of option that can hold the resource type.
-        required: true
-        choices:
-            - keys
-            - protection-policies
-            - access-policies
-            - user-sets
-            - interfaces
-            - character-sets
-            - users
-            - dpg-policies
-            - client-profiles
-            - masking-formats
+    bind_type:
+        description: Binding type for this license. Can be either 'instance' or 'cluster'. If omitted, then CM attempts to bind the license to the cluster. If this step fails with a lock code error, it will attempt to bind to the instance.
+        required: false
         type: str
+
 '''
 
 EXAMPLES = '''
-# Delete Resource at CipherTrust Manager
-- name: "Delete key on Ciphertrust Manager"
-  thales.ciphertrust.cm_resource_delete:
-    localNode: 
+- name: "Add License"
+  thales.ciphertrust.license_create:
+    localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Privare IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
         verify: false
-    key: "resource_id"
-    resource_type: "keys"
+    license: license_string
 '''
 
 RETURN = '''
-message:
-    description: String with response
-    returned: changed or success
-    type: string
-    sample: succesfully deleted
+
 '''
 
-_arr_resource_type_choices = [
-    'keys', 
-    'protection-policies', 
-    'access-policies', 
-    'user-sets', 
-    'interfaces', 
-    'character-sets', 
-    'users', 
-    'dpg-policies', 
-    'client-profiles', 
-    'masking-formats'
-]
-
 argument_spec = dict(
-    key=dict(type='str', required=True),
-    resource_type=dict(type='str', choices=_arr_resource_type_choices, required=True),
+    license=dict(type='str', options=['create', 'patch'], required=True),
+    bind_type=dict(type='str'),
 )
 
 def validate_parameters(user_module):
@@ -146,6 +117,7 @@ def setup_module_object():
     return module
 
 def main():
+
     global module
     
     module = setup_module_object()
@@ -157,29 +129,18 @@ def main():
         changed=False,
     )
 
-    endpoint = ''
-    #Create the API end point based on the resource_type
-    if resource_type == "keys":
-        endpoint = 'vault/keys2'
-    elif resource_type == "interfaces":
-        endpoint = 'configs/interfaces'
-    elif resource_type == "users":
-        endpoint = 'usermgmt/users'
-    else:
-        module.fail_json(msg='resource_type not supported yet')
-
     try:
-        response = DELETEByNameOrId(
-            key=key,
-            cm_node=localNode,
-            cm_api_endpoint=endpoint
-        )
-        result['response'] = response
+      response = addLicense(
+        node=module.params.get('localNode'),
+        license=module.params.get('license'),
+        bind_type=module.params.get('bind_type'),
+      )
+      result['response'] = response
     except CMApiException as api_e:
-        if api_e.api_error_code:
-          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      if api_e.api_error_code:
+        module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
     except AnsibleCMException as custom_e:
-        module.fail_json(msg=custom_e.message)
+      module.fail_json(msg=custom_e.message)
 
     module.exit_json(**result)
 

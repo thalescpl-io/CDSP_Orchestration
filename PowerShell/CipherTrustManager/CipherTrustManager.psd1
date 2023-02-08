@@ -96,6 +96,7 @@
         "Remove-CMKey",
         "Find-CMUsers",
         "New-CMUser",
+        "Get-CMUser",
         "Remove-CMUser",
         "Find-CMInterfaces",
         "New-CMInterface",

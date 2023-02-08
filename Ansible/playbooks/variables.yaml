@@ -1,0 +1,46 @@
+this_node_address: 10.10.10.10
+this_node_private_ip: 10.0.0.4
+this_node_username: admin
+this_node_password: ChangeIt!
+
+cluster_nodes:
+  - public_address: 20.20.20.20
+    private_address: 10.0.0.7
+    username: admin
+    password: ChangeIt!
+      
+this_node_connection_string:
+  server_ip: "{{ this_node_address }}"
+  server_private_ip: "{{ this_node_private_ip }}"
+  server_port: 5432
+  user: "{{ this_node_username }}"
+  password: "{{ this_node_password }}"
+  verify: false
+
+dpg_key_name: AnsibleKey
+nae_port_number: 9006
+char_set_name: AnsibleCharset
+fpe_card_protection_policy_name: "AnsibleProtPolicyCard"
+non_card_protection_policy_name: "AnsibleProtPolicyNonCard"
+access_policy_name: AnsibleAccessPolicy
+var_users:
+  - username: "AnsibleUser1"
+    password: "KeySecure01!"
+  - username: "AnsibleUser2"
+    password: "KeySecure01!"
+var_usersets:
+  - name: "AnsibleUserset101"
+    users:
+      - ccaccountowner
+  - name: "AnsibleUserset102"
+    users:
+      - AnsibleUser1
+      - AnsibleUser2
+var_usersetPolicies:
+  - user_set_name: "AnsibleUserset101"
+    reveal_type: "Plaintext"
+  - user_set_name: "AnsibleUserset102"
+    reveal_type: "Masked Value"
+    masking_format_name: "SHOW_LAST_FOUR"
+dpg_policy_name: AnsibleDpgPolicy
+client_profile_name: AnsibleClientProfile

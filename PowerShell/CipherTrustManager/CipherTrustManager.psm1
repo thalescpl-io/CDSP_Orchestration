@@ -111,6 +111,7 @@ Export-ModuleMember -Function Remove-CMKey
 #Users
 Export-ModuleMember -Function Find-CMUsers
 Export-ModuleMember -Function New-CMUser
+Export-ModuleMember -Function Get-CMUser
 Export-ModuleMember -Function Remove-CMUser
 #Tokens
 Export-ModuleMember -Function Get-CM_AuthTokens

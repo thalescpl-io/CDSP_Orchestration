@@ -192,7 +192,6 @@ def main():
         changed=False,
     )
 
-#Change below this
     if module.params.get('op_type') == 'add':
       if module.params.get('object_type') == 'user':
         try:

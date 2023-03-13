@@ -27,7 +27,6 @@ import json
 import ast
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData
-#from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, POSTWithoutData, DeleteWithoutData, PUTData
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -37,92 +36,117 @@ def is_json(myjson):
     return False
   return True
 
-def new(node):
-    result = dict()
-    
-    request = {
-        "localNodeHost":node["server_private_ip"],
-        "localNodePort":node["server_port"],
-        "publicAddress":node["server_ip"],
-    }
-    payload = json.dumps(request)
+# Utils function to create a new single node cluster
+# Node information is required as an argument to this method
+def new(**kwargs):
+  result = dict()
+  request = {}
 
-    try:
+  node = kwargs['node']
+  cm = ast.literal_eval(node)
+  
+  request["localNodeHost"] = cm["server_private_ip"]
+  request["localNodePort"] = cm["server_port"]
+  request["publicAddress"] = cm["server_ip"]
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+          payload=payload,
+          cm_node=kwargs['node'],
+          cm_api_endpoint="cluster/new",
+      )
+    return 'Cluster creation initiated succesfully!'
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def csr(**kwargs):
+  master = kwargs['master']
+  node = kwargs['node']
+
+  master_cm = ast.literal_eval(master)
+  node_cm = ast.literal_eval(node)
+  
+  request = {}
+  request["localNodeHost"] = node_cm["server_private_ip"]
+  request["publicAddress"] = master_cm["server_ip"]
+  payload = json.dumps(request)
+
+  try:
       response = POSTData(
-            payload=payload,
-            cm_node=node,
-            cm_api_endpoint="cluster/new",
-        )
-      return 'Cluster creation success!'
-    except CMApiException as api_e:
-      raise
-    except AnsibleCMException as custom_e:
-      raise
+          payload=payload,
+          cm_node=node,
+          cm_api_endpoint="cluster/csr"
+      )
+      return response["csr"]
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
 
-def csr(master, node):
-    request = {
-        "localNodeHost":node["server_private_ip"],
-        "publicAddress":master["server_ip"],
-    }
-    payload = json.dumps(request)
+def sign(**kwargs):
+  master = kwargs['master']
+  node = kwargs['node']
+  csr = kwargs['csr']
 
-    try:
-        response = POSTData(
-            payload=payload,
-            cm_node=node,
-            cm_api_endpoint="cluster/csr"
-        )
-        return response["csr"]
-    except CMApiException as api_e:
-      raise
-    except AnsibleCMException as custom_e:
-      raise
+  master_cm = ast.literal_eval(master)
+  node_cm = ast.literal_eval(node)
 
-def sign(master, node, csr):
-    result=dict()
-    request = {
-        "csr":csr,
-        "shared_hsm_partition":False,
-        "newNodeHost":node["server_private_ip"],
-        "publicAddress":master["server_ip"],
-    }
-    payload = json.dumps(request)
+  result=dict()
+  request = {}
+  request["csr"] = csr
+  request["shared_hsm_partition"] = False
+  request["newNodeHost"] = node_cm["server_private_ip"]
+  request["publicAddress"] = master_cm["server_ip"]
+  payload = json.dumps(request)
 
-    try:
-        response = POSTData(
-            payload=payload,
-            cm_node=master,
-            cm_api_endpoint="nodes"
-        )
-        return response
-    except CMApiException as api_e:
-      raise
-    except AnsibleCMException as custom_e:
-      raise
+  try:
+      response = POSTData(
+          payload=payload,
+          cm_node=master,
+          cm_api_endpoint="nodes"
+      )
+      return response
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
 
 def join(master, node, cert, caChain, mkek_blob):
-    result = dict()
-    request = {
-        "cert":cert,
-        "cachain":caChain,
-        "localNodeHost":node["server_private_ip"],
-        "localNodePort":5432,
-        "localNodePublicAddress":node["server_ip"],
-        "memberNodeHost":master["server_private_ip"],
-        "memberNodePort":5432,
-        "mkek_blob":mkek_blob,
-        "blocking":False,
-    }
-    payload = json.dumps(request)
+  master = kwargs['master']
+  node = kwargs['node']
+  cert = kwargs['cert']
+  caChain = kwargs['caChain']
+  mkek_blob = kwargs['mkek_blob']
+  
+  master_cm = ast.literal_eval(master)
+  node_cm = ast.literal_eval(node)
+  
+  result = dict()
+  request = {}
 
-    try:
-        response = POSTData(
-                payload=payload,
-                cm_node=node,
-                cm_api_endpoint="cluster/join"
-            )
-        return response
-    except CMApiException as api_e:
-      raise
-    except AnsibleCMException as custom_e:
-      raise
+  request["cert"] = cert
+  request["cachain"] = caChain
+  request["localNodeHost"] = node_cm["server_private_ip"]
+  request["localNodePort"] = 5432
+  request["localNodePublicAddress"] = node_cm["server_ip"]
+  request["memberNodeHost"] = master_cm["server_private_ip"]
+  request["memberNodePort"] = 5432
+  request["mkek_blob"] = mkek_blob
+  request["blocking"] = False
+
+  payload = json.dumps(request)
+
+  try:
+      response = POSTData(
+              payload=payload,
+              cm_node=node,
+              cm_api_endpoint="cluster/join"
+          )
+      return response
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise

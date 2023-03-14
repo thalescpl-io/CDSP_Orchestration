@@ -1,5 +1,5 @@
 # Ansible Collection
-For IT admins and DevOps teams who use Red Hat® Ansible® to manage their infrastructure, we have provided Ansible Modules and Playbooks that interfaces with each of the products within the CipherTrust Data Security Platform.
+For IT admins and DevOps teams who use Red Hat® Ansible® to manage their infrastructure, we have provided Ansible Modules and Playbooks that interfaces with each of the products within the CipherTrust Data Security Platform and IBM Guardium Data Encryption.
 
 ## Ansible version compatibility
 Tested with the Ansible Core 2.12, and 2.13 releases, and the current development version of Ansible. Ansible Core versions before 2.11.0 are not tested.

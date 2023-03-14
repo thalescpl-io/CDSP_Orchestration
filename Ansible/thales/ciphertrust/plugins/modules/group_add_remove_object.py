@@ -102,7 +102,7 @@ EXAMPLES = '''
   thales.ciphertrust.group_add_remove_object:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Privare IP in case that is different from above"
+        server_private_ip: "Private IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
@@ -116,7 +116,7 @@ EXAMPLES = '''
   thales.ciphertrust.group_add_remove_object:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Privare IP in case that is different from above"
+        server_private_ip: "Private IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
@@ -130,7 +130,7 @@ EXAMPLES = '''
   thales.ciphertrust.group_add_remove_object:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Privare IP in case that is different from above"
+        server_private_ip: "Private IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
@@ -144,7 +144,7 @@ EXAMPLES = '''
   thales.ciphertrust.group_add_remove_object:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Privare IP in case that is different from above"
+        server_private_ip: "Private IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"

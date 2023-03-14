@@ -98,7 +98,7 @@ EXAMPLES = '''
   thales.ciphertrust.cm_resource_delete:
     localNode: 
         server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Privare IP in case that is different from above"
+        server_private_ip: "Private IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
@@ -112,7 +112,7 @@ message:
     description: String with response
     returned: changed or success
     type: string
-    sample: succesfully deleted
+    sample: successfully deleted
 '''
 
 _arr_resource_type_choices = [

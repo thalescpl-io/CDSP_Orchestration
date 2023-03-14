@@ -103,7 +103,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
       if id is not None and id in response:
         __ret = {
           "id": response[id],
-          "message": "Resource created sucessfully"
+          "message": "Resource created successfully"
         }
       else:
         if "codeDesc" in json.dumps(response):
@@ -112,7 +112,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
             if id is None:
                 if pattern_2xx.search(str(response)) or pattern_2xx.search(str(_data.status_code)):
                   __ret = {
-                    "message": "Resource created sucessfully",
+                    "message": "Resource created successfully",
                     "description": str(response)
                   }
                 elif pattern_4xx.search(str(response)) or pattern_4xx.search(str(_data.status_code)):
@@ -158,12 +158,12 @@ def PUTData(payload=None, cm_node=None, cm_api_endpoint=None):
           raise CMApiException(message="Error updating resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
         else:
           __ret = {
-            "message": "Resource updated sucessfully",
+            "message": "Resource updated successfully",
           }
       else:
         if pattern_2xx.search(str(response)):
           __ret = {
-            "message": "Resource updated sucessfully",
+            "message": "Resource updated successfully",
             "description": str(response)
           }
         elif pattern_4xx.search(str(response)):
@@ -206,12 +206,12 @@ def POSTWithoutData(cm_node=None, cm_api_endpoint=None):
           raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
         else:
           __ret = {
-            "message": "Resource created sucessfully",
+            "message": "Resource created successfully",
           }
       else:
         if pattern_2xx.search(str(response)):
           __ret = {
-            "message": "Resource created sucessfully",
+            "message": "Resource created successfully",
             "description": str(response)
           }
         elif pattern_4xx.search(str(response)):
@@ -254,12 +254,12 @@ def PATCHData(payload=None, cm_node=None, cm_api_endpoint=None):
           raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
         else:
           __ret = {
-            "message": "Resource updated succesfully",
+            "message": "Resource updated successfully",
           }
       else:
         if pattern_2xx.search(str(response)):
           __ret = {
-            "message": "Resource updated succesfully",
+            "message": "Resource updated successfully",
             "status_code": str(response)
           }
         elif pattern_4xx.search(str(response)):
@@ -297,12 +297,12 @@ def DELETEByNameOrId(key=None, cm_node=None, cm_api_endpoint=None):
           raise CMApiException(message="Error deleting resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
         else:
           __ret = {
-            "message": "Resource deletion succesful",
+            "message": "Resource deletion successful",
           }
       else:
         if pattern_2xx.search(str(response)):
           __ret = {
-            "message": "Resource deletion succesful",
+            "message": "Resource deletion successful",
             "status_code": str(response)
           }
         elif pattern_4xx.search(str(response)):
@@ -340,10 +340,10 @@ def DeleteWithoutData(cm_node=None, cm_api_endpoint=None):
           if "codeDesc" in response.json():
             raise CMApiException(message="Error creating resource < " + response["codeDesc"] + " >", api_error_code=response.status_code)
           else:
-              return 'Resource deleted succesfully'
+              return 'Resource deleted successfully'
       else:
           if pattern_2xx.search(str(response)):
-              return 'Resource deleted succesfully'
+              return 'Resource deleted successfully'
           elif pattern_4xx.search(str(response)):
             raise CMApiException(message="Error deleting resource " + str(response), api_error_code=response.status_code)
           else:
@@ -389,7 +389,7 @@ def GETData(cm_node=None, cm_api_endpoint=None):
         "id": response["resources"][0][id]
       }
     else:
-      raise CMApiException(message="No recors found", api_error_code=_data.status_code)
+      raise CMApiException(message="No records found", api_error_code=_data.status_code)
 
     return __ret
   except requests.exceptions.HTTPError as errh:
@@ -464,7 +464,7 @@ def GETIdByQueryParam(param=None, value=None, cm_node=None, cm_api_endpoint=None
             "id": response["resources"][0][id]
           }
       else:
-        raise CMApiException(message="No matching recors found", api_error_code=_data.status_code)
+        raise CMApiException(message="No matching records found", api_error_code=_data.status_code)
 
       return __ret
     except requests.exceptions.HTTPError as errh:

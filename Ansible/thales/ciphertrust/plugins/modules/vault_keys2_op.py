@@ -429,7 +429,7 @@ EXAMPLES = '''
   thales.ciphertrust.vault_keys2_create:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Privare IP in case that is different from above"
+        server_private_ip: "Private IP in case that is different from above"
         server_port: 5432
         user: "CipherTrust Manager Username"
         password: "CipherTrust Manager Password"
@@ -676,7 +676,6 @@ def main():
         
     else:
         module.fail_json(msg="invalid op_type")
-    #result['response'] = response
 
     module.exit_json(**result)
 

@@ -56,7 +56,7 @@ def new(**kwargs):
           cm_node=kwargs['node'],
           cm_api_endpoint="cluster/new",
       )
-    return 'Cluster creation initiated succesfully!'
+    return 'Cluster creation initiated successfully!'
   except CMApiException as api_e:
     raise
   except AnsibleCMException as custom_e:

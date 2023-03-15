@@ -40,8 +40,8 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
         type: dict
+        required: true
         suboptions:
           server_ip:
             description: CM Server IP or FQDN

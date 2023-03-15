@@ -42,7 +42,7 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
+        required: true
         type: dict
         suboptions:
           server_ip:
@@ -74,8 +74,8 @@ options:
     op_type:
         description: 
           - Operation to be performed
-          - add: user or client to a group
-          - remove: remove user or client from a group
+          - add to add a user or client to a group
+          - remove to remove a user or client from a group
         choices: [add, remove]
         required: true
         type: str
@@ -249,7 +249,6 @@ def main():
             module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
         except AnsibleCMException as custom_e:
           module.fail_json(msg=custom_e.message)
-    #result['response'] = response
 
     module.exit_json(**result)
 

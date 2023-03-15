@@ -44,7 +44,7 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
+        required: true
         type: dict
         suboptions:
           server_ip:
@@ -92,7 +92,7 @@ options:
         description: A schema-less object, which can be used by applications to store information about the resource. app_metadata is typically used by applications to store information which the end-users are not themselves allowed to change, like group membership or security roles.
         required: false
         type: dict
-        default: None
+        default: null
     certificate_subject_dn:
         description: The Distinguished Name of the user in certificate
         required: false

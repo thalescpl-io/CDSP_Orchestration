@@ -137,7 +137,7 @@ options:
     description: Name fields like O, OU, L, ST, C
     type: list
     elements: dict
-    default: none
+    default: []
     required: false
   copy_from:
     description: 

@@ -164,14 +164,14 @@ options:
         description: 
           - Specifies the encoding used for the 'material' field.
           - This parameter is used during importing keys when key material is not empty or while returning the key material after the key is created ('includeMaterial' is true)
-          - For wrapping scenarios and PKCS12 format, the only valid option is base64. In case of "Symmetric Keys" when 'format' parameter has 'base64' value and 'encoding' parameter also contains some value; the encoding parameter takes the priority. Following are the options for Symmetric Keys: [hex, base64]
+          - For wrapping scenarios and PKCS12 format, the only valid option is base64. In case of "Symmetric Keys" when 'format' parameter has 'base64' value and 'encoding' parameter also contains some value. The encoding parameter takes the priority. Following are the options for Symmetric Keys are hex or base64
         type: str
         required: false
         default: null
     format:
         description: 
           - This parameter is used while importing keys ('material' is not empty), and also when returning the key material after the key is created ('includeMaterial' is true).
-          - For Asymmetric keys, When this parameter is not specified, while importing keys, the format of the material is inferred from the material itself. When this parameter is specified, while importing keys, the only allowed format is 'pkcs12', and this only applies to the 'rsa' algorithm (the 'material' should contain the base64 encoded value of the PFX file in this case). Options: [pkcs1, pkcs8 (default), pkcs12]
+          - For Asymmetric keys, When this parameter is not specified, while importing keys, the format of the material is inferred from the material itself. When this parameter is specified, while importing keys, the only allowed format is 'pkcs12', and this only applies to the 'rsa' algorithm (the 'material' should contain the base64 encoded value of the PFX file in this case). Options are pkcs1, pkcs8 (default) or pkcs12
           - For Symmetric keys, When importing keys if specified, the value must be given according to the format of the material. Options are raw or opaque
         type: str
         required: false
@@ -543,7 +543,7 @@ options:
     wrappingHashAlgo:
         description:
           - This parameter specifies the hashing algorithm used if "wrappingMethod" corresponds to "mac/sign". In case of MAC operation, the hashing algorithm used will be inferred from the type of HMAC key("macSignKeyIdentifier").
-          - In case of SIGN operation, the possible values are: choices=[sha1, sha224, sha256, sha384, sha512]
+          - In case of SIGN operation, the possible values are sha1, sha224, sha256, sha384 or sha512
         type: str
         required: false
         default: null

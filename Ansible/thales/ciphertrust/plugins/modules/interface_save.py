@@ -131,7 +131,7 @@ options:
     interface_type:
         description: This parameter is used to identify the type of interface, what service to run on the interface.
         required: false
-        default nae
+        default: nae
         choices:
             - web
             - kmip
@@ -186,7 +186,7 @@ options:
         type: str
     mode:
         description: 
-          - The interface mode can be one of the following: no-tls-pw-opt, no-tls-pw-req, unauth-tls-pw-opt, tls-cert-opt-pw-opt, tls-pw-opt, tls-pw-req, tls-cert-pw-opt, or tls-cert-and-pw. Default mode is no-tls-pw-opt.
+          - The interface mode can be one of no-tls-pw-opt, no-tls-pw-req, unauth-tls-pw-opt, tls-cert-opt-pw-opt, tls-pw-opt, tls-pw-req, tls-cert-pw-opt, or tls-cert-and-pw. Default mode is no-tls-pw-opt.
         required: false
         default: no-tls-pw-opt
         choices:
@@ -217,11 +217,6 @@ options:
     trusted_cas:
         description:
           - Collection of local and external CA IDs to trust for client authentication. See section "Certificate Authority" for more details.
-          - Example:
-            {
-              "local": ["kylo:kylo:naboo:localca:634c90f4-808d-11e8-8711-77b786d179d5", "kylo:kylo:naboo:localca:67e6e8f8-808d-11e8-981b-f30fc34129ae"],
-              "external": ["kylo:kylo:naboo:external_ca:747b27d2-808d-11e8-b9ba-bf6d65974e66"]
-            }
         type: dict
         default: none
         required: false
@@ -290,7 +285,7 @@ options:
           default: none
           required: true
         enabled:
-          description: TLS cipher suite enabled flag. If set to true, cipher suite will be available for TLS hanshake.
+          description: TLS cipher suite enabled flag. If set to true, cipher suite will be available for TLS handshake.
           type: bool
           default: none
           required: true

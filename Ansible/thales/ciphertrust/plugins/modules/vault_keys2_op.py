@@ -107,8 +107,8 @@ options:
         default: null
     reason:
         description: 
-          - The reason the key is being revoked. Choices are: [Unspecified, KeyCompromise, CACompromise, AffiliationChanged, Superseded, CessationOfOperation, PrivilegeWithdrawn]
-          - The reason the key is being reactivated. Choices are: [DeactivatedToActive, ActiveProtectStopToActive, DeactivatedToActiveProtectStop]
+          - The reason the key is being revoked. Choices are Unspecified, KeyCompromise, CACompromise, AffiliationChanged, Superseded, CessationOfOperation or PrivilegeWithdrawn
+          - The reason the key is being reactivated. Choices are DeactivatedToActive, ActiveProtectStopToActive or DeactivatedToActiveProtectStop
           - Required if op_type is either revoke or reactivate
         type: str
         default: null
@@ -136,8 +136,8 @@ options:
         required: false
     encoding:
         description: 
-          - Specifies the encoding used for the 'material' field.
-          - For wrapping scenarios and PKCS12 format, the only valid option is base64. In case of "Symmetric Keys" when 'format' parameter has 'base64' value and 'encoding' parameter also contains some value; the encoding parameter takes the priority. Following are the options for Symmetric Keys: [hex, base64]
+          - Specifies the encoding used for the material field.
+          - For wrapping scenarios and PKCS12 format, the only valid option is base64. In case of "Symmetric Keys" when 'format' parameter has 'base64' value and 'encoding' parameter also contains some value. The encoding parameter takes the priority. Options for Symmetric Keys are hex or base64
           - Only applicable for op_type "export"
         type: str
         required: false
@@ -387,7 +387,7 @@ options:
     wrappingHashAlgo:
         description:
           - This parameter specifies the hashing algorithm used if "wrappingMethod" corresponds to "mac/sign". In case of MAC operation, the hashing algorithm used will be inferred from the type of HMAC key("macSignKeyIdentifier").
-          - In case of SIGN operation, the possible values are: choices=[sha1, sha224, sha256, sha384, sha512]
+          - In case of SIGN operation, the possible values are sha1, sha224, sha256, sha384 or sha512
           - Only applicable for op_type "export"
         type: str
         required: false

@@ -39,113 +39,113 @@ description:
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
-    localNode:
-        description:
-            - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
-            - holds IP/FQDN of the server, username, password, and port 
-        required: true
-        type: dict
-        suboptions:
-          server_ip:
-            description: CM Server IP or FQDN
-            type: str
-            required: true
-          server_private_ip:
-            description: internal or private IP of the CM Server, if different from the server_ip
-            type: str
-            required: true
-          server_port:
-            description: Port on which CM server is listening
-            type: int
-            required: true
-            default: 5432
-          user:
-            description: admin username of CM
-            type: str
-            required: true
-          password:
-            description: admin password of CM
-            type: str
-            required: true
-          verify:
-            description: if SSL verification is required
-            type: bool
-            required: true
-            default: false     
-    op_type:
-        description: Operation to be performed
-        choices: [put_certificate, enable, disable, restore-default-tls-ciphers, csr, auto-gen-server-cert, use-certificate]
-        required: true
+  localNode:
+    description:
+      - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
+      - holds IP/FQDN of the server, username, password, and port 
+    required: true
+    type: dict
+    suboptions:
+      server_ip:
+        description: CM Server IP or FQDN
         type: str
-    interface_id:
-        description:
-            - Identifier of the interface to be updated
         required: true
+      server_private_ip:
+        description: internal or private IP of the CM Server, if different from the server_ip
         type: str
-    certificate:
-      description: 
-        - The certificate and key data in PEM format or base64 encoded PKCS12 format. A chain chain of certs may be included - it must be in ascending order (server to root ca).
-        - required if op_type is put_certificate
+        required: true
+      server_port:
+        description: Port on which CM server is listening
+        type: int
+        required: true
+        default: 5432
+      user:
+        description: admin username of CM
+        type: str
+        required: true
+      password:
+        description: admin password of CM
+        type: str
+        required: true
+      verify:
+        description: if SSL verification is required
+        type: bool
+        required: true
+        default: false
+  op_type:
+      description: Operation to be performed
+      choices: [put_certificate, enable, disable, restore-default-tls-ciphers, csr, auto-gen-server-cert, use-certificate]
+      required: true
       type: str
-      default: none
-      required: false
-    format:
-      description: 
-        - The format of the certificate data (PEM or PKCS12).
-        - required if op_type is put_certificate
+  interface_id:
+      description:
+          - Identifier of the interface to be updated
+      required: true
       type: str
-      default: none
-      required: false
-    generate:
-      description: 
-        - Create a new self-signed certificate
-      type: str
-      default: none
-      required: false
-    password:
-      description: 
-        - Password to the encrypted key
-      type: str
-      default: none
-      required: false
-    cn:
-      description: 
-        - Common name
-        - required if op_type is csr
-      type: str
-      default: none
-      required: false
-    dns_names:
-      description: Subject Alternative Names (SAN) DNS names
-      type: list
-      elements: str
-      default: none
-      required: false
-    email_addresses:
-      description: Subject Alternative Names (SAN) Email addresses
-      type: list
-      elements: str
-      default: none
-      required: false
-    ip_addresses:
-      description: Subject Alternative Names (SAN) IP addresses
-      type: list
-      elements: str
-      default: none
-      required: false
-    names:
-      description: Name fields are "O=organization, OU=organizational unit, L=location, ST=state/province, C=country". Example: [{"O": "Thales Group", "OU": "CPL", "C": "US", "ST": "MD", "L": "Belcamp"}, {"OU": "Thales Group Inc."}]
-      type: list
-      elements: dict
-      default: none
-      required: false
-    copy_from:
-      description: 
-        - Source interface name
-        - required if op_type is use-certificate
-      type: str
-      default: none
-      required: false
+  certificate:
+    description: 
+      - The certificate and key data in PEM format or base64 encoded PKCS12 format. A chain chain of certs may be included - it must be in ascending order (server to root ca).
+      - required if op_type is put_certificate
+    type: str
+    default: none
+    required: false
+  format:
+    description: 
+      - The format of the certificate data (PEM or PKCS12).
+      - required if op_type is put_certificate
+    type: str
+    default: none
+    required: false
+  generate:
+    description: 
+      - Create a new self-signed certificate
+    type: str
+    default: none
+    required: false
+  password:
+    description: 
+      - Password to the encrypted key
+    type: str
+    default: none
+    required: false
+  cn:
+    description: 
+      - Common name
+      - required if op_type is csr
+    type: str
+    default: none
+    required: false
+  dns_names:
+    description: Subject Alternative Names (SAN) DNS names
+    type: list
+    elements: str
+    default: none
+    required: false
+  email_addresses:
+    description: Subject Alternative Names (SAN) Email addresses
+    type: list
+    elements: str
+    default: none
+    required: false
+  ip_addresses:
+    description: Subject Alternative Names (SAN) IP addresses
+    type: list
+    elements: str
+    default: none
+    required: false
+  names:
+    description: Name fields like O, OU, L, ST, C
+    type: list
+    elements: dict
+    default: none
+    required: false
+  copy_from:
+    description: 
+      - Source interface name
+      - required if op_type is use-certificate
+    type: str
+    default: none
+    required: false
 '''
 
 EXAMPLES = '''

@@ -268,7 +268,7 @@ options:
           default: none
           required: false
         names:
-          description: Name fields are "O=organization, OU=organizational unit, L=location, ST=state/province, C=country". Example: [{"O": "Thales Group", "OU": "CPL", "C": "US", "ST": "MD", "L": "Belcamp"}, {"OU": "Thales Group Inc."}]
+          description: Name fields like O, OU, L, ST, C
           type: list
           elements: dict
           default: none

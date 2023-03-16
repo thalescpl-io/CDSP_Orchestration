@@ -111,7 +111,6 @@ options:
         required: false
         default: null
         type: dict
-        suboptions: schema-less
     parent_ca_id:
         description: This optional parameter is the ID or URI of the parent domain's CA. This CA is used for signing the default CA of a newly created sub-domain. The oldest CA in the parent domain is used if this value is not supplied.
         required: false

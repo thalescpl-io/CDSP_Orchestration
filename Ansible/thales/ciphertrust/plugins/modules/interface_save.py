@@ -266,7 +266,7 @@ options:
           description: Name fields like O, OU, L, ST, C
           type: list
           elements: dict
-          default: none
+          default: []
           required: false
         uid:
           description: User ID
@@ -287,7 +287,7 @@ options:
         enabled:
           description: TLS cipher suite enabled flag. If set to true, cipher suite will be available for TLS handshake.
           type: bool
-          default: none
+          default: null
           required: true
 '''
 

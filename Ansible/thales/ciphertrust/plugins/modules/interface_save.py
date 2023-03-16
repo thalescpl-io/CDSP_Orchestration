@@ -98,7 +98,7 @@ options:
         description:
             - Set auto registration to allow auto registration of KMIP clients.
         required: false
-        default: none
+        default: null
         type: bool
     cert_user_field:
         description:
@@ -116,12 +116,12 @@ options:
     custom_uid_size:
         description: This flag is used to define the custom uid size of managed object over the KMIP interface.
         required: false
-        default: none
+        default: null
         type: int
     custom_uid_v2:
         description: This flag specifies which version of custom uid feature is to be used for KMIP interface. If it is set to true, new implementation i.e. Custom uid version 2 will be used.
         required: false
-        default: none
+        default: null
         type: bool
     default_connection:
         description: The default connection may be "local_account" for local authentication or the LDAP domain for LDAP authentication. This value is applied when the username does not embed the connection name (e.g. "jdoe" effectively becomes "local_account|jdoe"). This value only applies to NAE only and is ignored if set for web and KMIP interfaces.
@@ -218,7 +218,7 @@ options:
         description:
           - Collection of local and external CA IDs to trust for client authentication. See section "Certificate Authority" for more details.
         type: dict
-        default: none
+        default: null
         required: false
         suboptions:
           external:
@@ -237,7 +237,7 @@ options:
       description: Local CSR parameters for interface's certificate. These are for the local node itself, and they do not affect other nodes in the cluster. This gives user a convenient way to supply custom fields for automatic interface certification generation. Without them, the system defaults are used.
       type: dict
       required: false
-      default: none
+      default: null
       suboptions:
         cn:
           description: Common name
@@ -277,7 +277,7 @@ options:
       description: TLS Ciphers contain the list of cipher suites available in the system for the respective interfaces (KMIP, NAE & WEB) for TLS handshake.
       type: dict
       required: false
-      default: none
+      default: null
       suboptions:
         cipher_suite:
           description: TLS cipher suite name.

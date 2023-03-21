@@ -201,7 +201,7 @@ def createCharacterSet(**kwargs):
     raise
 
 def updateCharacterSet(**kwargs):
-  # Using char_set_id to update the UserSet
+  # Using char_set_id to update the Character Set
   result = dict()
   request = {}
 
@@ -216,6 +216,100 @@ def updateCharacterSet(**kwargs):
       payload=payload,
       cm_node=kwargs['node'],
       cm_api_endpoint="data-protection/character-sets/" + kwargs['char_set_id'],
+    )
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+# Save or Update Masking Format
+def createMaskingFormat(**kwargs):
+  result = dict()
+  request = {}
+
+  for key, value in kwargs.items():
+    if key != "node" and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="data-protection/masking-formats",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def updateMaskingFormat(**kwargs):
+  # Using masking_format_id to update the Masking Format
+  result = dict()
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ["node", "masking_format_id"] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = PATCHData(
+      payload=payload,
+      cm_node=kwargs['node'],
+      cm_api_endpoint="data-protection/masking-formats/" + kwargs['masking_format_id'],
+    )
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+# Save or Update Client Profile
+def createClientProfile(**kwargs):
+  result = dict()
+  request = {}
+
+  for key, value in kwargs.items():
+    if key != "node" and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="data-protection/client-profiles",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def updateClientProfile(**kwargs):
+  # Using profile_id to update the Client Profile
+  result = dict()
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ["node", "profile_id"] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = PATCHData(
+      payload=payload,
+      cm_node=kwargs['node'],
+      cm_api_endpoint="data-protection/client-profiles/" + kwargs['profile_id'],
     )
     return ast.literal_eval(str(response))
   except CMApiException as api_e:

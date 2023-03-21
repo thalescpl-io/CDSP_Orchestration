@@ -32,6 +32,7 @@
         size: 256
         usageMask: 3145740
         localNode: "{{ this_node_connection_string }}"
+      ignore_errors: true
 
     - name: "Create Interface"
       thales.ciphertrust.interface_save:
@@ -68,7 +69,7 @@
         tweak: "1628462495815733"
         tweak_algorithm: "SHA1"
         algorithm: "FPE/FF3/ASCII"
-        character_set_id: "{{ charset['id'] }}"
+        character_set_id: "{{ charset['response']['id'] }}"
       register: protection_policy_non_card
 
     - name: "Create Protection Policy for CARD"
@@ -110,7 +111,7 @@
         user_set_policy:
           - error_replacement_value: 000000
             reveal_type: Ciphertext
-            user_set_id: "{{ userset['id'] }}"
+            user_set_id: "{{ userset['response']['id'] }}"
 
     - name: "Create DPG Policy"
       thales.ciphertrust.dpg_policy_save:
@@ -130,7 +131,7 @@
         app_connector_type: DPG
         ca_id: "kylo:kylo:naboo:localca:76c4da32-0953-4c6a-bf77-c5a70314244c"
         nae_iface_port: "{{ nae_port_number }}"
-        policy_id: "{{ policy['id'] }}"
+        policy_id: "{{ policy['response']['id'] }}"
         localNode: "{{ this_node_connection_string }}"
       register: output
 

@@ -316,3 +316,50 @@ def updateClientProfile(**kwargs):
     raise
   except AnsibleCMException as custom_e:
     raise
+
+# Save or Update DPG Policy
+def createDPGPolicy(**kwargs):
+  result = dict()
+  request = {}
+
+  for key, value in kwargs.items():
+    if key != "node" and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="data-protection/dpg-policies",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def updateDPGPolicy(**kwargs):
+  # Using policy_id to update the DPG Policy
+  result = dict()
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ["node", "policy_id"] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = PATCHData(
+      payload=payload,
+      cm_node=kwargs['node'],
+      cm_api_endpoint="data-protection/dpg-policies/" + kwargs['policy_id'],
+    )
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise

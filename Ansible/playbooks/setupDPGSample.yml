@@ -92,7 +92,7 @@
       ignore_errors: true
 
     - name: "User Set Creation"
-      thales.ciphertrust.dpg_user_set_create:
+      thales.ciphertrust.dpg_user_set_save:
         localNode: "{{ this_node_connection_string }}"
         op_type: "create"
         name: "{{ var_user_set_name }}"

@@ -26,7 +26,7 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.domains import createUserSet, updateUserSet
+from ansible_collections.thales.ciphertrust.plugins.module_utils.dpg import createUserSet, updateUserSet
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''

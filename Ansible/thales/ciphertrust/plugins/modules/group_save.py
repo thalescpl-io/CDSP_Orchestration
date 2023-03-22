@@ -42,7 +42,7 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
+        required: true
         type: dict
         suboptions:
           server_ip:
@@ -215,7 +215,6 @@ def main():
 
     else:
         module.fail_json(msg="invalid op_type")
-    #result['response'] = response
 
     module.exit_json(**result)
 

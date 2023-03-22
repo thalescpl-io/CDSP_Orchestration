@@ -42,7 +42,7 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
+        required: true
         type: dict
         suboptions:
           server_ip:
@@ -107,8 +107,8 @@ options:
         default: null
     reason:
         description: 
-          - The reason the key is being revoked. Choices are: [Unspecified, KeyCompromise, CACompromise, AffiliationChanged, Superseded, CessationOfOperation, PrivilegeWithdrawn]
-          - The reason the key is being reactivated. Choices are: [DeactivatedToActive, ActiveProtectStopToActive, DeactivatedToActiveProtectStop]
+          - The reason the key is being revoked. Choices are Unspecified, KeyCompromise, CACompromise, AffiliationChanged, Superseded, CessationOfOperation or PrivilegeWithdrawn
+          - The reason the key is being reactivated. Choices are DeactivatedToActive, ActiveProtectStopToActive or DeactivatedToActiveProtectStop
           - Required if op_type is either revoke or reactivate
         type: str
         default: null
@@ -136,15 +136,15 @@ options:
         required: false
     encoding:
         description: 
-          - Specifies the encoding used for the 'material' field.
-          - For wrapping scenarios and PKCS12 format, the only valid option is base64. In case of "Symmetric Keys" when 'format' parameter has 'base64' value and 'encoding' parameter also contains some value; the encoding parameter takes the priority. Following are the options for Symmetric Keys: [hex, base64]
+          - Specifies the encoding used for the material field.
+          - For wrapping scenarios and PKCS12 format, the only valid option is base64. In case of "Symmetric Keys" when 'format' parameter has 'base64' value and 'encoding' parameter also contains some value. The encoding parameter takes the priority. Options for Symmetric Keys are hex or base64
           - Only applicable for op_type "export"
         type: str
         required: false
         default: null
     keyFormat:
         description: 
-          - The format of the returned key material. If the algorithm is 'rsa' or 'ec'. The value can be one of these: 'pkcs1', 'pkcs8' , 'pkcs12', or 'jwe'. The default value is 'pkcs8'. If algorithm is ‘rsa’ and format is 'pkcs12', the key material will contain the base64-encoded value of the PFX file. The value 'base64' is used for symmetric keys, for which the format of the returned key material is base64-encoded if wrapping is applied (i.e., either 'wrapKeyName' or 'wrapPublicKey' is specified),otherwise, the format is hex-encoded, unless 'base64' is given. If the "format" is 'jwe' then the "material" for the symmetric key, asymmetric key or certificate will be wrapped in JWE format. "wrapKeyName"(should be a public key) or "wrapPublicKey" and "wrapJWE" parameters are required for 'jwe' format. The value 'opaque' is supported for symmetric keys with 'opaque' format only.
+          - The format of the returned key material. If the algorithm is 'rsa' or 'ec'. The value can be one of 'pkcs1', 'pkcs8' , 'pkcs12', or 'jwe'. The default value is 'pkcs8'. If algorithm is ‘rsa’ and format is 'pkcs12', the key material will contain the base64-encoded value of the PFX file. The value 'base64' is used for symmetric keys, for which the format of the returned key material is base64-encoded if wrapping is applied (i.e., either 'wrapKeyName' or 'wrapPublicKey' is specified),otherwise, the format is hex-encoded, unless 'base64' is given. If the "format" is 'jwe' then the "material" for the symmetric key, asymmetric key or certificate will be wrapped in JWE format. "wrapKeyName"(should be a public key) or "wrapPublicKey" and "wrapJWE" parameters are required for 'jwe' format. The value 'opaque' is supported for symmetric keys with 'opaque' format only.
           - Only applicable for op_type "export"
         type: str
         choices: [pkcs1, pkcs8, pkcs12, jwe]
@@ -378,7 +378,7 @@ options:
         default: null
     wrappingEncryptionAlgo:
         description:
-          - It indicates the Encryption Algorithm information for wrapping the key. Format is : Algorithm/Mode/Padding. For example : AES/AESKEYWRAP. Here AES is Algorithm, AESKEYWRAP is Mode & Padding is not specified. AES/AESKEYWRAP is RFC-3394 & AES/AESKEYWRAPPADDING is RFC-5649. For wrapping private key, only AES/AESKEYWRAPPADDING is allowed. RSA/RSAAESKEYWRAPPADDING is used to wrap/unwrap asymmetric keys using RSA AES KWP method. Refer "WrapRSAAES" to provide optional parameters.
+          - It indicates the Encryption Algorithm information for wrapping the key. Format is Algorithm/Mode/Padding. For example AES/AESKEYWRAP. Here AES is Algorithm, AESKEYWRAP is Mode & Padding is not specified. AES/AESKEYWRAP is RFC-3394 & AES/AESKEYWRAPPADDING is RFC-5649. For wrapping private key, only AES/AESKEYWRAPPADDING is allowed. RSA/RSAAESKEYWRAPPADDING is used to wrap/unwrap asymmetric keys using RSA AES KWP method. Refer "WrapRSAAES" to provide optional parameters.
           - Only applicable for op_type "export"
         type: str
         choices: [AES/AESKEYWRAP, AES/AESKEYWRAPPADDING, RSA/RSAAESKEYWRAPPADDING]
@@ -387,7 +387,7 @@ options:
     wrappingHashAlgo:
         description:
           - This parameter specifies the hashing algorithm used if "wrappingMethod" corresponds to "mac/sign". In case of MAC operation, the hashing algorithm used will be inferred from the type of HMAC key("macSignKeyIdentifier").
-          - In case of SIGN operation, the possible values are: choices=[sha1, sha224, sha256, sha384, sha512]
+          - In case of SIGN operation, the possible values are sha1, sha224, sha256, sha384 or sha512
           - Only applicable for op_type "export"
         type: str
         required: false

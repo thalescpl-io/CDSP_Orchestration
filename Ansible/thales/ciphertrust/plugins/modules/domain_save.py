@@ -42,7 +42,7 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
+        required: true
         type: dict
         suboptions:
           server_ip:
@@ -109,9 +109,8 @@ options:
     meta:
         description: Optional end-user or service data stored with the domain.
         required: false
-        default: none
+        default: null
         type: dict
-        suboptions: schema-less
     parent_ca_id:
         description: This optional parameter is the ID or URI of the parent domain's CA. This CA is used for signing the default CA of a newly created sub-domain. The oldest CA in the parent domain is used if this value is not supplied.
         required: false

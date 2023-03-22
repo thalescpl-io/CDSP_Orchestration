@@ -103,6 +103,7 @@ def POSTData(payload=None, cm_node=None, cm_api_endpoint=None, id=None):
       if id is not None and id in response:
         __ret = {
           "id": response[id],
+          "data": response,
           "message": "Resource created successfully"
         }
       else:

@@ -42,7 +42,7 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
+        required: true
         type: dict
         suboptions:
           server_ip:
@@ -121,7 +121,7 @@ options:
         required: false
         default: null
         type: str
-    certType
+    certType:
         description: This specifies the type of certificate object that is being created. Valid values are 'x509-pem' and 'x509-der'. At present, we only support x.509 certificates. The cerfificate data is passed in via the 'material' field. The certificate type is infered from the material if it is left blank.
         type: str
         choices: [x509-pem, x509-der]
@@ -164,15 +164,15 @@ options:
         description: 
           - Specifies the encoding used for the 'material' field.
           - This parameter is used during importing keys when key material is not empty or while returning the key material after the key is created ('includeMaterial' is true)
-          - For wrapping scenarios and PKCS12 format, the only valid option is base64. In case of "Symmetric Keys" when 'format' parameter has 'base64' value and 'encoding' parameter also contains some value; the encoding parameter takes the priority. Following are the options for Symmetric Keys: [hex, base64]
+          - For wrapping scenarios and PKCS12 format, the only valid option is base64. In case of "Symmetric Keys" when 'format' parameter has 'base64' value and 'encoding' parameter also contains some value. The encoding parameter takes the priority. Following are the options for Symmetric Keys are hex or base64
         type: str
         required: false
         default: null
     format:
         description: 
           - This parameter is used while importing keys ('material' is not empty), and also when returning the key material after the key is created ('includeMaterial' is true).
-          - For Asymmetric keys: When this parameter is not specified, while importing keys, the format of the material is inferred from the material itself. When this parameter is specified, while importing keys, the only allowed format is 'pkcs12', and this only applies to the 'rsa' algorithm (the 'material' should contain the base64 encoded value of the PFX file in this case). Options: [pkcs1, pkcs8 (default), pkcs12]
-          - For Symmetric keys: When importing keys if specified, the value must be given according to the format of the material. Options: [raw, opaque]
+          - For Asymmetric keys, When this parameter is not specified, while importing keys, the format of the material is inferred from the material itself. When this parameter is specified, while importing keys, the only allowed format is 'pkcs12', and this only applies to the 'rsa' algorithm (the 'material' should contain the base64 encoded value of the PFX file in this case). Options are pkcs1, pkcs8 (default) or pkcs12
+          - For Symmetric keys, When importing keys if specified, the value must be given according to the format of the material. Options are raw or opaque
         type: str
         required: false
         default: null
@@ -222,12 +222,7 @@ options:
         required: false
         default: null
     labels:
-        description: Optional key/value pairs used to group keys. APIs that list keys can use labels to filter the set of matching resources. A label's key has an optional prefix up to 253 characters followed by a forward slash and a required name up to 63 characters. For example, sales.widgets.com/region is a label key with the prefix sales.widgets.com and the name region, while region is a label key without a prefix. A label's value may be empty and may be up to 63 characters. Each part of the label (i.e. the prefix, name, and value) must begin and end with an alphanumeric character (a-zA-Z0-9). Characters inbetween the beginning and end may contain alphanumeric characters, dots (.), dashes (-) and underscores (_). A Label can be a simple tag by specifying a key with no value (e.g. { "critical": "" }). Here's a full example showing a name/value pair with prefix, a name/value pair, and a simple tag:
-        "labels": {
-            "sales.widgets.com/region": "noram",
-            "team": "sales",
-            "critical": ""
-        }
+        description: Optional key/value pairs used to group keys. APIs that list keys can use labels to filter the set of matching resources. A label's key has an optional prefix up to 253 characters followed by a forward slash and a required name up to 63 characters. For example, sales.widgets.com/region is a label key with the prefix sales.widgets.com and the name region, while region is a label key without a prefix. A label's value may be empty and may be up to 63 characters. Each part of the label (i.e. the prefix, name, and value) must begin and end with an alphanumeric character (a-zA-Z0-9). Characters in between the beginning and end may contain alphanumeric characters, dots (.), dashes (-) and underscores (_). A Label can be a simple tag by specifying a key with no value
         type: dict
         required: false
         default: null
@@ -540,7 +535,7 @@ options:
         default: null
     wrappingEncryptionAlgo:
         description:
-          - It indicates the Encryption Algorithm information for wrapping the key. Format is : Algorithm/Mode/Padding. For example : AES/AESKEYWRAP. Here AES is Algorithm, AESKEYWRAP is Mode & Padding is not specified. AES/AESKEYWRAP is RFC-3394 & AES/AESKEYWRAPPADDING is RFC-5649. For wrapping private key, only AES/AESKEYWRAPPADDING is allowed. RSA/RSAAESKEYWRAPPADDING is used to wrap/unwrap asymmetric keys using RSA AES KWP method. Refer "WrapRSAAES" to provide optional parameters.
+          - It indicates the Encryption Algorithm information for wrapping the key. Format is Algorithm/Mode/Padding. For example AES/AESKEYWRAP. Here AES is Algorithm, AESKEYWRAP is Mode & Padding is not specified. AES/AESKEYWRAP is RFC-3394 & AES/AESKEYWRAPPADDING is RFC-5649. For wrapping private key, only AES/AESKEYWRAPPADDING is allowed. RSA/RSAAESKEYWRAPPADDING is used to wrap/unwrap asymmetric keys using RSA AES KWP method. Refer "WrapRSAAES" to provide optional parameters.
         type: str
         choices: [AES/AESKEYWRAP, AES/AESKEYWRAPPADDING, RSA/RSAAESKEYWRAPPADDING]
         required: false
@@ -548,7 +543,7 @@ options:
     wrappingHashAlgo:
         description:
           - This parameter specifies the hashing algorithm used if "wrappingMethod" corresponds to "mac/sign". In case of MAC operation, the hashing algorithm used will be inferred from the type of HMAC key("macSignKeyIdentifier").
-          - In case of SIGN operation, the possible values are: choices=[sha1, sha224, sha256, sha384, sha512]
+          - In case of SIGN operation, the possible values are sha1, sha224, sha256, sha384 or sha512
         type: str
         required: false
         default: null

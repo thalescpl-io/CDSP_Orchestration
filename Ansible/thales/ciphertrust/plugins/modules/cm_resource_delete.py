@@ -40,8 +40,8 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
         type: dict
+        required: true
         suboptions:
           server_ip:
             description: CM Server IP or FQDN
@@ -158,6 +158,7 @@ def main():
     )
 
     endpoint = ''
+    resource_type=module.params.get('resource_type')
     #Create the API end point based on the resource_type
     if resource_type == "keys":
         endpoint = 'vault/keys2'
@@ -165,13 +166,25 @@ def main():
         endpoint = 'configs/interfaces'
     elif resource_type == "users":
         endpoint = 'usermgmt/users'
+    elif resource_type == "client-profiles":
+        endpoint = 'data-protection/client-profiles'
+    elif resource_type == "dpg-policies":
+        endpoint = 'data-protection/dpg-policies'
+    elif resource_type == "access-policies":
+        endpoint='data-protection/access-policies'
+    elif resource_type == "user-sets":
+        endpoint='data-protection/user-sets'
+    elif resource_type == "protection-policies":
+        endpoint='data-protection/protection-policies'
+    elif resource_type == "character-sets":
+        endpoint='data-protection/character-sets'
     else:
         module.fail_json(msg='resource_type not supported yet')
 
     try:
         response = DELETEByNameOrId(
-            key=key,
-            cm_node=localNode,
+            key=module.params.get('key'),
+            cm_node=module.params.get('localNode'),
             cm_api_endpoint=endpoint
         )
         result['response'] = response

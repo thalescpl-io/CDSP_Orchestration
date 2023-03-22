@@ -42,7 +42,7 @@ options:
         description:
             - this holds the connection parameters required to communicate with an instance of CipherTrust Manager (CM)
             - holds IP/FQDN of the server, username, password, and port 
-        default: true
+        required: true
         type: dict
         suboptions:
           server_ip:
@@ -98,7 +98,7 @@ options:
         description:
             - Set auto registration to allow auto registration of KMIP clients.
         required: false
-        default: none
+        default: null
         type: bool
     cert_user_field:
         description:
@@ -116,12 +116,12 @@ options:
     custom_uid_size:
         description: This flag is used to define the custom uid size of managed object over the KMIP interface.
         required: false
-        default: none
+        default: null
         type: int
     custom_uid_v2:
         description: This flag specifies which version of custom uid feature is to be used for KMIP interface. If it is set to true, new implementation i.e. Custom uid version 2 will be used.
         required: false
-        default: none
+        default: null
         type: bool
     default_connection:
         description: The default connection may be "local_account" for local authentication or the LDAP domain for LDAP authentication. This value is applied when the username does not embed the connection name (e.g. "jdoe" effectively becomes "local_account|jdoe"). This value only applies to NAE only and is ignored if set for web and KMIP interfaces.
@@ -131,7 +131,7 @@ options:
     interface_type:
         description: This parameter is used to identify the type of interface, what service to run on the interface.
         required: false
-        default nae
+        default: nae
         choices:
             - web
             - kmip
@@ -186,7 +186,7 @@ options:
         type: str
     mode:
         description: 
-          - The interface mode can be one of the following: no-tls-pw-opt, no-tls-pw-req, unauth-tls-pw-opt, tls-cert-opt-pw-opt, tls-pw-opt, tls-pw-req, tls-cert-pw-opt, or tls-cert-and-pw. Default mode is no-tls-pw-opt.
+          - The interface mode can be one of no-tls-pw-opt, no-tls-pw-req, unauth-tls-pw-opt, tls-cert-opt-pw-opt, tls-pw-opt, tls-pw-req, tls-cert-pw-opt, or tls-cert-and-pw. Default mode is no-tls-pw-opt.
         required: false
         default: no-tls-pw-opt
         choices:
@@ -217,13 +217,8 @@ options:
     trusted_cas:
         description:
           - Collection of local and external CA IDs to trust for client authentication. See section "Certificate Authority" for more details.
-          - Example:
-            {
-              "local": ["kylo:kylo:naboo:localca:634c90f4-808d-11e8-8711-77b786d179d5", "kylo:kylo:naboo:localca:67e6e8f8-808d-11e8-981b-f30fc34129ae"],
-              "external": ["kylo:kylo:naboo:external_ca:747b27d2-808d-11e8-b9ba-bf6d65974e66"]
-            }
         type: dict
-        default: none
+        default: null
         required: false
         suboptions:
           external:
@@ -242,7 +237,7 @@ options:
       description: Local CSR parameters for interface's certificate. These are for the local node itself, and they do not affect other nodes in the cluster. This gives user a convenient way to supply custom fields for automatic interface certification generation. Without them, the system defaults are used.
       type: dict
       required: false
-      default: none
+      default: null
       suboptions:
         cn:
           description: Common name
@@ -268,10 +263,10 @@ options:
           default: none
           required: false
         names:
-          description: Name fields are "O=organization, OU=organizational unit, L=location, ST=state/province, C=country". Example: [{"O": "Thales Group", "OU": "CPL", "C": "US", "ST": "MD", "L": "Belcamp"}, {"OU": "Thales Group Inc."}]
+          description: Name fields like O, OU, L, ST, C
           type: list
           elements: dict
-          default: none
+          default: []
           required: false
         uid:
           description: User ID
@@ -282,7 +277,7 @@ options:
       description: TLS Ciphers contain the list of cipher suites available in the system for the respective interfaces (KMIP, NAE & WEB) for TLS handshake.
       type: dict
       required: false
-      default: none
+      default: null
       suboptions:
         cipher_suite:
           description: TLS cipher suite name.
@@ -290,9 +285,9 @@ options:
           default: none
           required: true
         enabled:
-          description: TLS cipher suite enabled flag. If set to true, cipher suite will be available for TLS hanshake.
+          description: TLS cipher suite enabled flag. If set to true, cipher suite will be available for TLS handshake.
           type: bool
-          default: none
+          default: null
           required: true
 '''
 

@@ -35,7 +35,7 @@
     - name: "Delete Client Profile"
       thales.ciphertrust.cm_resource_delete:
         localNode: "{{ this_node_connection_string }}"
-        key: "{{ clientProfile['id'] }}"
+        key: "{{ clientProfile['response']['id'] }}"
         resource_type: "client-profiles"
 
     # Get and delete DPG Policy
@@ -43,14 +43,14 @@
       thales.ciphertrust.cm_resource_get_id_from_name:
         localNode: "{{ this_node_connection_string }}"
         query_param: "name"
-        query_param_value: "{{  dpg_policy_name }}"
+        query_param_value: "{{ dpg_policy_name }}"
         resource_type: "dpg-policies"
       register: dpgPolicy
 
     - name: "Delete DPG Policy"
       thales.ciphertrust.cm_resource_delete:
         localNode: "{{ this_node_connection_string }}"
-        key: "{{ dpgPolicy['id'] }}"
+        key: "{{ dpgPolicy['response']['id'] }}"
         resource_type: "dpg-policies"
 
     # Get and delete Access Policy
@@ -65,7 +65,7 @@
     - name: "Delete Access Policy"
       thales.ciphertrust.cm_resource_delete:
         localNode: "{{ this_node_connection_string }}"
-        key: "{{ accessPolicy['id'] }}"
+        key: "{{ accessPolicy['response']['id'] }}"
         resource_type: "access-policies"
 
     # Get and delete User Set
@@ -80,7 +80,7 @@
     - name: "Delete UserSet"
       thales.ciphertrust.cm_resource_delete:
         localNode: "{{ this_node_connection_string }}"
-        key: "{{ userset['id'] }}"
+        key: "{{ userset['response']['id'] }}"
         resource_type: "user-sets"
 
     # Delete Protection Policies
@@ -108,7 +108,7 @@
     - name: "Delete Character Set"
       thales.ciphertrust.cm_resource_delete:
         localNode: "{{ this_node_connection_string }}"
-        key: "{{ charset['id'] }}"
+        key: "{{ charset['response']['id'] }}"
         resource_type: "character-sets"
 
     # Delete NAE Interface
@@ -129,5 +129,5 @@
     - name: "Delete Key"
       thales.ciphertrust.cm_resource_delete:
         localNode: "{{ this_node_connection_string }}"
-        key: "{{ key['id'] }}"
+        key: "{{ key['response']['id'] }}"
         resource_type: "keys"

@@ -131,8 +131,22 @@
         name: "{{ client_profile_name }}"
         op_type: create
         app_connector_type: DPG
+        name: AnsibleClientProfile
+        lifetime: 30d
+        cert_duration: 730
+        max_clients: 200
         ca_id: "kylo:kylo:naboo:localca:76c4da32-0953-4c6a-bf77-c5a70314244c"
         nae_iface_port: "{{ nae_port_number }}"
+        csr_parameters:
+          csr_cn: admin
+        configurations:
+          verify_ssl_certificate: false
+          use_persistent_connections: true
+          log_level: DEBUG
+          tls_to_appserver:
+            tls_skip_verify: true
+            tls_enabled: true
+          auth_method_used: Basic
         policy_id: "{{ policy['response']['id'] }}"
         localNode: "{{ this_node_connection_string }}"
       register: output

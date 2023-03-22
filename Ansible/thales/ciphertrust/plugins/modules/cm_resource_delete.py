@@ -183,8 +183,8 @@ def main():
 
     try:
         response = DELETEByNameOrId(
-            key=key,
-            cm_node=localNode,
+            key=module.params.get('key'),
+            cm_node=module.params.get('localNode'),
             cm_api_endpoint=endpoint
         )
         result['response'] = response

@@ -64,6 +64,7 @@
     - name: "Create Protection Policy for non-CARD"
       thales.ciphertrust.dpg_protection_policy_save:
         localNode: "{{ this_node_connection_string }}"
+        op_type: create
         name: "{{ non_card_protection_policy_name }}"
         key: "{{ dpg_key_name }}"
         tweak: "1628462495815733"
@@ -75,6 +76,7 @@
     - name: "Create Protection Policy for CARD"
       thales.ciphertrust.dpg_protection_policy_save:
         localNode: "{{ this_node_connection_string }}"
+        op_type: create
         name: "{{ fpe_card_protection_policy_name }}"
         key: "{{ dpg_key_name }}"
         tweak: "9828462495846783"
@@ -107,15 +109,14 @@
         op_type: "create"
         name: "{{ access_policy_name }}"
         default_reveal_type: "Ciphertext"
-        default_error_replacement_value: 000000
         user_set_policy:
-          - error_replacement_value: 000000
-            reveal_type: Ciphertext
+          - reveal_type: Ciphertext
             user_set_id: "{{ userset['response']['id'] }}"
 
     - name: "Create DPG Policy"
       thales.ciphertrust.dpg_policy_save:
         localNode: "{{ this_node_connection_string }}"
+        op_type: create
         name: "{{  dpg_policy_name }}"
         proxy_config:
           - api_url: "/tmp/abc"
@@ -128,6 +129,7 @@
     - name: "Create Client Profile"
       thales.ciphertrust.dpg_client_profile_save:
         name: "{{ client_profile_name }}"
+        op_type: create
         app_connector_type: DPG
         ca_id: "kylo:kylo:naboo:localca:76c4da32-0953-4c6a-bf77-c5a70314244c"
         nae_iface_port: "{{ nae_port_number }}"

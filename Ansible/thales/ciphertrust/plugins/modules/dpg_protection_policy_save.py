@@ -145,7 +145,7 @@ argument_spec = dict(
     algorithm=dict(type='str'),
     key=dict(type='str'),
     name=dict(type='str'),
-    allow_single_char_input=dict(type='bool')
+    allow_single_char_input=dict(type='bool'),
     character_set_id=dict(type='str'),
     iv=dict(type='str'),
     tweak=dict(type='str'),

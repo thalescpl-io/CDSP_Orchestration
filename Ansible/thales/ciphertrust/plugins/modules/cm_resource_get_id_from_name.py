@@ -187,6 +187,21 @@ def main():
     elif resource_type == "users":
         endpoint='usermgmt/users'
         query_id='user_id'
+    elif resource_type == "client-profiles":
+        endpoint='data-protection/client-profiles'
+        query_id='id'
+    elif resource_type == "dpg-policies":
+        endpoint='data-protection/dpg-policies'
+        query_id='id'
+    elif resource_type == "access-policies":
+        endpoint='data-protection/access-policies'
+        query_id='id'
+    elif resource_type == "user-sets":
+        endpoint='data-protection/user-sets'
+        query_id='id'
+    elif resource_type == "character-sets":
+        endpoint='data-protection/character-sets'
+        query_id='id'
     else:
         module.fail_json(msg='resource_type not supported yet')
 

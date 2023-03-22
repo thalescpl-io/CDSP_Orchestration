@@ -56,8 +56,9 @@
         op_type: create
         name: "{{ char_set_name }}"
         range:
-          - 0-1F
-          - AF-100
+          - 0030-0039
+          - 0041-005A
+          - 0061-007A
         encoding: UTF-8
       register: charset
     
@@ -139,14 +140,6 @@
         nae_iface_port: "{{ nae_port_number }}"
         csr_parameters:
           csr_cn: admin
-        configurations:
-          verify_ssl_certificate: false
-          use_persistent_connections: true
-          log_level: DEBUG
-          tls_to_appserver:
-            tls_skip_verify: true
-            tls_enabled: true
-          auth_method_used: Basic
         policy_id: "{{ policy['response']['id'] }}"
         localNode: "{{ this_node_connection_string }}"
       register: output

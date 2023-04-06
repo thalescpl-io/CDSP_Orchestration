@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, POSTWithoutData, DeleteWithoutData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -48,6 +48,12 @@ def createConnection(**kwargs):
     endpoint = 'connectionmgmt/services/aws/connections'
   elif kwargs["connection_type"] == "azure":
     endpoint = 'connectionmgmt/services/azure/connections'
+  elif kwargs["connection_type"] == "elasticsearch":
+    endpoint = 'connectionmgmt/services/log-forwarders/elasticsearch/connections'
+  elif kwargs["connection_type"] == "google":
+    endpoint = 'connectionmgmt/services/gcp/connections'
+  elif kwargs["connection_type"] == "hadoop":
+    endpoint = 'connectionmgmt/services/hadoop/connections'
   else:
     module.fail_json(msg='connection_type not supported yet')
 
@@ -78,13 +84,19 @@ def patchConnection(**kwargs):
     endpoint = 'connectionmgmt/services/aws/connections/' + kwargs["connection_id"]
   elif kwargs["connection_type"] == "azure":
     endpoint = 'connectionmgmt/services/azure/connections/' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "elasticsearch":
+    endpoint = 'connectionmgmt/services/log-forwarders/elasticsearch/connections/' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "google":
+    endpoint = 'connectionmgmt/services/gcp/connections/' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "hadoop":
+    endpoint = 'connectionmgmt/services/hadoop/connections' + kwargs["connection_id"]
   else:
     module.fail_json(msg='connection_type not supported yet')
 
   payload = json.dumps(request)
 
   try:
-    response = POSTData(
+    response = PATCHData(
       payload=payload,
       cm_node=kwargs["node"],
       cm_api_endpoint=endpoint,

@@ -54,6 +54,16 @@ def createConnection(**kwargs):
     endpoint = 'connectionmgmt/services/gcp/connections'
   elif kwargs["connection_type"] == "hadoop":
     endpoint = 'connectionmgmt/services/hadoop/connections'
+  elif kwargs["connection_type"] == "ldap":
+    endpoint = 'connectionmgmt/services/ldap/connections'
+  elif kwargs["connection_type"] == "oidc":
+    endpoint = 'connectionmgmt/services/oidc/connections'
+  elif kwargs["connection_type"] == "oracle":
+    endpoint = 'connectionmgmt/services/oci/connections'
+  elif kwargs["connection_type"] == "scp":
+    endpoint = 'connectionmgmt/services/scp/connections'
+  elif kwargs["connection_type"] == "smb":
+    endpoint = 'connectionmgmt/services/smb/connections'
   else:
     module.fail_json(msg='connection_type not supported yet')
 
@@ -90,6 +100,16 @@ def patchConnection(**kwargs):
     endpoint = 'connectionmgmt/services/gcp/connections/' + kwargs["connection_id"]
   elif kwargs["connection_type"] == "hadoop":
     endpoint = 'connectionmgmt/services/hadoop/connections' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "ldap":
+    endpoint = 'connectionmgmt/services/ldap/connections' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "oidc":
+    endpoint = 'connectionmgmt/services/oidc/connections' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "oracle":
+    endpoint = 'connectionmgmt/services/oci/connections' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "scp":
+    endpoint = 'connectionmgmt/services/scp/connections' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "smb":
+    endpoint = 'connectionmgmt/services/smb/connections' + kwargs["connection_id"]
   else:
     module.fail_json(msg='connection_type not supported yet')
 

@@ -31,7 +31,7 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_aws
+module: connection_manager_google
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
     - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
@@ -163,23 +163,26 @@ RETURN = '''
 '''
 _schema_less = dict()
 
-_elasticsearch_params = dict(
-    ca_cert=dict(type='str', required=False),
-    http_password=dict(type='str', required=False),
-    http_user=dict(type='str', required=False),
-    insecure_tls_skip_verify=dict(type='bool', required=False),
-    transport=dict(type='str', options=['tcp', 'tls'], required=False),
-)
-
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
     connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
-    connection_id=dict(type='str', required=False),
-    host=dict(type='str'),
+    connection_id=dict(type='str', required=False),    
+    base_dn=dict(type='str'),
     name=dict(type='str'),
-    port=dict(type='int'),
-    description=dict(type='str', required=False),
-    elasticsearch_params=dict(type='dict', options=_elasticsearch_params, required=False),
+    server_url=dict(type='str'),
+    user_login_attribute=dict(type='str'),
+    bind_dn=dict(type='str'),
+    bind_password=dict(type='str'),
+    description=dict(type='str'),
+    group_base_dn=dict(type='str'),
+    group_filter=dict(type='str'),
+    group_id_attribute=dict(type='str'),
+    group_member_field=dict(type='str'),
+    group_name_attribute=dict(type='str'),
+    insecure_skip_verify=dict(type='bool'),
+    root_cas=dict(type='list', element='str'),
+    search_filter=dict(type='str'),
+    user_dn_attribute=dict(type='str'),
     meta=dict(type='dict', options=_schema_less, required=False),
     products=dict(type='list', element='str', required=False),
 )
@@ -217,13 +220,24 @@ def main():
         response = createConnection(
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
-          host=module.params.get('host'),
+          base_dn=module.params.get('base_dn'),
           name=module.params.get('name'),
-          port=module.params.get('port'),
+          server_url=module.params.get('server_url'),
+          user_login_attribute=module.params.get('user_login_attribute'),
+          bind_dn=module.params.get('bind_dn'),
+          bind_password=module.params.get('bind_password'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
+          group_base_dn=module.params.get('group_base_dn'),
+          group_filter=module.params.get('group_filter'),
+          group_id_attribute=module.params.get('group_id_attribute'),
+          group_member_field=module.params.get('group_member_field'),
+          group_name_attribute=module.params.get('group_name_attribute'),
+          insecure_skip_verify=module.params.get('insecure_skip_verify'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
+          root_cas=module.params.get('root_cas'),
+          search_filter=module.params.get('search_filter'),
+          user_dn_attribute=module.params.get('user_dn_attribute'),
         )
         result['response'] = response
       except CMApiException as api_e:
@@ -238,12 +252,23 @@ def main():
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
           connection_id=module.params.get('connection_id'),
-          host=module.params.get('host'),
-          port=module.params.get('port'),
+          base_dn=module.params.get('base_dn'),
+          server_url=module.params.get('server_url'),
+          user_login_attribute=module.params.get('user_login_attribute'),
+          bind_dn=module.params.get('bind_dn'),
+          bind_password=module.params.get('bind_password'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
+          group_base_dn=module.params.get('group_base_dn'),
+          group_filter=module.params.get('group_filter'),
+          group_id_attribute=module.params.get('group_id_attribute'),
+          group_member_field=module.params.get('group_member_field'),
+          group_name_attribute=module.params.get('group_name_attribute'),
+          insecure_skip_verify=module.params.get('insecure_skip_verify'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
+          root_cas=module.params.get('root_cas'),
+          search_filter=module.params.get('search_filter'),
+          user_dn_attribute=module.params.get('user_dn_attribute'),
         )
         result['response'] = response
       except CMApiException as api_e:

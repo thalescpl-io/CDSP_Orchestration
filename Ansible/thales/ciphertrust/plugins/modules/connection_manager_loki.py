@@ -163,7 +163,7 @@ RETURN = '''
 '''
 _schema_less = dict()
 
-_elasticsearch_params = dict(
+_loki_param = dict(
     ca_cert=dict(type='str', required=False),
     http_password=dict(type='str', required=False),
     http_user=dict(type='str', required=False),
@@ -174,12 +174,12 @@ _elasticsearch_params = dict(
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
     connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
-    connection_id=dict(type='str', required=False),
+    connection_id=dict(type='str', required=False),    
     host=dict(type='str'),
     name=dict(type='str'),
     port=dict(type='int'),
     description=dict(type='str', required=False),
-    elasticsearch_params=dict(type='dict', options=_elasticsearch_params, required=False),
+    loki_params=dict(type='dict', options=_loki_param, required=False),    
     meta=dict(type='dict', options=_schema_less, required=False),
     products=dict(type='list', element='str', required=False),
 )
@@ -221,7 +221,7 @@ def main():
           name=module.params.get('name'),
           port=module.params.get('port'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
+          loki_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )
@@ -241,7 +241,7 @@ def main():
           host=module.params.get('host'),
           port=module.params.get('port'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
+          loki_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )

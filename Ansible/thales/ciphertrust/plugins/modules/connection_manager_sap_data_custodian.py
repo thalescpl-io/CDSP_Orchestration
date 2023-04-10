@@ -163,25 +163,28 @@ RETURN = '''
 '''
 _schema_less = dict()
 
-_elasticsearch_params = dict(
-    ca_cert=dict(type='str', required=False),
-    http_password=dict(type='str', required=False),
-    http_user=dict(type='str', required=False),
-    insecure_tls_skip_verify=dict(type='bool', required=False),
-    transport=dict(type='str', options=['tcp', 'tls'], required=False),
+_technical_user_credential = dict(
+    api_key=dict(type='str'),
+    secret=dict(type='str'),
+)
+
+_user_credential = dict(
+    secret=dict(type='str'),
+    tenant=dict(type='str'),
+    user=dict(type='str'),
 )
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
     connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
-    connection_id=dict(type='str', required=False),
-    host=dict(type='str'),
+    connection_id=dict(type='str', required=False),  
+    api_endpoint=dict(type='str'),
     name=dict(type='str'),
-    port=dict(type='int'),
     description=dict(type='str', required=False),
-    elasticsearch_params=dict(type='dict', options=_elasticsearch_params, required=False),
     meta=dict(type='dict', options=_schema_less, required=False),
     products=dict(type='list', element='str', required=False),
+    technical_user_credentials=dict(type='dict', options=_technical_user_credential, required=False),
+    user_credentials=dict(type='dict', options=_user_credential, required=False),
 )
 
 def validate_parameters(domain_module):
@@ -192,7 +195,7 @@ def setup_module_object():
         argument_spec=argument_spec,
         required_if=(
             ['op_type', 'patch', ['connection_id']],
-            ['op_type', 'create', ['name']],
+            ['op_type', 'create', ['name', 'api_endpoint']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -217,11 +220,11 @@ def main():
         response = createConnection(
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
-          host=module.params.get('host'),
+          api_endpoint=module.params.get('credentials'),
+          technical_user_credentials=module.params.get('technical_user_credentials'),
+          user_credentials=module.params.get('user_credentials'),
           name=module.params.get('name'),
-          port=module.params.get('port'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )
@@ -238,10 +241,10 @@ def main():
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
           connection_id=module.params.get('connection_id'),
-          host=module.params.get('host'),
-          port=module.params.get('port'),
+          api_endpoint=module.params.get('credentials'),
+          technical_user_credentials=module.params.get('technical_user_credentials'),
+          user_credentials=module.params.get('user_credentials'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )

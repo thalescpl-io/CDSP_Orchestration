@@ -163,23 +163,22 @@ RETURN = '''
 '''
 _schema_less = dict()
 
-_elasticsearch_params = dict(
-    ca_cert=dict(type='str', required=False),
-    http_password=dict(type='str', required=False),
-    http_user=dict(type='str', required=False),
-    insecure_tls_skip_verify=dict(type='bool', required=False),
-    transport=dict(type='str', options=['tcp', 'tls'], required=False),
+_credential = dict(
+    key_file=dict(type='str'),
+    pass_phrase=dict(type='str'),
 )
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
     connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
-    connection_id=dict(type='str', required=False),
-    host=dict(type='str'),
+    connection_id=dict(type='str', required=False),  
+    credentials=dict(type='str'),
+    fingerprint=dict(type='str'),
     name=dict(type='str'),
-    port=dict(type='int'),
+    region=dict(type='str'),
+    tenancy_ocid=dict(type='str'),
+    user_ocid=dict(type='str'),
     description=dict(type='str', required=False),
-    elasticsearch_params=dict(type='dict', options=_elasticsearch_params, required=False),
     meta=dict(type='dict', options=_schema_less, required=False),
     products=dict(type='list', element='str', required=False),
 )
@@ -192,7 +191,7 @@ def setup_module_object():
         argument_spec=argument_spec,
         required_if=(
             ['op_type', 'patch', ['connection_id']],
-            ['op_type', 'create', ['name']],
+            ['op_type', 'create', ['name', 'credentials', 'fingerprint', 'region', 'tenancy_ocid', 'user_ocid']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -217,11 +216,13 @@ def main():
         response = createConnection(
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
-          host=module.params.get('host'),
+          credentials=module.params.get('credentials'),
+          fingerprint=module.params.get('fingerprint'),
+          region=module.params.get('region'),
+          tenancy_ocid=module.params.get('tenancy_ocid'),
+          user_ocid=module.params.get('user_ocid'),
           name=module.params.get('name'),
-          port=module.params.get('port'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )
@@ -238,10 +239,12 @@ def main():
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
           connection_id=module.params.get('connection_id'),
-          host=module.params.get('host'),
-          port=module.params.get('port'),
+          credentials=module.params.get('credentials'),
+          fingerprint=module.params.get('fingerprint'),
+          region=module.params.get('region'),
+          tenancy_ocid=module.params.get('tenancy_ocid'),
+          user_ocid=module.params.get('user_ocid'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )

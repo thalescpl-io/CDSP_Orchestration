@@ -31,7 +31,7 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_aws
+module: connection_manager_google
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
     - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
@@ -163,23 +163,17 @@ RETURN = '''
 '''
 _schema_less = dict()
 
-_elasticsearch_params = dict(
-    ca_cert=dict(type='str', required=False),
-    http_password=dict(type='str', required=False),
-    http_user=dict(type='str', required=False),
-    insecure_tls_skip_verify=dict(type='bool', required=False),
-    transport=dict(type='str', options=['tcp', 'tls'], required=False),
-)
-
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
     connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
-    connection_id=dict(type='str', required=False),
+    connection_id=dict(type='str', required=False),    
+    username=dict(type='str'),
+    password=dict(type='str'),
+    domain=dict(type='str', options=['key', 'password']),
     host=dict(type='str'),
+    port=dict(type='str'),
     name=dict(type='str'),
-    port=dict(type='int'),
-    description=dict(type='str', required=False),
-    elasticsearch_params=dict(type='dict', options=_elasticsearch_params, required=False),
+    description=dict(type='str'),
     meta=dict(type='dict', options=_schema_less, required=False),
     products=dict(type='list', element='str', required=False),
 )
@@ -191,8 +185,8 @@ def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
         required_if=(
-            ['op_type', 'patch', ['connection_id']],
-            ['op_type', 'create', ['name']],
+            ['op_type', 'patch', ['connection_id', 'connection_type']],
+            ['op_type', 'create', ['name', 'connection_type', 'username', 'password']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -216,12 +210,14 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type=module.params.get('connection_type'),          
+          domain=module.params.get('domain'),
           host=module.params.get('host'),
-          name=module.params.get('name'),
+          username=module.params.get('username'),
           port=module.params.get('port'),
+          password=module.params.get('password'),
+          name=module.params.get('name'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )
@@ -238,10 +234,12 @@ def main():
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
           connection_id=module.params.get('connection_id'),
+          domain=module.params.get('domain'),
           host=module.params.get('host'),
+          username=module.params.get('username'),
           port=module.params.get('port'),
+          password=module.params.get('password'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )

@@ -31,7 +31,7 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_aws
+module: connection_manager_google
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
     - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
@@ -163,23 +163,15 @@ RETURN = '''
 '''
 _schema_less = dict()
 
-_elasticsearch_params = dict(
-    ca_cert=dict(type='str', required=False),
-    http_password=dict(type='str', required=False),
-    http_user=dict(type='str', required=False),
-    insecure_tls_skip_verify=dict(type='bool', required=False),
-    transport=dict(type='str', options=['tcp', 'tls'], required=False),
-)
-
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
     connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
-    connection_id=dict(type='str', required=False),
-    host=dict(type='str'),
+    connection_id=dict(type='str', required=False),    
+    client_id=dict(type='str'),
+    client_secret=dict(type='str'),
     name=dict(type='str'),
-    port=dict(type='int'),
-    description=dict(type='str', required=False),
-    elasticsearch_params=dict(type='dict', options=_elasticsearch_params, required=False),
+    url=dict(type='str'),
+    description=dict(type='str'),
     meta=dict(type='dict', options=_schema_less, required=False),
     products=dict(type='list', element='str', required=False),
 )
@@ -217,11 +209,11 @@ def main():
         response = createConnection(
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
-          host=module.params.get('host'),
+          client_id=module.params.get('client_id'),
+          client_secret=module.params.get('client_secret'),
           name=module.params.get('name'),
-          port=module.params.get('port'),
+          url=module.params.get('url'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )
@@ -238,10 +230,10 @@ def main():
           node=module.params.get('localNode'),
           connection_type=module.params.get('connection_type'),
           connection_id=module.params.get('connection_id'),
-          host=module.params.get('host'),
-          port=module.params.get('port'),
+          client_id=module.params.get('client_id'),
+          client_secret=module.params.get('client_secret'),
+          url=module.params.get('url'),
           description=module.params.get('description'),
-          elasticsearch_params=module.params.get('elasticsearch_params'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
         )

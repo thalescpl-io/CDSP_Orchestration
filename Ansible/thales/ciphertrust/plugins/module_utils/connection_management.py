@@ -64,6 +64,10 @@ def createConnection(**kwargs):
     endpoint = 'connectionmgmt/services/scp/connections'
   elif kwargs["connection_type"] == "smb":
     endpoint = 'connectionmgmt/services/smb/connections'
+  elif kwargs["connection_type"] == "salesforce":
+    endpoint = 'connectionmgmt/services/salesforce/connections'
+  elif kwargs["connection_type"] == "syslog":
+    endpoint = 'connectionmgmt/services/log-forwarders/syslog/connections'
   else:
     module.fail_json(msg='connection_type not supported yet')
 
@@ -110,6 +114,10 @@ def patchConnection(**kwargs):
     endpoint = 'connectionmgmt/services/scp/connections' + kwargs["connection_id"]
   elif kwargs["connection_type"] == "smb":
     endpoint = 'connectionmgmt/services/smb/connections' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "salesforce":
+    endpoint = 'connectionmgmt/services/salesforce/connections' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "syslog":
+    endpoint = 'connectionmgmt/services/log-forwarders/syslog/connections' + kwargs["connection_id"]
   else:
     module.fail_json(msg='connection_type not supported yet')
 

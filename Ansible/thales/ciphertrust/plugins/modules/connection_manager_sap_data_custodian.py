@@ -31,10 +31,10 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_aws
+module: connection_manager_sap_data_custodian
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for SAP Data Custodian
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -76,44 +76,13 @@ options:
         choices: [create, patch]
         required: true
         type: str
+    connection_id:
+        description: Unique ID of the connection to be updated
+        default: none
+        type: str
     name:
         description: Unique connection name
         required: true
-        default: none
-        type: str
-    access_key_id:
-        description: Key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    secret_access_key:
-        description: Secret associated with the access key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    assume_role_arn:
-        description: AWS IAM role ARN
-        required: false
-        default: none
-        type: str
-    assume_role_external_id:
-        description: AWS role external ID
-        required: false
-        default: none
-        type: str
-    aws_region:
-        description: AWS region. only used when aws_sts_regional_endpoints is equal to regional otherwise, it takes default values according to Cloud Name given.
-        required: false
-        default: none
-        type: str
-    aws_sts_regional_endpoints:
-        description: By default, AWS Security Token Service (AWS STS) is available as a global service, and all AWS STS requests go to a single endpoint at https://sts.amazonaws.com. Global requests map to the US East (N. Virginia) Region. AWS recommends using Regional AWS STS endpoints instead of the global endpoint to reduce latency, build in redundancy, and increase session token validity.
-        required: false
-        default: none
-        type: str
-    cloud_name:
-        description: Name of the cloud
-        required: false
         default: none
         type: str
     description:
@@ -132,11 +101,38 @@ options:
         default: none
         type: list
         element: str
+    api_endpoint:
+        description: KMS API endpoint of the SAP Data Custodian. Provide HTTP URL with the API version in it. Only v2 version of KMS API is supported.
+        default: none
+        type: str
+    technical_user_credentials:
+        description: Technical User Credentials for SAP Data Custodian connection 
+        type: dict
+        suboptions:
+          api_key:
+            description: API key of the technical user
+            type: str
+          secret:
+            description: Secret/Password of the technical user
+            type: str
+    user_credentials:
+        description: Standard User Credentials for SAP Data Custodian connection
+        type: dict
+        suboptions:
+          secret:
+            description: Secret/Password of the user
+            type: str
+          tenant:
+            description: Tenant of the user
+            type: str
+          user:
+            description: Username
+            type: str
 '''
 
 EXAMPLES = '''
-- name: "Create AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Create SAP Data Custodian Connection"
+  thales.ciphertrust.connection_manager_sap_data_custodian:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -145,9 +141,17 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
+    api_endpoint: "https://demo-kms-endpoint/kms/v2"
+    name: "SAP Data Custodian"
+    products:
+      - cckm
+    user_credentials:
+      secret: secret
+      tenant: tenant
+      username: username
 
-- name: "Update AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Update SAP Data Custodian Connection"
+  thales.ciphertrust.connection_manager_sap_data_custodian:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -176,15 +180,14 @@ _user_credential = dict(
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
-    connection_id=dict(type='str', required=False),  
+    connection_id=dict(type='str', required=False),
     api_endpoint=dict(type='str'),
     name=dict(type='str'),
-    description=dict(type='str', required=False),
-    meta=dict(type='dict', options=_schema_less, required=False),
-    products=dict(type='list', element='str', required=False),
-    technical_user_credentials=dict(type='dict', options=_technical_user_credential, required=False),
-    user_credentials=dict(type='dict', options=_user_credential, required=False),
+    description=dict(type='str'),
+    meta=dict(type='dict', options=_schema_less),
+    products=dict(type='list', element='str'),
+    technical_user_credentials=dict(type='dict', options=_technical_user_credential),
+    user_credentials=dict(type='dict', options=_user_credential),
 )
 
 def validate_parameters(domain_module):
@@ -219,7 +222,7 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='sap',
           api_endpoint=module.params.get('credentials'),
           technical_user_credentials=module.params.get('technical_user_credentials'),
           user_credentials=module.params.get('user_credentials'),
@@ -239,7 +242,7 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='sap',
           connection_id=module.params.get('connection_id'),
           api_endpoint=module.params.get('credentials'),
           technical_user_credentials=module.params.get('technical_user_credentials'),

@@ -31,10 +31,10 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_google
+module: connection_manager_syslog
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for Syslog
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -76,44 +76,13 @@ options:
         choices: [create, patch]
         required: true
         type: str
+    connection_id:
+        description: Unique ID of the connection to be updated
+        default: none
+        type: str
     name:
         description: Unique connection name
         required: true
-        default: none
-        type: str
-    access_key_id:
-        description: Key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    secret_access_key:
-        description: Secret associated with the access key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    assume_role_arn:
-        description: AWS IAM role ARN
-        required: false
-        default: none
-        type: str
-    assume_role_external_id:
-        description: AWS role external ID
-        required: false
-        default: none
-        type: str
-    aws_region:
-        description: AWS region. only used when aws_sts_regional_endpoints is equal to regional otherwise, it takes default values according to Cloud Name given.
-        required: false
-        default: none
-        type: str
-    aws_sts_regional_endpoints:
-        description: By default, AWS Security Token Service (AWS STS) is available as a global service, and all AWS STS requests go to a single endpoint at https://sts.amazonaws.com. Global requests map to the US East (N. Virginia) Region. AWS recommends using Regional AWS STS endpoints instead of the global endpoint to reduce latency, build in redundancy, and increase session token validity.
-        required: false
-        default: none
-        type: str
-    cloud_name:
-        description: Name of the cloud
-        required: false
         default: none
         type: str
     description:
@@ -132,11 +101,33 @@ options:
         default: none
         type: list
         element: str
+    syslog_params:
+        description:
+            Syslog connection parameters 
+        type: dict
+        suboptions:
+          transport:
+            description: Transport mode for sending data, supports "udp", "tls" and "tcp".
+            type: str
+          ca_cert:
+            description: The trusted CA certificate in the PEM format. Only used in the TLS transport mode.
+            type: str
+          message_format:
+            description: The log message format for new log messages
+            type: str
+    host:
+        description: Host of the log-forwarder server
+        default: none
+        type: str
+    port:
+        description: The port to use for the connection. Defaults to 514 for udp, 601 for tcp and 6514 for tls
+        default: none
+        type: int
 '''
 
 EXAMPLES = '''
-- name: "Create AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Create Syslog Connection"
+  thales.ciphertrust.connection_manager_syslog:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -145,9 +136,18 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
+    name: "Syslog Connection"
+    syslog_params:
+      transport: TLS
+      message_format: rfc3164
+      ca_cert: ""
+    host: 127.0.0.1
+    port: 514
+    products:
+      - logger
 
-- name: "Update AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Update Syslog Connection"
+  thales.ciphertrust.connection_manager_syslog:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -171,7 +171,6 @@ _syslog_param = dict(
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
     connection_id=dict(type='str', required=False),    
     syslog_params=dict(type='dict', options=_syslog_param, required=False),
     host=dict(type='str'),
@@ -189,7 +188,7 @@ def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
         required_if=(
-            ['op_type', 'patch', ['connection_id', 'connection_type']],
+            ['op_type', 'patch', ['connection_id']],
             ['op_type', 'create', ['name', 'syslog_params']],
         ),
         mutually_exclusive=[],
@@ -214,7 +213,7 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),          
+          connection_type='syslog',
           syslog_params=module.params.get('syslog_params'),
           host=module.params.get('host'),
           port=module.params.get('port'),
@@ -234,7 +233,7 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='syslog',
           connection_id=module.params.get('connection_id'),
           syslog_params=module.params.get('syslog_params'),
           host=module.params.get('host'),

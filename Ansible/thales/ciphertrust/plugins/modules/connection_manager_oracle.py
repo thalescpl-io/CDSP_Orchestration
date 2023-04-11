@@ -31,7 +31,7 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_aws
+module: connection_manager_oracle
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
     - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
@@ -76,44 +76,13 @@ options:
         choices: [create, patch]
         required: true
         type: str
+    connection_id:
+        description: Unique ID of the connection to be updated
+        default: none
+        type: str
     name:
         description: Unique connection name
         required: true
-        default: none
-        type: str
-    access_key_id:
-        description: Key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    secret_access_key:
-        description: Secret associated with the access key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    assume_role_arn:
-        description: AWS IAM role ARN
-        required: false
-        default: none
-        type: str
-    assume_role_external_id:
-        description: AWS role external ID
-        required: false
-        default: none
-        type: str
-    aws_region:
-        description: AWS region. only used when aws_sts_regional_endpoints is equal to regional otherwise, it takes default values according to Cloud Name given.
-        required: false
-        default: none
-        type: str
-    aws_sts_regional_endpoints:
-        description: By default, AWS Security Token Service (AWS STS) is available as a global service, and all AWS STS requests go to a single endpoint at https://sts.amazonaws.com. Global requests map to the US East (N. Virginia) Region. AWS recommends using Regional AWS STS endpoints instead of the global endpoint to reduce latency, build in redundancy, and increase session token validity.
-        required: false
-        default: none
-        type: str
-    cloud_name:
-        description: Name of the cloud
-        required: false
         default: none
         type: str
     description:
@@ -132,11 +101,37 @@ options:
         default: none
         type: list
         element: str
+    credentials:
+        description: Credentials of the OCI connection
+        type: dict
+        suboptions:
+          key_file:
+            description: Private key file for OCI connection (PEM format)
+            type: str
+          pass_phrase:
+            description: Passphrase of the encrypted key file
+            type: str
+    fingerprint:
+        description: Fingerprint of the public key added to this user
+        default: none
+        type: str
+    region:
+        description: An Oracle Cloud Infrastructure region
+        default: none
+        type: str
+    tenancy_ocid:
+        description: OCID of the tenancy
+        default: none
+        type: str
+    user_ocid:
+        description: OCID of the user
+        default: none
+        type: str
 '''
 
 EXAMPLES = '''
-- name: "Create AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Create Oracle Connection"
+  thales.ciphertrust.connection_manager_oracle:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -145,9 +140,18 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
+    name: "OCI Connection"
+    products: 
+      - cckm
+    user_ocid: "ocid1.user.oc1..asdaaaaat2x4wy2jz4iat56kk7kqbzcevwyrasdty2bquujjhwcstmcfvbfq"
+    tenancy_ocid: "ocid1.tenancy.oc1..7777aaaadixb52q2mvlsn634ql577776hb2vg7audpd4d4mcf5zluymff644"
+    fingerprint: "c4:a9:89:47:21:11:11:ac:c4:a9:89:47:21:31:9e"
+    region: ap-sydney-1
+    credentials: "private key"
+    pass_phrase: password
 
-- name: "Update AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Update Oracle Connection"
+  thales.ciphertrust.connection_manager_oracle:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -170,7 +174,6 @@ _credential = dict(
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
     connection_id=dict(type='str', required=False),  
     credentials=dict(type='str'),
     fingerprint=dict(type='str'),
@@ -215,7 +218,7 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='oracle',
           credentials=module.params.get('credentials'),
           fingerprint=module.params.get('fingerprint'),
           region=module.params.get('region'),
@@ -237,7 +240,7 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='oracle',
           connection_id=module.params.get('connection_id'),
           credentials=module.params.get('credentials'),
           fingerprint=module.params.get('fingerprint'),

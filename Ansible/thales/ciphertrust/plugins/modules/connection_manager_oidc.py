@@ -31,7 +31,7 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_google
+module: connection_manager_oidc
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
     - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
@@ -76,44 +76,13 @@ options:
         choices: [create, patch]
         required: true
         type: str
+    connection_id:
+        description: Unique ID of the connection to be updated
+        default: none
+        type: str
     name:
         description: Unique connection name
         required: true
-        default: none
-        type: str
-    access_key_id:
-        description: Key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    secret_access_key:
-        description: Secret associated with the access key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    assume_role_arn:
-        description: AWS IAM role ARN
-        required: false
-        default: none
-        type: str
-    assume_role_external_id:
-        description: AWS role external ID
-        required: false
-        default: none
-        type: str
-    aws_region:
-        description: AWS region. only used when aws_sts_regional_endpoints is equal to regional otherwise, it takes default values according to Cloud Name given.
-        required: false
-        default: none
-        type: str
-    aws_sts_regional_endpoints:
-        description: By default, AWS Security Token Service (AWS STS) is available as a global service, and all AWS STS requests go to a single endpoint at https://sts.amazonaws.com. Global requests map to the US East (N. Virginia) Region. AWS recommends using Regional AWS STS endpoints instead of the global endpoint to reduce latency, build in redundancy, and increase session token validity.
-        required: false
-        default: none
-        type: str
-    cloud_name:
-        description: Name of the cloud
-        required: false
         default: none
         type: str
     description:
@@ -132,11 +101,23 @@ options:
         default: none
         type: list
         element: str
+    client_id:
+        description: clientID for the connection
+        default: none
+        type: str
+    client_secret:
+        description: Client Secret of the OIDC connection
+        default: none
+        type: str
+    url:
+        description: url for the connection
+        default: none
+        type: str
 '''
 
 EXAMPLES = '''
-- name: "Create AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Create OIDC Connection"
+  thales.ciphertrust.connection_manager_oidc:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -145,9 +126,15 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
+    name: "OIDC Connection"
+    products:
+      - cte
+    client_id: "js7sjn-4jas98-fo2rm13-94ne5t"
+    url: www.oidc-test-connection.com
+    client_secret: huj4be2sdf97ahs5fd98h
 
-- name: "Update AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Update OIDC Connection"
+  thales.ciphertrust.connection_manager_oidc:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -165,7 +152,6 @@ _schema_less = dict()
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
     connection_id=dict(type='str', required=False),    
     client_id=dict(type='str'),
     client_secret=dict(type='str'),
@@ -184,7 +170,7 @@ def setup_module_object():
         argument_spec=argument_spec,
         required_if=(
             ['op_type', 'patch', ['connection_id']],
-            ['op_type', 'create', ['name']],
+            ['op_type', 'create', ['name', 'client_id', 'client_secret', 'url']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -208,7 +194,7 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='oidc',
           client_id=module.params.get('client_id'),
           client_secret=module.params.get('client_secret'),
           name=module.params.get('name'),
@@ -228,7 +214,7 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='oidc',
           connection_id=module.params.get('connection_id'),
           client_id=module.params.get('client_id'),
           client_secret=module.params.get('client_secret'),

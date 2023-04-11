@@ -31,7 +31,7 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_google
+module: connection_manager_salesforce
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
     - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
@@ -76,44 +76,13 @@ options:
         choices: [create, patch]
         required: true
         type: str
+    connection_id:
+        description: Unique ID of the connection to be updated
+        default: none
+        type: str
     name:
         description: Unique connection name
         required: true
-        default: none
-        type: str
-    access_key_id:
-        description: Key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    secret_access_key:
-        description: Secret associated with the access key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    assume_role_arn:
-        description: AWS IAM role ARN
-        required: false
-        default: none
-        type: str
-    assume_role_external_id:
-        description: AWS role external ID
-        required: false
-        default: none
-        type: str
-    aws_region:
-        description: AWS region. only used when aws_sts_regional_endpoints is equal to regional otherwise, it takes default values according to Cloud Name given.
-        required: false
-        default: none
-        type: str
-    aws_sts_regional_endpoints:
-        description: By default, AWS Security Token Service (AWS STS) is available as a global service, and all AWS STS requests go to a single endpoint at https://sts.amazonaws.com. Global requests map to the US East (N. Virginia) Region. AWS recommends using Regional AWS STS endpoints instead of the global endpoint to reduce latency, build in redundancy, and increase session token validity.
-        required: false
-        default: none
-        type: str
-    cloud_name:
-        description: Name of the cloud
-        required: false
         default: none
         type: str
     description:
@@ -132,11 +101,39 @@ options:
         default: none
         type: list
         element: str
+    client_id:
+        description: Unique Identifier (client ID/consumer key) for the Salesforce Application
+        default: none
+        type: str
+    cloud_name:
+        description: Name or Type of the Salesforce cloud
+        default: none
+        type: str
+    username:
+        description: Username of the Salesforce account
+        default: none
+        type: str
+    cert_duration:
+        description: Duration in days for which the salesforce server certificate is valid, default (730 i.e. 2 Years)
+        default: none
+        type: int
+    certificate:
+        description: User has the option to upload external certificate for Salesforce Cloud connection. This option cannot be used with option is_certificate_used and client_secret. User first has to generate a new Certificate Signing Request (CSR) in POST /v1/connectionmgmt/connections/csr. The generated CSR can be signed with any internal or external CA. The Certificate must have an RSA key strength of 1024, 2048 or 4096. User can also update the new external certificate in the existing connection in Update (PATCH) API call. Any unused certificate will automatically deleted in 24 hours.
+        default: none
+        type: str
+    client_secret:
+        description: Consumer Secret for the Salesforce application. This a mandatory parameter for a connection with Client Credential Authentication method. This parameter is not needed for Certificate Authentication
+        default: none
+        type: str
+    is_certificate_used:
+        description: User has the option to choose the Certificate Authentication method instead of Client Credentials (password and client_secret) Authentication for Salesforce Cloud connection. In order to use the Certificate, set this field to true. Once the connection is created, in the response user will get a certificate
+        default: none
+        type: bool
 '''
 
 EXAMPLES = '''
-- name: "Create AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Create Salesforce Connection"
+  thales.ciphertrust.connection_manager_salesforce:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -145,9 +142,19 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
+    name: salesforce-1
+    products:
+      - cckm
+    cloud_name: "Salesforce Sandbox Cloud"
+    client_id: 3bf0dbe6-a2c7-431d-9a6f-4843b74c7e12
+    client_secret: BC0556E7A0B4C96E218EF91370C5B
+    username: abc@xyz.com
+    password: password
+    is_certificate_used: false
+    certificate: "cert"
 
-- name: "Update AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Update Salesforce Connection"
+  thales.ciphertrust.connection_manager_salesforce:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -165,7 +172,6 @@ _schema_less = dict()
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
     connection_id=dict(type='str', required=False),    
     client_id=dict(type='str'),
     cloud_name=dict(type='str', options=['Salesforce Sandbox Cloud', 'Salesforce Cloud']),
@@ -188,7 +194,7 @@ def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
         required_if=(
-            ['op_type', 'patch', ['connection_id', 'connection_type']],
+            ['op_type', 'patch', ['connection_id']],
             ['op_type', 'create', ['name', 'client_id', 'username', 'cloud_name']],
         ),
         mutually_exclusive=[],
@@ -213,7 +219,7 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),          
+          connection_type='salesforce',       
           client_id=module.params.get('client_id'),
           cloud_name=module.params.get('cloud_name'),
           cert_duration=module.params.get('cert_duration'),
@@ -238,7 +244,7 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='salesforce',
           connection_id=module.params.get('connection_id'),
           client_id=module.params.get('client_id'),
           cloud_name=module.params.get('cloud_name'),

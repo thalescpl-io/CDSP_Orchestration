@@ -31,10 +31,10 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_google
+module: connection_manager_hadoop
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for Hadoop
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -76,44 +76,13 @@ options:
         choices: [create, patch]
         required: true
         type: str
+    connection_id:
+        description: Unique ID of the connection to be updated
+        default: none
+        type: str
     name:
         description: Unique connection name
         required: true
-        default: none
-        type: str
-    access_key_id:
-        description: Key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    secret_access_key:
-        description: Secret associated with the access key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    assume_role_arn:
-        description: AWS IAM role ARN
-        required: false
-        default: none
-        type: str
-    assume_role_external_id:
-        description: AWS role external ID
-        required: false
-        default: none
-        type: str
-    aws_region:
-        description: AWS region. only used when aws_sts_regional_endpoints is equal to regional otherwise, it takes default values according to Cloud Name given.
-        required: false
-        default: none
-        type: str
-    aws_sts_regional_endpoints:
-        description: By default, AWS Security Token Service (AWS STS) is available as a global service, and all AWS STS requests go to a single endpoint at https://sts.amazonaws.com. Global requests map to the US East (N. Virginia) Region. AWS recommends using Regional AWS STS endpoints instead of the global endpoint to reduce latency, build in redundancy, and increase session token validity.
-        required: false
-        default: none
-        type: str
-    cloud_name:
-        description: Name of the cloud
-        required: false
         default: none
         type: str
     description:
@@ -132,11 +101,48 @@ options:
         default: none
         type: list
         element: str
+    nodes:
+        description: Hadoop nodes information
+        default: none
+        type: list
+        elements: dict
+        suboptions:
+          hostname:
+            description: hostname for Hadoop Server
+            type: str
+          port:
+            description: port for Hadoop Server. Possible values 1-65535
+            type: int
+          protocol:
+            description: http or https protocol to be used for communication with the Hadoop node (https required for hadoop-knox)
+            type: str
+          path:
+            description: path for Hadoop Server
+            type: str
+          server_certificate:
+            description: SSL certificate for Hadoop Server TLS communication
+            type: str
+    password:
+        description: Password for Hadoop server (required for Knox)
+        default: none
+        type: str
+    service:
+        description: Name of the third-party service associated with the resource. Examples: aws, azure, gcp, luna network, hadoop-knox
+        default: none
+        type: str
+    username:
+        description: Username for accessing Hadoop server (required for Knox)
+        default: none
+        type: str
+    topology:
+        description: Topology deployment of the Knox gateway
+        default: none
+        type: str
 '''
 
 EXAMPLES = '''
-- name: "Create AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Create Hadoop Connection"
+  thales.ciphertrust.connection_manager_hadoop:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -145,9 +151,23 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
+    name: knoxConnection
+    service: hadoop-knox
+    products:
+      - cte
+      - "data discovery"
+    username: user
+    password: pwd
+    topology: default
+    nodes:
+      - hostname: node1
+        port: 1234
+        protocol: https
+        server_certificate: "-----cert-----"
 
-- name: "Update AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+
+- name: "Update Hadoop Connection"
+  thales.ciphertrust.connection_manager_hadoop:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -173,17 +193,16 @@ _node = dict(
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
     connection_id=dict(type='str', required=False),
-    nodes=dict(type='list', element='dict', options=_node, required=False),
-    password=dict(type='str', required=True),
-    name=dict(type='str', required=True),
-    service=dict(type='str', required=True),
-    username=dict(type='str', required=True),
-    topology=dict(type='str', required=False),
-    description=dict(type='str', required=False),
-    meta=dict(type='dict', options=_schema_less, required=False),
-    products=dict(type='list', element='str', required=False),
+    nodes=dict(type='list', element='dict', options=_node),
+    password=dict(type='str'),
+    name=dict(type='str'),
+    service=dict(type='str'),
+    username=dict(type='str'),
+    topology=dict(type='str'),
+    description=dict(type='str'),
+    meta=dict(type='dict', options=_schema_less),
+    products=dict(type='list', element='str'),
 )
 
 def validate_parameters(domain_module):
@@ -194,7 +213,7 @@ def setup_module_object():
         argument_spec=argument_spec,
         required_if=(
             ['op_type', 'patch', ['connection_id']],
-            ['op_type', 'create', ['name']],
+            ['op_type', 'create', ['name', 'nodes', 'password', 'service', 'username']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -218,7 +237,7 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='hadoop',
           name=module.params.get('name'),
           nodes=module.params.get('nodes'),
           password=module.params.get('password'),
@@ -240,7 +259,7 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='hadoop',
           connection_id=module.params.get('connection_id'),
           password=module.params.get('password'),
           username=module.params.get('username'),

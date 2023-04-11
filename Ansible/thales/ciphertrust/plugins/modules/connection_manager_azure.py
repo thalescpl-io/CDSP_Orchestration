@@ -31,10 +31,10 @@ from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions impo
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_aws
+module: connection_manager_azure
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for AWS
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for Azure
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -76,44 +76,13 @@ options:
         choices: [create, patch]
         required: true
         type: str
+    connection_id:
+        description: Unique ID of the connection to be updated
+        default: none
+        type: str
     name:
         description: Unique connection name
         required: true
-        default: none
-        type: str
-    access_key_id:
-        description: Key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    secret_access_key:
-        description: Secret associated with the access key ID of the AWS user
-        required: true
-        default: none
-        type: str
-    assume_role_arn:
-        description: AWS IAM role ARN
-        required: false
-        default: none
-        type: str
-    assume_role_external_id:
-        description: AWS role external ID
-        required: false
-        default: none
-        type: str
-    aws_region:
-        description: AWS region. only used when aws_sts_regional_endpoints is equal to regional otherwise, it takes default values according to Cloud Name given.
-        required: false
-        default: none
-        type: str
-    aws_sts_regional_endpoints:
-        description: By default, AWS Security Token Service (AWS STS) is available as a global service, and all AWS STS requests go to a single endpoint at https://sts.amazonaws.com. Global requests map to the US East (N. Virginia) Region. AWS recommends using Regional AWS STS endpoints instead of the global endpoint to reduce latency, build in redundancy, and increase session token validity.
-        required: false
-        default: none
-        type: str
-    cloud_name:
-        description: Name of the cloud
-        required: false
         default: none
         type: str
     description:
@@ -132,11 +101,67 @@ options:
         default: none
         type: list
         element: str
+    client_id:
+        description: Unique Identifier (client ID) for the Azure application
+        default: none
+        type: str
+    tenant_id:
+        description: Tenant ID of the Azure application
+        default: none
+        type: str
+    active_directory_endpoint:
+        description: Azure stack active directory authority URL
+        default: none
+        type: str
+    azure_stack_connection_type:
+        description: Azure stack connection type
+        default: none
+        type: str
+    azure_stack_server_cert:
+        description: Azure stack server certificate
+        default: none
+        type: str
+    cert_duration:
+        description: Duration in days for which the azure certificate is valid, default (730 i.e. 2 Years)
+        default: none
+        type: int
+    certificate:
+        description: User has the option to upload external certificate for Azure Cloud connection. This option cannot be used with option is_certificate_used and client_secret.User first has to generate a new Certificate Signing Request (CSR) in POST /v1/connectionmgmt/connections/csr. The generated CSR can be signed with any internal or external CA. The Certificate must have an RSA key strength of 2048 or 4096. User can also update the new external certificate in the existing connection in Update (PATCH) API call. Any unused certificate will automatically deleted in 24 hours.
+        default: none
+        type: str
+    client_secret:
+        description: Secret key for the Azure application. Required in Azure Stack connection.
+        default: none
+        type: str
+    cloud_name:
+        description: Name of the cloud
+        default: none
+        type: str
+    is_certificate_used:
+        description: User has the option to choose the Certificate Authentication method instead of Client Secret for Azure Cloud connection. In order to use the Certificate, set it to true. Once the connection is created, in the response user will get a certificate. By default, the certificate is valid for 2 Years. User can update the certificate in the existing connection by setting it to true in Update (PATCH) API call.
+        default: none
+        type: bool
+    key_vault_dns_suffix:
+        description: Azure stack key vault dns suffix
+        default: none
+        type: str
+    management_url:
+        description: Azure stack management URL
+        default: none
+        type: str
+    resource_manager_url:
+        description: Azure stack resource manager URL
+        default: none
+        type: str
+    vault_resource_url:
+        description: Azure stack vault service resource URL
+        default: none
+        type: str
 '''
 
 EXAMPLES = '''
-- name: "Create AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Create Azure Connection"
+  thales.ciphertrust.connection_manager_azure:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -145,9 +170,16 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
+    name: azure-connection
+    products:
+      - cckm
+    client_secret: 3bf0dbe6-a2c7-431d-9a6f-4843b74c71285nfjdu2
+    cloud_name: AzureCloud
+    client_id: 3bf0dbe6-a2c7-431d-9a6f-4843b74c7e12
+    tenant_id: 3bf0dbe6-a2c7-431d-9a6f-4843b74c71285nfjdu2
 
-- name: "Update AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Update Azure Connection"
+  thales.ciphertrust.connection_manager_azure:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -166,25 +198,24 @@ _schema_less = dict()
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
     client_id=dict(type='str', required=True),
-    connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
     connection_id=dict(type='str', required=False),
-    name=dict(type='str', required=True),
-    tenant_id=dict(type='str', required=True),
-    active_directory_endpoint=dict(type='str', required=False),
-    azure_stack_connection_type=dict(type='str', required=False),
-    azure_stack_server_cert=dict(type='str', required=False),
-    cert_duration=dict(type='int', default=730, required=False),
-    certificate=dict(type='str', required=False),
-    client_secret=dict(type='str', required=False),
-    cloud_name=dict(type='str', required=False),
-    description=dict(type='str', required=False),
-    is_certificate_used=dict(type='bool', required=False),
-    key_vault_dns_suffix=dict(type='str', required=False),
-    management_url=dict(type='str', required=False),
-    meta=dict(type='dict', options=_schema_less, required=False),
-    products=dict(type='list', element='str', required=False),
-    resource_manager_url=dict(type='str', required=False),
-    vault_resource_url=dict(type='str', required=False),
+    name=dict(type='str'),
+    tenant_id=dict(type='str'),
+    active_directory_endpoint=dict(type='str'),
+    azure_stack_connection_type=dict(type='str', options=['AAD', 'ADFS']),
+    azure_stack_server_cert=dict(type='str'),
+    cert_duration=dict(type='int', default=730),
+    certificate=dict(type='str'),
+    client_secret=dict(type='str'),
+    cloud_name=dict(type='str', options=['AzureCloud', 'AzureChinaCloud', 'AzureUSGovernment', 'AzureStack']),
+    description=dict(type='str'),
+    is_certificate_used=dict(type='bool'),
+    key_vault_dns_suffix=dict(type='str'),
+    management_url=dict(type='str'),
+    meta=dict(type='dict', options=_schema_less),
+    products=dict(type='list', element='str'),
+    resource_manager_url=dict(type='str'),
+    vault_resource_url=dict(type='str'),
 )
 
 def validate_parameters(domain_module):
@@ -195,7 +226,7 @@ def setup_module_object():
         argument_spec=argument_spec,
         required_if=(
             ['op_type', 'patch', ['connection_id']],
-            ['op_type', 'create', ['name']],
+            ['op_type', 'create', ['name', 'client_id', 'tenant_id']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -219,7 +250,7 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='azure',
           client_id=module.params.get('client_id'),
           name=module.params.get('name'),
           tenant_id=module.params.get('tenant_id'),
@@ -250,7 +281,7 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='azure',
           connection_id=module.params.get('connection_id'),
           client_id=module.params.get('client_id'),
           tenant_id=module.params.get('tenant_id'),

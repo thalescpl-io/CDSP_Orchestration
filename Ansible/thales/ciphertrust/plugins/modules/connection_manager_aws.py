@@ -76,6 +76,10 @@ options:
         choices: [create, patch]
         required: true
         type: str
+    connection_id:
+        description: Unique ID of the connection to be updated
+        default: none
+        type: str
     name:
         description: Unique connection name
         required: true
@@ -145,6 +149,12 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
+    name: aws-connection
+    products:
+      - cckm
+    access_key_id: "Sample ID"
+    secret_access_key: "Sample Secret"
+    cloud_name: aws
 
 - name: "Update AWS Connection"
   thales.ciphertrust.connection_manager_aws:
@@ -165,19 +175,18 @@ _schema_less = dict()
 
 argument_spec = dict(
     op_type=dict(type='str', options=['create', 'patch'], required=True),
-    connection_type=dict(type='str', options=['aws', 'azure', 'dsm', 'elasticsearch', 'google', 'hadoop', 'ldap', 'loki', 'luna_network_hsm_server', 'oidc', 'oracle', 'sap', 'scp', 'smb', 'salesforce', 'syslog'], required=True),
-    access_key_id=dict(type='str', required=True),
-    connection_id=dict(type='str', required=False),
-    name=dict(type='str', required=True),
-    secret_access_key=dict(type='str', required=True),
-    assume_role_arn=dict(type='str', required=False),
-    assume_role_external_id=dict(type='str', required=False),
-    aws_region=dict(type='str', required=False),
-    aws_sts_regional_endpoints=dict(type='str', options=['legacy', 'regional'], default="legacy", required=False),
-    cloud_name=dict(type='str', options=['aws', 'aws-us-gov', 'aws-cn'], default="aws", required=False),
-    description=dict(type='str', required=False),
-    meta=dict(type='dict', options=_schema_less, required=False),
-    products=dict(type='list', element='str', required=False),
+    access_key_id=dict(type='str'),
+    connection_id=dict(type='str'),
+    name=dict(type='str'),
+    secret_access_key=dict(type='str'),
+    assume_role_arn=dict(type='str'),
+    assume_role_external_id=dict(type='str'),
+    aws_region=dict(type='str'),
+    aws_sts_regional_endpoints=dict(type='str', options=['legacy', 'regional'], default="legacy"),
+    cloud_name=dict(type='str', options=['aws', 'aws-us-gov', 'aws-cn'], default="aws"),
+    description=dict(type='str'),
+    meta=dict(type='dict', options=_schema_less),
+    products=dict(type='list', element='str'),
 )
 
 def validate_parameters(domain_module):
@@ -188,7 +197,7 @@ def setup_module_object():
         argument_spec=argument_spec,
         required_if=(
             ['op_type', 'patch', ['connection_id']],
-            ['op_type', 'create', ['name']],
+            ['op_type', 'create', ['name', 'access_key_id', 'secret_access_key']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -212,7 +221,7 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='aws',
           access_key_id=module.params.get('access_key_id'),
           name=module.params.get('name'),
           secret_access_key=module.params.get('secret_access_key'),
@@ -236,7 +245,7 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type=module.params.get('connection_type'),
+          connection_type='aws',
           connection_id=module.params.get('connection_id'),
           access_key_id=module.params.get('access_key_id'),
           secret_access_key=module.params.get('secret_access_key'),

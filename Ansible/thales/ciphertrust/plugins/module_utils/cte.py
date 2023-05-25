@@ -34,6 +34,7 @@ def createCTEPolicy(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/policies",
+            id="id",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -77,6 +78,7 @@ def ctePolicyAddRule(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/policies/" + kwargs['policy_id'] + "/" + kwargs["rule_name"],
+            id="id",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -121,6 +123,7 @@ def createProcessSet(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/processsets",
+            id="id",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -207,6 +210,7 @@ def createResourceSet(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/resourcesets",
+            id="id",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -293,6 +297,7 @@ def createSignatureSet(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/signaturesets",
+            id="id",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -356,6 +361,7 @@ def sendSignAppRequest(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/signaturesets/" + kwargs['id'] + "/signapp",
+            id="status",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -377,6 +383,7 @@ def querySignAppRequest(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/signaturesets/" + kwargs['id'] + "/querysignapp",
+            id="status",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -398,6 +405,7 @@ def cancelSignAppRequest(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/signaturesets/" + kwargs['id'] + "/cancelsignapp",
+            id="status",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -421,6 +429,7 @@ def createUserSet(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/usersets",
+            id="id",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -507,6 +516,7 @@ def createCSIStorageGroup(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/csigroups",
+            id="id",
         )
         return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -549,6 +559,7 @@ def csiGroupAddClient(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/csigroups/" + kwargs['id'] + "/clients",
+            id="id",
       )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -570,6 +581,7 @@ def csiGroupAddGuardPoint(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/csigroups/" + kwargs['id'] + "/guardpoints",
+            id="id",
         )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -593,6 +605,7 @@ def createClientGroup(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/clientgroups",
+            id="id",
         )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -636,6 +649,7 @@ def clientGroupAddClients(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/clientgroups/" + kwargs['id'] + "/clients",
+            id="association_response",
         )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -658,6 +672,7 @@ def clientGroupAddGuardPoint(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/clientgroups/" + kwargs['id'] + "/guardpoints",
+            id="guardpoints",
         )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -682,6 +697,7 @@ def createClient(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/clients",
+            id="id",
         )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -704,6 +720,7 @@ def clientAddGuardPoint(**kwargs):
             payload=payload,
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'] + "/guardpoints",
+            id="guardpoints",
         )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:

@@ -60,7 +60,7 @@
             cte_versioned: false
         xts: false
         localNode: "{{ this_node_connection_string }}"
-      ignore_errors: false
+      ignore_errors: true
 
     - name: "Create CTE Policy Element - Resource Set"
       thales.ciphertrust.cte_resource_set:

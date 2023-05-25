@@ -628,6 +628,8 @@ _permission = dict(
     SignWithKey=dict(type='list', element='str'),
     DecryptWithKey=dict(type='list', element='str'),
     EncryptWithKey=dict(type='list', element='str'),
+    MACVerifyWithKey=dict(type='list', element='str'),
+    SignVerifyWithKey=dict(type='list', element='str'),
 )
 _meta = dict(
     ownerId=dict(type='str', required=False),

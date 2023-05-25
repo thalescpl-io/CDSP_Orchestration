@@ -76,7 +76,7 @@
             hdfs: false
 
     - name: "Create CTE Policy"
-      thales.ciphertrust.dpg_policy_save:
+      thales.ciphertrust.cte_policy_save:
         localNode: "{{ this_node_connection_string }}"
         op_type: create
         name: "Policy-Ans-001"

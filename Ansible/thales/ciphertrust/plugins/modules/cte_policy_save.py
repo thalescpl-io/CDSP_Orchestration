@@ -202,7 +202,6 @@ argument_spec = dict(
     # params for op_type add_ldt_rule
     current_key=dict(type='dict', options=_current_key),
     is_exclusion_rule=dict(type='bool'),
-    resource_set_id=dict(type='str'),
     transformation_key=dict(type='dict', options=_transformation_key),
     ldtRuleId=dict(type='str'),
     # params for op_type add_security_rule
@@ -213,7 +212,6 @@ argument_spec = dict(
     exclude_user_set=dict(type='bool'),
     partial_match=dict(type='bool'),
     process_set_id=dict(type='str'),
-    resource_set_id=dict(type='str'),
     user_set_id=dict(type='str'),
     securityRuleId=dict(type='str'),
 )

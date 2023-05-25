@@ -143,6 +143,7 @@ argument_spec = dict(
     profile_identifier=dict(type='str'),
     registration_allowed=dict(type='bool'),
     system_locked=dict(type='bool'),
+    user_space_client=dict(type='bool'),
     # Patch specific attributes
     client_mfa_enabled=dict(type='bool'),
     del_client=dict(type='bool'),
@@ -202,6 +203,7 @@ def main():
           profile_identifier=module.params.get('profile_identifier'),
           registration_allowed=module.params.get('registration_allowed'),
           system_locked=module.params.get('system_locked'),
+          user_space_client=module.params.get('user_space_client'),
         )
         result['response'] = response
       except CMApiException as api_e:

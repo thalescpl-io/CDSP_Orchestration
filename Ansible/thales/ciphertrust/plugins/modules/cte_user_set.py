@@ -24,7 +24,7 @@ import os
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createUserSet, updateUserSet, addUserToSet, updateUserInSetByIndex
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createUserSet, updateUserSet, addUserToSet, updateUserInSetByIndex, deleteUserInSetByIndex
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
@@ -122,6 +122,7 @@ argument_spec = dict(
       'patch', 
       'add_user', 
       'patch_user',
+      'delete_user',
     ], required=True),
     id=dict(type='str'),
     userIndex=dict(type='str'),
@@ -146,6 +147,7 @@ def setup_module_object():
             ['op_type', 'patch', ['id']],
             ['op_type', 'add_user', ['id']],
             ['op_type', 'patch_user', ['id', 'userIndex']],
+            ['op_type', 'delete_user', ['id', 'userIndex']],            
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -220,6 +222,20 @@ def main():
           os_domain=module.params.get('os_domain'),
           uid=module.params.get('uid'),
           uname=module.params.get('uname'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'delete_user':
+      try:
+        response = deleteUserInSetByIndex(
+          node=module.params.get('localNode'),
+          id=module.params.get('id'),
+          userIndex=module.params.get('userIndex'),
         )
         result['response'] = response
       except CMApiException as api_e:

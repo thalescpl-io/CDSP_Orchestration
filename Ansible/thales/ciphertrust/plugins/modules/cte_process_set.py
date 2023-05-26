@@ -24,7 +24,7 @@ import os
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createProcessSet, updateProcessSet, addProcessToSet, updateProcessInSetByIndex
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createProcessSet, updateProcessSet, addProcessToSet, updateProcessInSetByIndex, deleteProcessInSetByIndex
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
@@ -71,18 +71,46 @@ options:
           default: false
     op_type:
       description: Operation to be performed
-      choices: [create, patch]
+      choices: [create, patch, add_process, patch_process, delete_process]
       required: true
       type: str
     id:
       description:
-        - Identifier of the CTE CSI Storage Group to be patched
+        - Identifier of the CTE ProcessSet to be patched or deleted
+      type: str
+    processIndex:
+      description:
+        - Identifier of the CTE Process within ProcessSet to be patched or deleted
+      type: str
+    name:
+      description:
+        - Name of the process set
+      type: str
+    description:
+      description:
+        - Description of the process set
+      type: str
+    processes:
+      description:
+        - List of processes to be added to the process set
+      type: str
+    directory:
+      description:
+        - directory path of the process which shall be associated with the process-set
+      type: str
+    file:
+      description:
+        - file name of the process which shall be associated with the process-set
+      type: str
+    signature:
+      description:
+        - Signature-set ID or Name which shall be associated with the process-set
       type: str
 '''
 
 EXAMPLES = '''
-- name: "Create CTE Policy"
-  thales.ciphertrust.dpg_policy_save:
+- name: "Create CTE ProcessSet"
+  thales.ciphertrust.cte_process_set:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -91,17 +119,15 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
-
-- name: "Patch DPG Policy"
-  thales.ciphertrust.dpg_policy_save:
-    localNode:
-        server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Private IP in case that is different from above"
-        server_port: 5432
-        user: "CipherTrust Manager Username"
-        password: "CipherTrust Manager Password"
-        verify: false
-    op_type: patch
+    name: TestProcessSet
+    description: "via Ansible"
+    processes:
+      - signature: TestSignSet
+        directory: "/home/testUser"
+        file: "*"
+      - signature: TestSignSet
+        directory: "/home/test"
+        file: "test.bin"
 '''
 
 RETURN = '''
@@ -120,6 +146,7 @@ argument_spec = dict(
       'patch', 
       'add_process', 
       'patch_process',
+      'delete_process',
     ], required=True),
     id=dict(type='str'),
     processIndex=dict(type='str'),
@@ -142,6 +169,7 @@ def setup_module_object():
             ['op_type', 'patch', ['id']],
             ['op_type', 'add_process', ['id']],
             ['op_type', 'patch_process', ['id', 'processIndex']],
+            ['op_type', 'delete_process', ['id', 'processIndex']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -214,6 +242,20 @@ def main():
           directory=module.params.get('directory'),
           file=module.params.get('file'),
           signature=module.params.get('signature'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'delete_process':
+      try:
+        response = deleteProcessInSetByIndex(
+          node=module.params.get('localNode'),
+          id=module.params.get('id'),
+          processIndex=module.params.get('processIndex'),
         )
         result['response'] = response
       except CMApiException as api_e:

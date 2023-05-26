@@ -24,7 +24,7 @@ import os
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createCSIStorageGroup, updateCSIStorageGroup, csiGroupAddClient, csiGroupAddGuardPoint
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createCSIStorageGroup, updateCSIStorageGroup, csiGroupAddClient, csiGroupAddGuardPoint, csiGroupRemoveClient, csiGroupUpdateGuardPoint, csiGroupRemoveGuardPoint
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
@@ -71,18 +71,55 @@ options:
           default: false
     op_type:
       description: Operation to be performed
-      choices: [create, patch]
+      choices: [create, patch, add_client, remove_client, add_guard_point, patch_guard_point, remove_guard_point]
       required: true
       type: str
     id:
       description:
         - Identifier of the CTE CSI Storage Group to be patched
       type: str
+    client_id:
+      description:
+        - Identifier of the client added added to the CSI Group
+      type: str
+    gp_id:
+      description:
+        - Identifier of the guard point added to the CSI Group
+      type: str
+    k8s_namespace:
+      description:
+        - Name of the K8s namespace
+      type: str
+    k8s_storage_class:
+      description:
+        - Name of the K8s StorageClass
+      type: str
+    name:
+      description:
+        - Name to uniquely identify the CSI storage group. This name will be visible on the CipherTrust Manager
+      type: str
+    client_profile:
+      description:
+        - Optional Client Profile for the storage group. If not provided, the default profile will be used
+      type: str
+    description:
+      description:
+        - Optional description for the storage group
+      type: str
+    client_list:
+      description: List of identifiers of clients to be associated with the client group. This identifier can be the name or UUID.
+      type: list
+    policy_list:
+      description: List of CSI policy identifiers to be associated with the storage group. This identifier can be the name or UUID.
+      type: list
+    guard_enabled:
+      description: Enable or disable the GuardPolicy. Set to true to enable, false to disable.
+      type: boolean
 '''
 
 EXAMPLES = '''
-- name: "Create CTE Policy"
-  thales.ciphertrust.dpg_policy_save:
+- name: "Create CSI Storage Group"
+  thales.ciphertrust.cte_csi_storage_group:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -91,17 +128,11 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
-
-- name: "Patch DPG Policy"
-  thales.ciphertrust.dpg_policy_save:
-    localNode:
-        server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Private IP in case that is different from above"
-        server_port: 5432
-        user: "CipherTrust Manager Username"
-        password: "CipherTrust Manager Password"
-        verify: false
-    op_type: patch
+    name: CSIStorageGroup_1
+    k8s_namespace: K8sNamespace_1
+    k8s_storage_class: K8sStorageClass_1
+    description: "Test CSIStorageGroup"
+    client_profile: DefaultClientProfile
 '''
 
 RETURN = '''
@@ -110,13 +141,17 @@ RETURN = '''
 
 argument_spec = dict(
     op_type=dict(type='str', options=[
-      'create', 
-      'patch', 
-      'add_client', 
+      'create',
+      'patch',
+      'add_client',
+      'remove_client',
       'add_guard_point',
-      'patch_guard_point', 
+      'patch_guard_point',
+      'remove_guard_point',
     ], required=True),
     id=dict(type='str'),
+    client_id=dict(type='str'),
+    gp_id=dict(type='str'),
     k8s_namespace=dict(type='str'),
     k8s_storage_class=dict(type='str'),
     name=dict(type='str'),
@@ -124,7 +159,7 @@ argument_spec = dict(
     description=dict(type='str'),
     client_list=dict(type='list', element='str'),
     policy_list=dict(type='list', element='str'),
-    guard_enabled=dict(type='str'),
+    guard_enabled=dict(type='bool'),
 )
 
 def validate_parameters(cte_csi_sg_module):
@@ -137,7 +172,10 @@ def setup_module_object():
             ['op_type', 'create', ['k8s_namespace', 'k8s_storage_class', 'name']],
             ['op_type', 'patch', ['id']],
             ['op_type', 'add_client', ['id', 'client_list']],
+            ['op_type', 'remove_client', ['id', 'client_id']],
             ['op_type', 'add_guard_point', ['id', 'policy_list']],
+            ['op_type', 'patch_guard_point', ['id', 'gp_id']],
+            ['op_type', 'remove_guard_point', ['id', 'gp_id']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -203,12 +241,53 @@ def main():
       except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
 
+    elif module.params.get('op_type') == 'remove_client':
+      try:
+        response = csiGroupRemoveClient(
+          node=module.params.get('localNode'),
+          id=module.params.get('id'),
+          client_id=module.params.get('client_id'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
     elif module.params.get('op_type') == 'add_guard_point':
       try:
         response = csiGroupAddGuardPoint(
           node=module.params.get('localNode'),
           id=module.params.get('id'),
           policy_list=module.params.get('policy_list'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'patch_guard_point':
+      try:
+        response = csiGroupUpdateGuardPoint(
+          node=module.params.get('localNode'),
+          gp_id=module.params.get('gp_id'),
+          guard_enabled=module.params.get('guard_enabled'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'remove_guard_point':
+      try:
+        response = csiGroupRemoveGuardPoint(
+          node=module.params.get('localNode'),
+          gp_id=module.params.get('gp_id'),
         )
         result['response'] = response
       except CMApiException as api_e:

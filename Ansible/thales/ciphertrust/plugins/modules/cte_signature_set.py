@@ -24,7 +24,7 @@ import os
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createSignatureSet, updateSignatureSet, addSignatureToSet, sendSignAppRequest, querySignAppRequest, cancelSignAppRequest
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createSignatureSet, updateSignatureSet, addSignatureToSet, deleteSignatureInSetById, sendSignAppRequest, querySignAppRequest, cancelSignAppRequest
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
@@ -118,11 +118,13 @@ argument_spec = dict(
       'create', 
       'patch', 
       'add_signature',
+      'delete_signature',
       'sign_app',
       'query_sign_app',
       'cancel_sign_app'
     ], required=True),
     id=dict(type='str'),
+    signature_id=dict(type='str'),
     name=dict(type='str'),
     description=dict(type='str'),
     source_list=dict(type='list', element='str'),
@@ -140,6 +142,7 @@ def setup_module_object():
             ['op_type', 'create', ['name']],
             ['op_type', 'patch', ['id']],
             ['op_type', 'add_signature', ['id', 'signatures']],
+            ['op_type', 'delete_signature', ['id', 'signature_id']],
             ['op_type', 'sign_app', ['id', 'client_id']],
             ['op_type', 'query_sign_app', ['id', 'client_id']],
             ['op_type', 'cancel_sign_app', ['id', 'client_id']],
@@ -198,6 +201,20 @@ def main():
           node=module.params.get('localNode'),
           id=module.params.get('id'),
           signatures=module.params.get('signatures'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'delete_signature':
+      try:
+        response = deleteSignatureInSetById(
+          node=module.params.get('localNode'),
+          id=module.params.get('id'),
+          signature_id=module.params.get('signature_id'),
         )
         result['response'] = response
       except CMApiException as api_e:

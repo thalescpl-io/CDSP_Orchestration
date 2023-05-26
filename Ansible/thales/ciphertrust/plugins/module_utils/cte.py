@@ -10,7 +10,7 @@ import os
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, DeleteWithoutData
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -106,6 +106,20 @@ def ctePolicyPatchRule(**kwargs):
         raise
     except AnsibleCMException as custom_e:
         raise
+
+def ctePolicyDeleteRule(**kwargs):
+    url = "transparent-encryption/policies/" + kwargs['policy_id'] + "/" + kwargs["rule_name"] + "/" + kwargs["rule_id"]
+
+    try:
+      response = DeleteWithoutData(
+      cm_node=kwargs['node'],
+      cm_api_endpoint=url,
+      )
+      return str(response)
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
 # End of add new rules to the CTE Policy
 
 # ProcessSet
@@ -193,6 +207,20 @@ def updateProcessInSetByIndex(**kwargs):
         raise
     except AnsibleCMException as custom_e:
         raise
+
+def deleteProcessInSetByIndex(**kwargs):
+    url = "transparent-encryption/processsets/" + kwargs['id'] + "/delprocesses?processIndexList=" + kwargs['processIndex']
+
+    try:
+      response = DeleteWithoutData(
+      cm_node=kwargs['node'],
+      cm_api_endpoint=url,
+      )
+      return str(response)
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
 # End ProcessSet
 
 # ResourceSet
@@ -280,6 +308,20 @@ def updateResourceInSetByIndex(**kwargs):
         raise
     except AnsibleCMException as custom_e:
         raise
+
+def deleteResourceInSetByIndex(**kwargs):
+    url = "transparent-encryption/resourcesets/" + kwargs['id'] + "/delresources?resourceIndexList=" + kwargs['resourceIndex']
+
+    try:
+      response = DeleteWithoutData(
+      cm_node=kwargs['node'],
+      cm_api_endpoint=url,
+      )
+      return str(response)
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
 # End ResourceSet
 
 # SignatureSet
@@ -346,6 +388,20 @@ def addSignatureToSet(**kwargs):
         raise
     except AnsibleCMException as custom_e:
         raise
+
+def deleteSignatureInSetById(**kwargs):
+    url = "transparent-encryption/signaturesets/" + kwargs['id'] + "/signatures/" + kwargs['signature_id']
+
+    try:
+      response = DeleteWithoutData(
+        cm_node=kwargs['node'],
+        cm_api_endpoint=url,
+      )
+      return str(response)
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
 
 def sendSignAppRequest(**kwargs):
     request = {}
@@ -499,6 +555,20 @@ def updateUserInSetByIndex(**kwargs):
         raise
     except AnsibleCMException as custom_e:
         raise
+
+def deleteUserInSetByIndex(**kwargs):
+    url = "transparent-encryption/usersets/" + kwargs['id'] + "/delusers?userIndexList=" + kwargs['userIndex']
+
+    try:
+      response = DeleteWithoutData(
+        cm_node=kwargs['node'],
+        cm_api_endpoint=url,
+      )
+      return str(response)
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
 # End UserSet
 
 # CSI Storage Group
@@ -567,6 +637,20 @@ def csiGroupAddClient(**kwargs):
     except AnsibleCMException as custom_e:
         raise
 
+def csiGroupRemoveClient(**kwargs):
+    url = "transparent-encryption/csigroups/" + kwargs['id'] + "/clients/" + kwargs['client_id']
+
+    try:
+      response = DeleteWithoutData(
+      cm_node=kwargs['node'],
+      cm_api_endpoint=url,
+      )
+      return str(response)
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
+
 def csiGroupAddGuardPoint(**kwargs):
     request = {}
 
@@ -588,6 +672,41 @@ def csiGroupAddGuardPoint(**kwargs):
         raise
     except AnsibleCMException as custom_e:
         raise
+
+def csiGroupUpdateGuardPoint(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "gp_id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/csigroups/guardpoints/" + kwargs['gp_id'],
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+def csiGroupRemoveGuardPoint(**kwargs):
+    url = "transparent-encryption/csigroups/guardpoints/" + kwargs['gp_id']
+
+    try:
+      response = DeleteWithoutData(
+      cm_node=kwargs['node'],
+      cm_api_endpoint=url,
+      )
+      return str(response)
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
 # End CSI Storage Group
 
 # CTE Client Group
@@ -634,7 +753,6 @@ def updateClientGroup(**kwargs):
     except AnsibleCMException as custom_e:
         raise
 
-# Add Client to ClientGroup
 def clientGroupAddClients(**kwargs):
     request = {}
 
@@ -657,7 +775,6 @@ def clientGroupAddClients(**kwargs):
     except AnsibleCMException as custom_e:
         raise
 
-# Add GuardPoint to ClientGroup
 def clientGroupAddGuardPoint(**kwargs):
     request = {}
 
@@ -673,6 +790,62 @@ def clientGroupAddGuardPoint(**kwargs):
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/clientgroups/" + kwargs['id'] + "/guardpoints",
             id="guardpoints",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+def clientGroupAuthBinaries(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clientgroups/" + kwargs['id'] + "/auth-binaries",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+def clientGroupDeleteClient(**kwargs):
+    url = "transparent-encryption/clientgroups/" + kwargs['id'] + "/clients/" + kwargs["client_id"]
+
+    try:
+      response = DeleteWithoutData(
+      cm_node=kwargs['node'],
+      cm_api_endpoint=url,
+      )
+      return str(response)
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
+
+def clientGroupLDTPause(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clientgroups/" + kwargs['id'] + "/ldtpause",
         )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:

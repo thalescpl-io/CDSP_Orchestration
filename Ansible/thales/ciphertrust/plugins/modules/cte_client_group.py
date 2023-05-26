@@ -24,7 +24,7 @@ import os
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createClientGroup, updateClientGroup, clientGroupAddClients, clientGroupAddGuardPoint
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createClientGroup, updateClientGroup, clientGroupAddClients, clientGroupAddGuardPoint, clientGroupAuthBinaries, clientGroupDeleteClient, clientGroupLDTPause
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
@@ -132,8 +132,12 @@ argument_spec = dict(
       'patch', 
       'add_client', 
       'add_guard_point',
+      'auth-binaries',
+      'remove_client',
+      'ldt_pause',
     ], required=True),
     id=dict(type='str'),
+    client_id=dict(type='str'),
     cluster_type=dict(type='str', options=['NON-CLUSTER', 'HDFS']),
     name=dict(type='str'),
     description=dict(type='str'),
@@ -150,6 +154,9 @@ argument_spec = dict(
     inherit_attributes=dict(type='bool'), 
     guard_paths=dict(type='list', element='str'),
     guard_point_params=dict(type='dict', options=_guard_point_params),
+    auth_binaries=dict(type='str'), 
+    re_sign=dict(type='bool'),
+    paused=dict(type='bool'),
 )
 
 def validate_parameters(cte_client_group_module):
@@ -163,6 +170,9 @@ def setup_module_object():
             ['op_type', 'patch', ['id']],
             ['op_type', 'add_client', ['id', 'client_list', 'inherit_attributes']],
             ['op_type', 'add_guard_point', ['id', 'guard_paths', 'guard_point_params']],
+            ['op_type', 'auth-binaries', ['id']],
+            ['op_type', 'remove_client', ['id', 'client_id']],
+            ['op_type', 'ldt_pause', ['id', 'paused']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -246,6 +256,49 @@ def main():
           id=module.params.get('id'),
           guard_paths=module.params.get('guard_paths'),
           guard_point_params=module.params.get('guard_point_params'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'auth-binaries':
+      try:
+        response = clientGroupAuthBinaries(
+          node=module.params.get('localNode'),
+          id=module.params.get('id'),
+          auth_binaries=module.params.get('auth_binaries'),
+          re_sign=module.params.get('re_sign'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'remove_client':
+      try:
+        response = clientGroupDeleteClient(
+          node=module.params.get('localNode'),
+          id=module.params.get('id'),
+          client_id=module.params.get('client_id'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'ldt_pause':
+      try:
+        response = clientGroupLDTPause(
+          node=module.params.get('localNode'),
+          id=module.params.get('id'),
+          paused=module.params.get('paused'),
         )
         result['response'] = response
       except CMApiException as api_e:

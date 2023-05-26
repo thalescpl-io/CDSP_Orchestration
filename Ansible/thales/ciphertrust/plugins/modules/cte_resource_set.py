@@ -24,7 +24,7 @@ import os
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createResourceSet, updateResourceSet, addResourceToSet, updateResourceInSetByIndex
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cte import createResourceSet, updateResourceSet, addResourceToSet, updateResourceInSetByIndex, deleteResourceInSetByIndex
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
@@ -71,37 +71,77 @@ options:
           default: false
     op_type:
       description: Operation to be performed
-      choices: [create, patch]
+      choices: [create, patch, add_resource, patch_resource, delete_resource]
       required: true
       type: str
     id:
       description:
-        - Identifier of the CTE CSI Storage Group to be patched
+        - Identifier of the CTE ResourceSet to be patched or deleted
       type: str
+    resourceIndex:
+      description:
+        - Identifier of the CTE Resource within ResourceSet to be patched or deleted
+      type: str
+    name:
+      description:
+        - Name of the resource set
+      type: str
+    description:
+      description:
+        - Description of the resource set
+      type: str
+    classification_tags:
+      description:
+        - Classification set to be added to the resource set
+      type: list
+      elements: dict
+    resources:
+      description:
+        - List of resources to be added to the resource set
+      type: list
+      elements: dict
+    type:
+      description:
+        - Type of the resource set i.e. Directory or Classification. Default value is Directory
+      type: str
+      choices: [Directory, Classification]
+    directory:
+      description:
+        - directory path of the Resource which shall be associated with the resource-set
+      type: str
+    file:
+      description:
+        - file name of the Resource which shall be associated with the resource-set
+      type: str
+    hdfs:
+      description:
+        - Whether the specified path is a HDFS path
+      type: boolean
+    include_subfolders:
+      description:
+        - Flag to include subfolders in the Resource
+      type: boolean
 '''
 
 EXAMPLES = '''
-- name: "Create CTE Policy"
-  thales.ciphertrust.dpg_policy_save:
+- name: "Create CTE ResourceSet"
+  thales.ciphertrust.cte_resource_set:
     localNode:
-        server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Private IP in case that is different from above"
-        server_port: 5432
-        user: "CipherTrust Manager Username"
-        password: "CipherTrust Manager Password"
-        verify: false
+      server_ip: "IP/FQDN of CipherTrust Manager"
+      server_private_ip: "Private IP in case that is different from above"
+      server_port: 5432
+      user: "CipherTrust Manager Username"
+      password: "CipherTrust Manager Password"
+      verify: false
     op_type: create
-
-- name: "Patch DPG Policy"
-  thales.ciphertrust.dpg_policy_save:
-    localNode:
-        server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Private IP in case that is different from above"
-        server_port: 5432
-        user: "CipherTrust Manager Username"
-        password: "CipherTrust Manager Password"
-        verify: false
-    op_type: patch
+    name: "RS-Ans-001"
+    description: "Created via Ansible"
+    type: Directory
+    resources:
+      - directory: "/"
+        file: "*"
+        include_subfolders: true
+        hdfs: false
 '''
 
 RETURN = '''
@@ -134,6 +174,7 @@ argument_spec = dict(
       'patch', 
       'add_resource', 
       'patch_resource',
+      'delete_resource',
     ], required=True),
     id=dict(type='str'),
     resourceIndex=dict(type='str'),
@@ -235,6 +276,20 @@ def main():
           file=module.params.get('file'),
           hdfs=module.params.get('hdfs'),
           include_subfolders=module.params.get('include_subfolders'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'delete_resource':
+      try:
+        response = deleteResourceInSetByIndex(
+          node=module.params.get('localNode'),
+          id=module.params.get('id'),
+          resourceIndex=module.params.get('resourceIndex'),
         )
         result['response'] = response
       except CMApiException as api_e:

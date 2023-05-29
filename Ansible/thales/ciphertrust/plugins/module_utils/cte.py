@@ -878,6 +878,27 @@ def createClient(**kwargs):
     except AnsibleCMException as custom_e:
         raise
 
+def patchClient(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'],
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
 # Add GuardPoint to Client
 def clientAddGuardPoint(**kwargs):
     request = {}
@@ -894,6 +915,184 @@ def clientAddGuardPoint(**kwargs):
             cm_node=kwargs['node'],
             cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'] + "/guardpoints",
             id="guardpoints",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+# UnEnroll CTE client
+def unEnrollClient(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/unenroll",
+            id="name",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+# Delete list of clients
+def deleteClients(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clients/delete",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+# UnEnroll CTE client by ID
+def deleteClientById(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'] + "/delete",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+# UnEnroll CTE client by ID
+def updateClientAuthBinaries(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'] + "/auth-binaries",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+# UnEnroll CTE client by ID
+def sendLDTPauseCmd(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = POSTData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'] + "/ldtpause",
+            id="status",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+# UnEnroll CTE client by ID
+def patchGuardPointCTEClient(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id", "gp_id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'] + "/guardpoints/" + kwargs['gp_id'],
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+# UnGuard Guard Points
+def unGuardPoints(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'] + "/guardpoints/unguard",
+        )
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+        raise
+    except AnsibleCMException as custom_e:
+        raise
+
+# UnGuard Guard Points
+def updateGPEarlyAccess(**kwargs):
+    request = {}
+
+    for key, value in kwargs.items():
+        if key not in ["node", "id", "gp_id"] and value != None:
+            request[key] = value
+
+    payload = json.dumps(request)
+
+    try:
+      response = PATCHData(
+            payload=payload,
+            cm_node=kwargs['node'],
+            cm_api_endpoint="transparent-encryption/clients/" + kwargs['id'] + "/guardpoints/" + kwargs['gp_id'] + "/early-access",
         )
       return ast.literal_eval(str(response))
     except CMApiException as api_e:

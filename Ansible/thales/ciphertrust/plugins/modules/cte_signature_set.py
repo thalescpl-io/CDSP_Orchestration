@@ -71,18 +71,44 @@ options:
           default: false
     op_type:
       description: Operation to be performed
-      choices: [create, patch]
+      choices: [create, patch, add_signature, delete_signature, sign_app, query_sign_app, cancel_sign_app]
       required: true
       type: str
     id:
       description:
-        - Identifier of the CTE CSI Storage Group to be patched
+        - Identifier of the CTE SignatureSet to be patched
+      type: str
+    signature_id:
+      description:
+        - Identifier of the Signature within the CTE SignatureSet to be patched
+      type: str
+    name:
+      description:
+        - Name of the signature set
+      type: str
+    description:
+      description:
+        - Description of the signature set
+      type: str
+    source_list:
+      description:
+        - Path of the directory or file to be signed. If a directory is specified, all files in the directory and its subdirectories are signed.
+      type: list
+      elements: str
+    signatures:
+      description:
+        - Name of the signature set
+      type: list
+      elements: dict
+    client_id:
+      description:
+        - ID of the client where the signing request is to be sent
       type: str
 '''
 
 EXAMPLES = '''
 - name: "Create CTE Policy"
-  thales.ciphertrust.dpg_policy_save:
+  thales.ciphertrust.cte_signature_set:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -91,17 +117,10 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
-
-- name: "Patch DPG Policy"
-  thales.ciphertrust.dpg_policy_save:
-    localNode:
-        server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Private IP in case that is different from above"
-        server_port: 5432
-        user: "CipherTrust Manager Username"
-        password: "CipherTrust Manager Password"
-        verify: false
-    op_type: patch
+    name: TestSignSet
+    source_list:
+      - "/usr/bin"
+        "/usr/sbin"
 '''
 
 RETURN = '''

@@ -238,7 +238,7 @@ def main():
         response = updateProcessInSetByIndex(
           node=module.params.get('localNode'),
           id=module.params.get('id'),
-          processIndex=module.params.get('processIndex'),
+          processIndex=str(module.params.get('processIndex')),
           directory=module.params.get('directory'),
           file=module.params.get('file'),
           signature=module.params.get('signature'),
@@ -255,7 +255,7 @@ def main():
         response = deleteProcessInSetByIndex(
           node=module.params.get('localNode'),
           id=module.params.get('id'),
-          processIndex=module.params.get('processIndex'),
+          processIndex=str(module.params.get('processIndex')),
         )
         result['response'] = response
       except CMApiException as api_e:

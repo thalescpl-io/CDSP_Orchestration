@@ -271,7 +271,7 @@ def main():
         response = updateResourceInSetByIndex(
           node=module.params.get('localNode'),
           id=module.params.get('id'),
-          resourceIndex=module.params.get('resourceIndex'),
+          resourceIndex=str(module.params.get('resourceIndex')),
           directory=module.params.get('directory'),
           file=module.params.get('file'),
           hdfs=module.params.get('hdfs'),
@@ -289,7 +289,7 @@ def main():
         response = deleteResourceInSetByIndex(
           node=module.params.get('localNode'),
           id=module.params.get('id'),
-          resourceIndex=module.params.get('resourceIndex'),
+          resourceIndex=str(module.params.get('resourceIndex')),
         )
         result['response'] = response
       except CMApiException as api_e:

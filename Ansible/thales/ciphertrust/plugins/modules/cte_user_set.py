@@ -216,7 +216,7 @@ def main():
         response = updateUserInSetByIndex(
           node=module.params.get('localNode'),
           id=module.params.get('id'),
-          userIndex=module.params.get('userIndex'),
+          userIndex=str(module.params.get('userIndex')),
           gid=module.params.get('gid'),
           gname=module.params.get('gname'),
           os_domain=module.params.get('os_domain'),
@@ -235,7 +235,7 @@ def main():
         response = deleteUserInSetByIndex(
           node=module.params.get('localNode'),
           id=module.params.get('id'),
-          userIndex=module.params.get('userIndex'),
+          userIndex=str(module.params.get('userIndex')),
         )
         result['response'] = response
       except CMApiException as api_e:

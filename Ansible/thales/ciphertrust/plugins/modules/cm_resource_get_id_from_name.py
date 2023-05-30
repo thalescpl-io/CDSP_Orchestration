@@ -137,7 +137,15 @@ _arr_resource_type_choices = [
     'users', 
     'dpg-policies', 
     'client-profiles', 
-    'masking-formats'
+    'masking-formats',
+    'resourceset',
+    'signatureset',
+    'userset',
+    'processset',
+    'cte-policy',
+    'cte-client-group',
+    'csigroup',
+    'cte-client',
 ]
 _arr_query_param_choices = [
     'name',
@@ -201,6 +209,30 @@ def main():
         query_id='id'
     elif resource_type == "character-sets":
         endpoint='data-protection/character-sets'
+        query_id='id'
+    elif resource_type == "masking-formats":
+        endpoint='data-protection/masking-formats'
+        query_id='id'
+    elif resource_type == "resourceset":
+        endpoint='transparent-encryption/resourcesets'
+        query_id='id'
+    elif resource_type == "signatureset":
+        endpoint='transparent-encryption/signaturesets'
+        query_id='id'
+    elif resource_type == "userset":
+        endpoint='transparent-encryption/usersets'
+        query_id='id'
+    elif resource_type == "processset":
+        endpoint='transparent-encryption/processsets'
+        query_id='id'
+    elif resource_type == "cte-policy":
+        endpoint='transparent-encryption/policies'
+        query_id='id'
+    elif resource_type == "cte-client-group":
+        endpoint='transparent-encryption/clientgroups'
+        query_id='id'
+    elif resource_type == "csigroup":
+        endpoint='transparent-encryption/csigroups'
         query_id='id'
     else:
         module.fail_json(msg='resource_type not supported yet')

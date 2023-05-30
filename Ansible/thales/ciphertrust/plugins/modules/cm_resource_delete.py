@@ -125,7 +125,15 @@ _arr_resource_type_choices = [
     'users', 
     'dpg-policies', 
     'client-profiles', 
-    'masking-formats'
+    'masking-formats',
+    'resourceset',
+    'signatureset',
+    'userset',
+    'processset',
+    'cte-policy',
+    'cte-client-group',
+    'csigroup',
+    'cte-client',
 ]
 
 argument_spec = dict(
@@ -178,6 +186,22 @@ def main():
         endpoint='data-protection/protection-policies'
     elif resource_type == "character-sets":
         endpoint='data-protection/character-sets'
+    elif resource_type == "masking-formats":
+        endpoint='data-protection/masking-formats'
+    elif resource_type == "resourceset":
+        endpoint='transparent-encryption/resourcesets'
+    elif resource_type == "signatureset":
+        endpoint='transparent-encryption/signaturesets'
+    elif resource_type == "userset":
+        endpoint='transparent-encryption/usersets'
+    elif resource_type == "processset":
+        endpoint='transparent-encryption/processsets'
+    elif resource_type == "cte-policy":
+        endpoint='transparent-encryption/policies'
+    elif resource_type == "cte-client-group":
+        endpoint='transparent-encryption/clientgroups'
+    elif resource_type == "csigroup":
+        endpoint='transparent-encryption/csigroups'
     else:
         module.fail_json(msg='resource_type not supported yet')
 

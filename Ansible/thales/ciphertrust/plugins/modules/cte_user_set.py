@@ -125,7 +125,7 @@ argument_spec = dict(
       'delete_user',
     ], required=True),
     id=dict(type='str'),
-    userIndex=dict(type='str'),
+    userIndex=dict(type='int'),
     name=dict(type='str'),
     description=dict(type='str'),
     users=dict(type='list', element='dict', options=_user),

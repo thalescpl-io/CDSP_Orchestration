@@ -177,7 +177,7 @@ argument_spec = dict(
       'delete_resource',
     ], required=True),
     id=dict(type='str'),
-    resourceIndex=dict(type='str'),
+    resourceIndex=dict(type='int'),
     name=dict(type='str'),
     description=dict(type='str'),
     classification_tags=dict(type='list', element='dict', options=_classification_tag),

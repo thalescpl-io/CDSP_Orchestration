@@ -149,7 +149,7 @@ argument_spec = dict(
       'delete_process',
     ], required=True),
     id=dict(type='str'),
-    processIndex=dict(type='str'),
+    processIndex=dict(type='int'),
     name=dict(type='str'),
     description=dict(type='str'),
     processes=dict(type='list', element='dict', options=_process),

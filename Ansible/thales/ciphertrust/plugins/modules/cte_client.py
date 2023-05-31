@@ -366,7 +366,7 @@ def main():
           profile_identifier=module.params.get('profile_identifier'),
           registration_allowed=module.params.get('registration_allowed'),
           system_locked=module.params.get('system_locked'),
-          user_space_client=module.params.get('user_space_client'),
+          #user_space_client=module.params.get('user_space_client'),
         )
         result['response'] = response
       except CMApiException as api_e:

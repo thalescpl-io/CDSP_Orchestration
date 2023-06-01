@@ -26,15 +26,15 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.connection_management import createConnection, patchConnection, addLunaPartition, deleteLunaPartition
+from ansible_collections.thales.ciphertrust.plugins.module_utils.connection_management import createConnection, patchConnection, addLunaPartition, deleteLunaPartition, enableSTC, disableSTC, addHSMServer, addLunaSTCPartition
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
-module: connection_manager_hadoop
+module: connection_manager_luna_hsm
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for Hadoop
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with Connection Manager API for Luna Network HSM
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -73,24 +73,22 @@ options:
             default: false     
     op_type:
         description: Operation to be performed
-        choices: [create, patch, add_node, update_node, delete_node]
+        choices: [create, patch, add_partition, delete_partition, add_stc_partition, add_hsm_server, enable_stc, disable_stc]
         required: true
         type: str
     connection_id:
         description: Unique ID of the connection to be updated
         default: none
         type: str
-    node_id:
-        description: Unique ID of the Hadoop node to be updated or removed
+    partition_id:
+        description: Unique ID of the Luna Network HSM partition to be updated or removed
         type: str
     name:
         description: Unique connection name
-        required: true
         default: none
         type: str
     description:
         description: Description about the connection
-        required: false
         default: none
         type: str
     meta:
@@ -100,67 +98,55 @@ options:
         type: dict
     products:
         description: Array of the CipherTrust products associated with the connection.
-        required: false
         default: none
         type: list
         element: str
-    nodes:
-        description: Hadoop nodes information
+    partitions:
+        description: One partition for a Non HA connection or a list for an HA group.
         default: none
         type: list
         elements: dict
         suboptions:
           hostname:
-            description: hostname for Hadoop Server
+            description: Hostname/IP of the Luna Network HSM Server.
             type: str
-          port:
-            description: port for Hadoop Server. Possible values 1-65535
-            type: int
-          protocol:
-            description: http or https protocol to be used for communication with the Hadoop node (https required for hadoop-knox)
+          partition_label:
+            description: Label of the partition on the Luna Network HSM Server.
             type: str
-          path:
-            description: path for Hadoop Server
-            type: str
-          server_certificate:
-            description: SSL certificate for Hadoop Server TLS communication
+          serial_number:
+            description: Serial number of the partition.
             type: str
     password:
-        description: Password for Hadoop server (required for Knox)
+        description: Password associated with the Partition of the Luna Network HSM.
         default: none
         type: str
-    service:
-        description: Name of the third-party service associated with the resource. Examples: aws, azure, gcp, luna network, hadoop-knox
+    is_ha_enabled:
+        description: Password associated with the Partition of the Luna Network HSM.
         default: none
+        type: boolean
+    partition_identity:
+        description: Contents of Luna Network HSM STC Partition Identity(pid) file in base64 form.
         type: str
-    username:
-        description: Username for accessing Hadoop server (required for Knox)
-        default: none
+    label:
+        description: Label of the Luna Network HSM STC Partition.
         type: str
-    topology:
-        description: Topology deployment of the Knox gateway
-        default: none
+    hsm_certificate:
+        description: Luna Network HSM Server Certificate.
         type: str
     hostname:
-      description: hostname for Hadoop Server
-      type: str
-    port:
-      description: port for Hadoop Server. Possible values 1-65535
-      type: int
-    protocol:
-      description: http or https protocol to be used for communication with the Hadoop node (https required for hadoop-knox)
-      type: str
-    path:
-      description: path for Hadoop Server
-      type: str
-    server_certificate:
-      description: SSL certificate for Hadoop Server TLS communication
-      type: str
+        description: Hostname/IP of the Luna Network HSM Server.
+        type: str
+    partition_label:
+        description: Label of the partition on the Luna Network HSM Server.
+        type: str
+    serial_number:
+        description: Serial number of the partition.
+        type: str
 '''
 
 EXAMPLES = '''
-- name: "Create Hadoop Connection"
-  thales.ciphertrust.connection_manager_hadoop:
+- name: "Create Luna Network HSM Connection"
+  thales.ciphertrust.connection_manager_luna_hsm:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -169,31 +155,17 @@ EXAMPLES = '''
         password: "CipherTrust Manager Password"
         verify: false
     op_type: create
-    name: knoxConnection
-    service: hadoop-knox
+    name: luna-network-connection
     products:
-      - cte
-      - "data discovery"
-    username: user
+      - cckm
+    meta:
+        color: blue
+    is_ha_enabled: false
     password: pwd
-    topology: default
-    nodes:
-      - hostname: node1
-        port: 1234
-        protocol: https
-        server_certificate: "-----cert-----"
-
-
-- name: "Update Hadoop Connection"
-  thales.ciphertrust.connection_manager_hadoop:
-    localNode:
-        server_ip: "IP/FQDN of CipherTrust Manager"
-        server_private_ip: "Private IP in case that is different from above"
-        server_port: 5432
-        user: "CipherTrust Manager Username"
-        password: "CipherTrust Manager Password"
-        verify: false
-    op_type: patch
+    partitions:
+      - hostname: sample-hostname
+        partition_label: sample-label
+        serial_number: serialNo.
 '''
 
 RETURN = '''
@@ -208,7 +180,7 @@ _partition = dict(
 )
 
 argument_spec = dict(
-    op_type=dict(type='str', options=['create', 'patch', 'add_partition', 'delete_partition'], required=True),
+    op_type=dict(type='str', options=['create', 'patch', 'add_partition', 'delete_partition', 'add_stc_partition', 'add_hsm_server', 'enable_stc', 'disable_stc'], required=True),
     connection_id=dict(type='str'),
     partition_id=dict(type='str'),    
     password=dict(type='str'),
@@ -221,6 +193,11 @@ argument_spec = dict(
     hostname=dict(type='str'),
     partition_label=dict(type='str'),
     serial_number=dict(type='str'),
+    # for add_stc_partition
+    partition_identity=dict(type='str'),
+    label=dict(type='str'),
+    # for add_hsm_server
+    hsm_certificate=dict(type='str'),
 )
 
 def validate_parameters(domain_module):
@@ -234,6 +211,10 @@ def setup_module_object():
             ['op_type', 'create', ['name', 'partitions', 'password']],
             ['op_type', 'add_partition', ['connection_id', 'hostname', 'port', 'protocol']],
             ['op_type', 'delete_partition', ['connection_id', 'partition_id']],
+            ['op_type', 'add_stc_partition', ['partition_identity', 'serial_number']],
+            ['op_type', 'add_hsm_server', ['hostname', 'hsm_certificate']],
+            ['op_type', 'enable_stc', ['connection_id']],
+            ['op_type', 'disable_stc', ['connection_id']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -313,6 +294,67 @@ def main():
           node=module.params.get('localNode'),
           connection_id=module.params.get('connection_id'),
           partition_id=module.params.get('partition_id'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'add_stc_partition':
+      try:
+        response = addLunaSTCPartition(
+          node=module.params.get('localNode'),
+          partition_identity=module.params.get('partition_identity'),
+          serial_number=module.params.get('serial_number'),
+          description=module.params.get('description'),
+          label=module.params.get('label'),
+          meta=module.params.get('meta'),
+          products=module.params.get('products'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'add_hsm_server':
+      try:
+        response = addHSMServer(
+          node=module.params.get('localNode'),
+          hostname=module.params.get('hostname'),
+          hsm_certificate=module.params.get('hsm_certificate'),
+          description=module.params.get('description'),
+          meta=module.params.get('meta'),
+          products=module.params.get('products'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'enable_stc':
+      try:
+        response = enableSTC(
+          node=module.params.get('localNode'),
+          connection_id=module.params.get('connection_id'),
+        )
+        result['response'] = response
+      except CMApiException as api_e:
+        if api_e.api_error_code:
+          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+      except AnsibleCMException as custom_e:
+        module.fail_json(msg=custom_e.message)
+
+    elif module.params.get('op_type') == 'disable_stc':
+      try:
+        response = disableSTC(
+          node=module.params.get('localNode'),
+          connection_id=module.params.get('connection_id'),
         )
         result['response'] = response
       except CMApiException as api_e:

@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, DELETEByNameOrId
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, DELETEByNameOrId, POSTWithoutData
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -235,6 +235,87 @@ def deleteLunaPartition(**kwargs):
       key="id",
       cm_node=kwargs["node"],
       cm_api_endpoint='connectionmgmt/services/luna-network/connections/' + kwargs["connection_id"] + '/partitions/' + kwargs["partition_id"],
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+# enableSTC, disableSTC, addHSMServer, addLunaSTCPartition
+def addLunaSTCPartition(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/luna-network/stc-partition',
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def addHSMServer(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/luna-network/servers',
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def enableSTC(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'connection_id'] and value != None:
+      request[key] = value
+
+  try:
+    response = POSTWithoutData(
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/luna-network/servers' + kwargs["connection_id"] + '/enable-stc',
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def disableSTC(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'connection_id'] and value != None:
+      request[key] = value
+
+  try:
+    response = POSTWithoutData(
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/luna-network/servers' + kwargs["connection_id"] + '/disable-stc',
     )          
     return ast.literal_eval(str(response))
   except CMApiException as api_e:

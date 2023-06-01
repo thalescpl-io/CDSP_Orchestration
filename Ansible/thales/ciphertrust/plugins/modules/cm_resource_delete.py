@@ -24,7 +24,7 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import CMAPIObject, DELETEByNameOrId
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import DELETEByNameOrId
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''

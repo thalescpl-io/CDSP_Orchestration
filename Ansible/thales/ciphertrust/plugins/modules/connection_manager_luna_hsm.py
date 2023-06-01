@@ -26,7 +26,7 @@ import urllib3
 import json
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.connection_management import createConnection, patchConnection, addHadoopNode, updateHadoopNode, deleteHadoopNode
+from ansible_collections.thales.ciphertrust.plugins.module_utils.connection_management import createConnection, patchConnection, addLunaPartition, deleteLunaPartition
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
@@ -201,32 +201,26 @@ RETURN = '''
 '''
 _schema_less = dict()
 
-_node = dict(
+_partition = dict(
     hostname=dict(type='str'),
-    port=dict(type='int'),
-    protocol=dict(type='str'),
-    path=dict(type='str'),
-    server_certificate=dict(type='str'),
+    partition_label=dict(type='str'),
+    serial_number=dict(type='str'),
 )
 
 argument_spec = dict(
-    op_type=dict(type='str', options=['create', 'patch', 'add_node', 'update_node', 'delete_node'], required=True),
+    op_type=dict(type='str', options=['create', 'patch', 'add_partition', 'delete_partition'], required=True),
     connection_id=dict(type='str'),
-    node_id=dict(type='str'),
-    nodes=dict(type='list', element='dict', options=_node),
+    partition_id=dict(type='str'),    
     password=dict(type='str'),
     name=dict(type='str'),
-    service=dict(type='str'),
-    username=dict(type='str'),
-    topology=dict(type='str'),
     description=dict(type='str'),
+    partitions=dict(type='list', element='dict', options=_partition),
+    is_ha_enabled=dict(type='bool'),
     meta=dict(type='dict', options=_schema_less),
     products=dict(type='list', element='str'),
     hostname=dict(type='str'),
-    port=dict(type='int'),
-    protocol=dict(type='str'),
-    path=dict(type='str'),
-    server_certificate=dict(type='str'),
+    partition_label=dict(type='str'),
+    serial_number=dict(type='str'),
 )
 
 def validate_parameters(domain_module):
@@ -237,10 +231,9 @@ def setup_module_object():
         argument_spec=argument_spec,
         required_if=(
             ['op_type', 'patch', ['connection_id']],
-            ['op_type', 'create', ['name', 'nodes', 'password', 'service', 'username']],
-            ['op_type', 'add_node', ['connection_id', 'hostname', 'port', 'protocol']],
-            ['op_type', 'update_node', ['connection_id', 'node_id', 'hostname', 'port', 'protocol']],
-            ['op_type', 'delete_node', ['connection_id', 'node_id']],
+            ['op_type', 'create', ['name', 'partitions', 'password']],
+            ['op_type', 'add_partition', ['connection_id', 'hostname', 'port', 'protocol']],
+            ['op_type', 'delete_partition', ['connection_id', 'partition_id']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -264,16 +257,14 @@ def main():
       try:
         response = createConnection(
           node=module.params.get('localNode'),
-          connection_type='hadoop',
+          connection_type='luna_nw_hsm',
           name=module.params.get('name'),
-          nodes=module.params.get('nodes'),
+          partitions=module.params.get('nodes'),
           password=module.params.get('password'),
-          service=module.params.get('service'),
-          username=module.params.get('username'),
           description=module.params.get('description'),
+          is_ha_enabled=module.params.get('is_ha_enabled'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
-          topology=module.params.get('topology'),
         )
         result['response'] = response
       except CMApiException as api_e:
@@ -286,14 +277,12 @@ def main():
       try:
         response = patchConnection(
           node=module.params.get('localNode'),
-          connection_type='hadoop',
+          connection_type='luna_nw_hsm',
           connection_id=module.params.get('connection_id'),
           password=module.params.get('password'),
-          username=module.params.get('username'),
           description=module.params.get('description'),
           meta=module.params.get('meta'),
           products=module.params.get('products'),
-          topology=module.params.get('topology'),
         )
         result['response'] = response
       except CMApiException as api_e:
@@ -302,16 +291,14 @@ def main():
       except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
 
-    elif module.params.get('op_type') == 'add_node':
+    elif module.params.get('op_type') == 'add_partition':
       try:
-        response = addHadoopNode(
+        response = addLunaPartition(
           node=module.params.get('localNode'),
           connection_id=module.params.get('connection_id'),
           hostname=module.params.get('hostname'),
-          port=module.params.get('port'),
-          protocol=module.params.get('protocol'),
-          path=module.params.get('path'),
-          server_certificate=module.params.get('server_certificate'),
+          partition_label=module.params.get('partition_label'),
+          serial_number=module.params.get('serial_number'),
         )
         result['response'] = response
       except CMApiException as api_e:
@@ -320,31 +307,12 @@ def main():
       except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
 
-    elif module.params.get('op_type') == 'update_node':
+    elif module.params.get('op_type') == 'delete_partition':
       try:
-        response = updateHadoopNode(
+        response = deleteLunaPartition(
           node=module.params.get('localNode'),
           connection_id=module.params.get('connection_id'),
-          node_id=module.params.get('node_id'),
-          hostname=module.params.get('hostname'),
-          port=module.params.get('port'),
-          protocol=module.params.get('protocol'),
-          path=module.params.get('path'),
-          server_certificate=module.params.get('server_certificate'),
-        )
-        result['response'] = response
-      except CMApiException as api_e:
-        if api_e.api_error_code:
-          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
-      except AnsibleCMException as custom_e:
-        module.fail_json(msg=custom_e.message)
-
-    elif module.params.get('op_type') == 'delete_node':
-      try:
-        response = deleteHadoopNode(
-          node=module.params.get('localNode'),
-          connection_id=module.params.get('connection_id'),
-          node_id=module.params.get('node_id'),
+          partition_id=module.params.get('partition_id'),
         )
         result['response'] = response
       except CMApiException as api_e:

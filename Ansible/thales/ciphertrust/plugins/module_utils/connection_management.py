@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, DELETEByNameOrId
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -68,6 +68,8 @@ def createConnection(**kwargs):
     endpoint = 'connectionmgmt/services/salesforce/connections'
   elif kwargs["connection_type"] == "syslog":
     endpoint = 'connectionmgmt/services/log-forwarders/syslog/connections'
+  elif kwargs["connection_type"] == "luna_nw_hsm":
+    endpoint = 'connectionmgmt/services/luna-network/connections'
   else:
     module.fail_json(msg='connection_type not supported yet')
 
@@ -118,6 +120,8 @@ def patchConnection(**kwargs):
     endpoint = 'connectionmgmt/services/salesforce/connections' + kwargs["connection_id"]
   elif kwargs["connection_type"] == "syslog":
     endpoint = 'connectionmgmt/services/log-forwarders/syslog/connections' + kwargs["connection_id"]
+  elif kwargs["connection_type"] == "luna_nw_hsm":
+    endpoint = 'connectionmgmt/services/luna-network/connections' + kwargs["connection_id"]
   else:
     module.fail_json(msg='connection_type not supported yet')
 
@@ -128,7 +132,109 @@ def patchConnection(**kwargs):
       payload=payload,
       cm_node=kwargs["node"],
       cm_api_endpoint=endpoint,
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def addHadoopNode(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', "connection_id"] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/hadoop/connections/' + kwargs["connection_id"] + '/nodes',
       id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def updateHadoopNode(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'node_id', 'connection_id'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = PATCHData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/hadoop/connections/' + kwargs["connection_id"] + '/nodes/' + kwargs["node_id"],
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def deleteHadoopNode(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'node_id', 'connection_id'] and value != None:
+      request[key] = value
+
+  try:
+    response = DELETEByNameOrId(
+      key="id",
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/hadoop/connections/' + kwargs["connection_id"] + '/nodes/' + kwargs["node_id"],
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def addLunaPartition(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', "connection_id"] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/luna-network/connections/' + kwargs["connection_id"] + '/partitions',
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def deleteLunaPartition(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'partition_id', 'connection_id'] and value != None:
+      request[key] = value
+
+  try:
+    response = DELETEByNameOrId(
+      key="id",
+      cm_node=kwargs["node"],
+      cm_api_endpoint='connectionmgmt/services/luna-network/connections/' + kwargs["connection_id"] + '/partitions/' + kwargs["partition_id"],
     )          
     return ast.literal_eval(str(response))
   except CMApiException as api_e:

@@ -450,25 +450,181 @@ def performKeyOperation(**kwargs):
     if key not in ['node', 'id', 'aws_key_action'] and value != None:
       request[key] = value
 
-  if kwargs['aws_key_action'] == "disable-rotation-job" or kwargs['aws_key_action'] == "delete-key-material" or kwargs['aws_key_action'] == "enable-key" or kwargs['aws_key_action'] == "disable-key" or kwargs['aws_key_action'] == "cancel-deletion" or kwargs['aws_key_action'] == "enable-auto-rotation" or kwargs['aws_key_action'] == "disable-auto-rotation":
+  if kwargs['aws_key_action'] == "disable-rotation-job" or kwargs['aws_key_action'] == "delete-material" or kwargs['aws_key_action'] == "enable" or kwargs['aws_key_action'] == "disable" or kwargs['aws_key_action'] == "cancel-deletion" or kwargs['aws_key_action'] == "enable-auto-rotation" or kwargs['aws_key_action'] == "disable-auto-rotation":
     try:
       response = POSTWithoutData(
         cm_node=kwargs["node"],
-        cm_api_endpoint="cckm/aws/synchronization-jobs/" + kwargs['id'] + "/cancel",
+        cm_api_endpoint="cckm/aws/keys/" + kwargs['id'] + "/" + kwargs['aws_key_action'],
       )          
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
       raise
     except AnsibleCMException as custom_e:
       raise
-  elif kwargs['aws_key_action'] == "disable-rotation-job" or kwargs['aws_key_action'] == "delete-key-material" or kwargs['aws_key_action'] == "enable-key" or kwargs['aws_key_action'] == "disable-key" or kwargs['aws_key_action'] == "cancel-deletion" or kwargs['aws_key_action'] == "enable-auto-rotation" or kwargs['aws_key_action'] == "disable-auto-rotation":
+  elif kwargs['aws_key_action'] == "enable-rotation-job" or kwargs['aws_key_action'] == "import-material" or kwargs['aws_key_action'] == "rotate" or kwargs['aws_key_action'] == "schedule-deletion" or kwargs['aws_key_action'] == "policy" or kwargs['aws_key_action'] == "update-description" or kwargs['aws_key_action'] == "add-tags" or kwargs['aws_key_action'] == "remove-tags" or kwargs['aws_key_action'] == "add-alias" or kwargs['aws_key_action'] == "delete-alias" or kwargs['aws_key_action'] == "replicate-key" or kwargs['aws_key_action'] == "update-primary-region":
+    payload = json.dumps(request)
     try:
-      response = POSTWithoutData(
+      response = POSTData(
+        payload=payload,
         cm_node=kwargs["node"],
-        cm_api_endpoint="cckm/aws/synchronization-jobs/" + kwargs['id'] + "/cancel",
-      )          
+        cm_api_endpoint="cckm/aws/keys/" + kwargs['id'] + "/" + kwargs['aws_key_action'],
+        id="id",
+      )        
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
       raise
     except AnsibleCMException as custom_e:
       raise
+
+def uploadKeyToAWS(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/upload-key",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def verifyKeyAlias(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/alias/verify",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def createKeyPolicy(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/templates",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def updateKeyPolicy(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'id'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = PATCHData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/templates/" + kwargs['id'],
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+# CCKM AWS Key Management Functions
+def createAwsKms(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/kms",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def updateAwsKms(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'id'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = PATCHData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/kms/" + kwargs['id'],
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def updateACLs(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'id'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/kms/" + kwargs['id'] + "/update-acls",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise

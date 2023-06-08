@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, DELETEByNameOrId, POSTWithoutData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, POSTWithoutData
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -36,6 +36,7 @@ def is_json(myjson):
     return False
   return True
 
+# CCKM AWS CKS Management Functions
 def createCustomKeyStore(**kwargs):
   request = {}
 
@@ -79,7 +80,7 @@ def editCustomKeyStore(**kwargs):
   except AnsibleCMException as custom_e:
     raise
 
-def createAWSKey(**kwargs):
+def createAWSKeyCKS(**kwargs):
   request = {}
 
   for key, value in kwargs.items():
@@ -378,3 +379,96 @@ def linkHYOKKey(**kwargs):
     raise
   except AnsibleCMException as custom_e:
     raise
+
+# CCKM AWS Key Management Functions
+def createAWSKey(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/keys",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def synchronizeAWSKey(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node'] and value != None:
+      request[key] = value
+
+  payload = json.dumps(request)
+
+  try:
+    response = POSTData(
+      payload=payload,
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/synchronization-jobs",
+      id="id",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def cancelSynchronizeAWSKeyJob(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'id'] and value != None:
+      request[key] = value
+
+  try:
+    response = POSTWithoutData(
+      cm_node=kwargs["node"],
+      cm_api_endpoint="cckm/aws/synchronization-jobs/" + kwargs['id'] + "/cancel",
+    )          
+    return ast.literal_eval(str(response))
+  except CMApiException as api_e:
+    raise
+  except AnsibleCMException as custom_e:
+    raise
+
+def performKeyOperation(**kwargs):
+  request = {}
+
+  for key, value in kwargs.items():
+    if key not in ['node', 'id', 'aws_key_action'] and value != None:
+      request[key] = value
+
+  if kwargs['aws_key_action'] == "disable-rotation-job" or kwargs['aws_key_action'] == "delete-key-material" or kwargs['aws_key_action'] == "enable-key" or kwargs['aws_key_action'] == "disable-key" or kwargs['aws_key_action'] == "cancel-deletion" or kwargs['aws_key_action'] == "enable-auto-rotation" or kwargs['aws_key_action'] == "disable-auto-rotation":
+    try:
+      response = POSTWithoutData(
+        cm_node=kwargs["node"],
+        cm_api_endpoint="cckm/aws/synchronization-jobs/" + kwargs['id'] + "/cancel",
+      )          
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
+  elif kwargs['aws_key_action'] == "disable-rotation-job" or kwargs['aws_key_action'] == "delete-key-material" or kwargs['aws_key_action'] == "enable-key" or kwargs['aws_key_action'] == "disable-key" or kwargs['aws_key_action'] == "cancel-deletion" or kwargs['aws_key_action'] == "enable-auto-rotation" or kwargs['aws_key_action'] == "disable-auto-rotation":
+    try:
+      response = POSTWithoutData(
+        cm_node=kwargs["node"],
+        cm_api_endpoint="cckm/aws/synchronization-jobs/" + kwargs['id'] + "/cancel",
+      )          
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise

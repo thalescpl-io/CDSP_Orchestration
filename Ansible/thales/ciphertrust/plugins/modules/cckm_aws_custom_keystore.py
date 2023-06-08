@@ -21,7 +21,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cckm import createCustomKeyStore, editCustomKeyStore, createAWSKey, blockCKS, unblockCKS, connectCKS, disconnectCKS, linkLocalCKSWithAWS, synchronize_AWS_CKS, cancelSynchronizeJob, rotateCredential, createVirtualKey, editVirtualKey, createHYOKKey, blockHYOKKey, unblockHYOKKey, linkHYOKKey
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cckm import createCustomKeyStore, editCustomKeyStore, createAWSKeyCKS, blockCKS, unblockCKS, connectCKS, disconnectCKS, linkLocalCKSWithAWS, synchronize_AWS_CKS, cancelSynchronizeJob, rotateCredential, createVirtualKey, editVirtualKey, createHYOKKey, blockHYOKKey, unblockHYOKKey, linkHYOKKey
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
@@ -128,7 +128,7 @@ argument_spec = dict(
     op_type=dict(type='str', options=[
        'create', 
        'edit',
-       'create-aws-key',
+       'create-aws-key-cks',
        'block-cks-access',
        'unblock-cks-access',
        'connect-cks',
@@ -237,9 +237,9 @@ def main():
       except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
 
-    elif module.params.get('op_type') == 'create-aws-key':
+    elif module.params.get('op_type') == 'create-aws-key-cks':
       try:
-        response = createAWSKey(
+        response = createAWSKeyCKS(
           node=module.params.get('localNode'),
           id=module.params.get('cks_id'),
           aws_param=module.params.get('aws_key_param'),

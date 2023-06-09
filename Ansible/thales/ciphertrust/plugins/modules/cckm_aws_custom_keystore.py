@@ -21,7 +21,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cckm import createCustomKeyStore, editCustomKeyStore, createAWSKeyCKS, blockCKS, unblockCKS, connectCKS, disconnectCKS, linkLocalCKSWithAWS, synchronize_AWS_CKS, cancelSynchronizeJob, rotateCredential, createVirtualKey, editVirtualKey, createHYOKKey, blockHYOKKey, unblockHYOKKey, linkHYOKKey
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cckm_aws import createCustomKeyStore, editCustomKeyStore, createAWSKeyCKS, blockCKS, unblockCKS, connectCKS, disconnectCKS, linkLocalCKSWithAWS, synchronize_AWS_CKS, cancelSynchronizeJob, rotateCredential, createVirtualKey, editVirtualKey, createHYOKKey, blockHYOKKey, unblockHYOKKey, linkHYOKKey
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''

@@ -21,15 +21,15 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible_collections.thales.ciphertrust.plugins.module_utils.modules import ThalesCipherTrustModule
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cckm_aws import createAwsKms, updateAwsKms, updateACLs
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cckm_azure import addAzureVault, editAzureVault, performAZVaultOperation
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 DOCUMENTATION = '''
 ---
-module: cckm_aws_key
+module: cckm_az_vault
 short_description: This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs.
 description:
-    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with CCKM for AWS Keys
+    - This is a Thales CipherTrust Manager module for working with the CipherTrust Manager APIs, more specifically with CCKM for Azure Vault
 version_added: "1.0.0"
 author: Anurag Jain, Developer Advocate Thales Group
 options:
@@ -74,8 +74,8 @@ options:
 '''
 
 EXAMPLES = '''
-- name: "Create AWS Connection"
-  thales.ciphertrust.connection_manager_aws:
+- name: "Create Azure Vault"
+  thales.ciphertrust.cckm_az_vault:
     localNode:
         server_ip: "IP/FQDN of CipherTrust Manager"
         server_private_ip: "Private IP in case that is different from above"
@@ -97,32 +97,60 @@ _acl = dict(
   user_id=dict(type='str'),
 )
 
+_schema_less = dict()
+
+_azure_vault_property_sku = dict(
+   family=dict(type='str'),
+   name=dict(type='str', options=['Standard', 'Premium']),
+)
+
+_azure_vault_property = dict(
+   createMode=dict(type='str', options=['CreateModeRecover', 'CreateModeDefault']),
+   enablePurgeProtection=dict(type='bool'),
+   enableRbacAuthorization=dict(type='bool'),
+   enableSoftDelete=dict(type='bool'),
+   enabledForDeployment=dict(type='bool'),
+   enabledForDiskEncryption=dict(type='bool'),
+   enabledForTemplateDeployment=dict(type='bool'),
+   sku=dict(type='dict', options=_azure_vault_property_sku),
+   softDeleteRetentionInDays=dict(type='int'),
+   tenantId=dict(type='str'),
+   vaultUri=dict(type='str'),
+)
+
+_azure_vault = dict(
+   azure_vault_id=dict(type='str'),
+   location=dict(type='str'),
+   name=dict(type='str'),
+   properties=dict(type='dict', options=_azure_vault_property),
+   type=dict(type='str'),
+   tags=dict(type='dict', options=_schema_less),
+)
+
 argument_spec = dict(
     op_type=dict(type='str', options=[
        'create', 
        'update',
        'update-acls',
        ], required=True),
-    kms_id=dict(type='str'),
-    account_id=dict(type='str'),
-    name=dict(type='str'),
+    vault_id=dict(type='str'),
     connection=dict(type='str'),
-    regions=dict(type='list', element='str'),
-    assume_role_arn=dict(type='str'),
-    assume_role_external_id=dict(type='str'),
+    subscription_id=dict(type='str'),
+    vaults=dict(type='list', element='dict', options=_azure_vault),
+    vault_op=dict(type='str', options=['enable-rotation-job', 'disable-rotation-job', 'update-acls', 'remove-vault']),
     acls=dict(type='list', element='dict', options=_acl),
 )
 
-def validate_parameters(cckm_aws_kms_module):
+def validate_parameters(cckm_az_vault_module):
     return True
 
 def setup_module_object():
     module = ThalesCipherTrustModule(
         argument_spec=argument_spec,
         required_if=(
-            ['op_type', 'create', ['account_id', 'connection', 'name', 'regions']],
-            ['op_type', 'update', ['kms_id']],
-            ['op_type', 'update-acls', ['kms_id']],
+            ['op_type', 'create', ['connection', 'subscription_id', 'vaults']],
+            ['op_type', 'update', ['vault_id', 'connection']],
+            ['op_type', 'action', ['vault_id', 'vault_op']],
         ),
         mutually_exclusive=[],
         supports_check_mode=True,
@@ -135,7 +163,7 @@ def main():
     
     module = setup_module_object()
     validate_parameters(
-        cckm_aws_kms_module=module,
+        cckm_az_vault_module=module,
     )
 
     result = dict(
@@ -144,14 +172,11 @@ def main():
 
     if module.params.get('op_type') == 'create':
       try:
-        response = createAwsKms(
+        response = addAzureVault(
           node=module.params.get('localNode'),
-          account_id=module.params.get('account_id'),
           connection=module.params.get('connection'),
-          name=module.params.get('name'),
-          regions=module.params.get('regions'),
-          assume_role_arn=module.params.get('assume_role_arn'),
-          assume_role_external_id=module.params.get('assume_role_external_id'),
+          subscription_id=module.params.get('subscription_id'),
+          vaults=module.params.get('vaults'),
         )
         result['response'] = response
       except CMApiException as api_e:
@@ -162,13 +187,10 @@ def main():
 
     elif module.params.get('op_type') == 'update':
       try:
-        response = updateAwsKms(
+        response = editAzureVault(
           node=module.params.get('localNode'),
-          id=module.params.get('kms_id'),
-          connection=module.params.get('connection'),
-          regions=module.params.get('regions'),
-          assume_role_arn=module.params.get('assume_role_arn'),
-          assume_role_external_id=module.params.get('assume_role_external_id'),        
+          id=module.params.get('vault_id'),
+          connection=module.params.get('connection'),      
         )
         result['response'] = response
       except CMApiException as api_e:
@@ -177,11 +199,11 @@ def main():
       except AnsibleCMException as custom_e:
         module.fail_json(msg=custom_e.message)
 
-    elif module.params.get('op_type') == 'update-acls':
+    elif module.params.get('op_type') == 'action':
       try:
-        response = updateACLs(
+        response = performAZVaultOperation(
           node=module.params.get('localNode'),
-          id=module.params.get('kms_id'),
+          id=module.params.get('vault_id'),
           acls=module.params.get('acls'),
         )
         result['response'] = response

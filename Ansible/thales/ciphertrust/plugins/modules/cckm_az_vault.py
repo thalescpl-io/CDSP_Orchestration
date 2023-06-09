@@ -139,6 +139,8 @@ argument_spec = dict(
     vaults=dict(type='list', element='dict', options=_azure_vault),
     vault_op=dict(type='str', options=['enable-rotation-job', 'disable-rotation-job', 'update-acls', 'remove-vault']),
     acls=dict(type='list', element='dict', options=_acl),
+    job_config_id=dict(type='str'),
+    override_key_scheduler=dict(type='bool'),
 )
 
 def validate_parameters(cckm_az_vault_module):
@@ -200,18 +202,48 @@ def main():
         module.fail_json(msg=custom_e.message)
 
     elif module.params.get('op_type') == 'action':
-      try:
-        response = performAZVaultOperation(
-          node=module.params.get('localNode'),
-          id=module.params.get('vault_id'),
-          acls=module.params.get('acls'),
-        )
-        result['response'] = response
-      except CMApiException as api_e:
-        if api_e.api_error_code:
-          module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
-      except AnsibleCMException as custom_e:
-        module.fail_json(msg=custom_e.message)
+      if module.params.get('vault_op') == 'enable-rotation-job':
+        try:
+          response = performAZVaultOperation(
+            node=module.params.get('localNode'),
+            id=module.params.get('vault_id'),
+            vault_op=module.params.get('vault_op'),
+            job_config_id=module.params.get('job_config_id'),
+            override_key_scheduler=module.params.get('override_key_scheduler'),
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
+      elif module.params.get('vault_op') == 'update-acls':
+        try:
+          response = performAZVaultOperation(
+            node=module.params.get('localNode'),
+            id=module.params.get('vault_id'),
+            vault_op=module.params.get('vault_op'),
+            acls=module.params.get('acls'),
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)         
+      else:         
+        try:
+          response = performAZVaultOperation(
+            node=module.params.get('localNode'),
+            id=module.params.get('vault_id'),
+            vault_op=module.params.get('vault_op'),
+          )
+          result['response'] = response
+        except CMApiException as api_e:
+          if api_e.api_error_code:
+            module.fail_json(msg="status code: " + str(api_e.api_error_code) + " message: " + api_e.message)
+        except AnsibleCMException as custom_e:
+          module.fail_json(msg=custom_e.message)
 
     else:
         module.fail_json(msg="invalid op_type")

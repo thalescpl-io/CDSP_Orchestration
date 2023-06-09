@@ -26,7 +26,7 @@ import urllib3
 import json
 import ast
 
-from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, POSTWithoutData
+from ansible_collections.thales.ciphertrust.plugins.module_utils.cm_api import POSTData, PATCHData, POSTWithoutData, DeleteWithoutData
 from ansible_collections.thales.ciphertrust.plugins.module_utils.exceptions import CMApiException, AnsibleCMException
 
 def is_json(myjson):
@@ -91,7 +91,7 @@ def performAZVaultOperation(**kwargs):
     try:
       response = POSTWithoutData(
         cm_node=kwargs["node"],
-        cm_api_endpoint="cckm/aws/keys/" + kwargs['id'] + "/" + kwargs['aws_key_action'],
+        cm_api_endpoint="cckm/azure/vaults/" + kwargs['id'] + "/" + kwargs['vault_op'],
       )          
       return ast.literal_eval(str(response))
     except CMApiException as api_e:
@@ -104,7 +104,7 @@ def performAZVaultOperation(**kwargs):
       response = POSTData(
         payload=payload,
         cm_node=kwargs["node"],
-        cm_api_endpoint="cckm/azure/vaults/" + kwargs['id'] + "/" + kwargs['aws_key_action'],
+        cm_api_endpoint="cckm/azure/vaults/" + kwargs['id'] + "/" + kwargs['vault_op'],
         id="id",
       )        
       return ast.literal_eval(str(response))
@@ -112,3 +112,16 @@ def performAZVaultOperation(**kwargs):
       raise
     except AnsibleCMException as custom_e:
       raise
+  elif kwargs['vault_op'] == "remove-vault":
+    try:
+      response = DeleteWithoutData(
+        cm_node=kwargs["node"],
+        cm_api_endpoint="cckm/azure/vaults/" + kwargs['id'] + "/" + kwargs['vault_op'],
+      )          
+      return ast.literal_eval(str(response))
+    except CMApiException as api_e:
+      raise
+    except AnsibleCMException as custom_e:
+      raise
+  else:
+    raise AnsibleCMException(message="Unsupported vault_op")

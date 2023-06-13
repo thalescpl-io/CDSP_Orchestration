@@ -615,8 +615,26 @@ _alias = dict(
     index=dict(type='int', required=False),
     type=dict(type='str', required=False), 
 )
+_cte = dict(
+  persistent_on_client=dict(type='bool'),
+  encryption_mode=dict(type='str'),
+  cte_versioned=dict(type='bool'),
+)
+_permission = dict(
+    UseKey=dict(type='list', element='str'),
+    ReadKey=dict(type='list', element='str'),
+    ExportKey=dict(type='list', element='str'),
+    MACWithKey=dict(type='list', element='str'),
+    SignWithKey=dict(type='list', element='str'),
+    DecryptWithKey=dict(type='list', element='str'),
+    EncryptWithKey=dict(type='list', element='str'),
+    MACVerifyWithKey=dict(type='list', element='str'),
+    SignVerifyWithKey=dict(type='list', element='str'),
+)
 _meta = dict(
     ownerId=dict(type='str', required=False),
+    permissions=dict(type='dict', options=_permission),
+    cte=dict(type='dict', options=_cte),
 )
 _schema_less = dict()
 _hkdfParam = dict(
